@@ -1,4 +1,15 @@
 import { defineConfig } from 'vitepress'
+import AutoConfigureNavSidebarPlugin from '@w3ctech-editorial-department/vitepress-auto-configure-nav-sidebar'
+
+const { nav, sidebar } = AutoConfigureNavSidebarPlugin({
+  collapsed: true,
+  isCollapsible: true,
+  showNavIcon: false,
+  singleLayerNav: true,
+  showSidebarIcon: true,
+  ignoreFolders: ['.vuepress'],
+})
+
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
@@ -13,18 +24,11 @@ export default defineConfig({
       { text: 'Workshop', link: '/workshop' },
     ],
 
-    sidebar: [
-      {
-        text: 'Examples',
-        items: [
-          { text: 'Markdown Examples', link: '/markdown-examples' },
-          { text: 'Runtime API Examples', link: '/api-examples' }
-        ]
-      }
-    ],
+    sidebar,
 
     socialLinks: [
       { icon: 'github', link: 'https://github.com/bkmashiro' }
     ]
-  }
+  },
+
 })

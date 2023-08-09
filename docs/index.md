@@ -22,4 +22,3 @@ features:
   - title: Minecraft
     details: Survival pro gamer, interested in redstone, command and pixel art.
 ---
-
