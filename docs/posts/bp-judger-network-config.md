@@ -4,7 +4,7 @@
 
 由于`gRPC`需要通过网络来发起调用
 
-**BP-Judger**( 后简称 **BP **) 与 **nsjail**(后简称 **jail** ) 中的**用户程序**(后简称 **bot** ) 需要使用网络通信，但是不能使bot访问除了BP-Judger gRPC Server之外的所有网络资源，于是需要这样的网络配置。
+**BP-Judger**( 后简称 **BP**) 与 **nsjail**(后简称 **jail** ) 中的**用户程序**(后简称 **bot** ) 需要使用网络通信，但是不能使bot访问除了`BP-Judger gRPC Server`之外的所有网络资源，于是需要这样的网络配置。
 
 ## What
 
@@ -90,7 +90,9 @@ echo "Hello from veth-jail" | nc veth-host-ip 3000
 
 如果一切正常，你会在两边分别看到 Hello from veth-jail 与 Hello from veth-host
 
-
+::: tip
+这里假设了你的防火墙没有设置任何规则.
+:::
 
 
 
