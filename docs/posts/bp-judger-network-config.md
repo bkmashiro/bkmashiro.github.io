@@ -14,6 +14,17 @@
 
 ## How
 
+::: tip
+建议您使用这个Perl脚本快速部署网络 
+[link](https://codeberg.org/adrian-blx/setup-ns/src/branch/master/setup-ns.pl)
+然后直接跳至配置iptables规则 (See: # @@@ 设置 jail_ns 的 iptables，只放行对特定端口的连接 @@@)
+:::
+
+::: danger
+以下内容未经验证，可能存在错误！
+:::
+
+
 Hint: You may need `sudo` to execute the following commands.
 
 ```bash {22}
@@ -30,10 +41,10 @@ ip link add veth-jail type veth peer name veth-host
 # 将 veth pair 的一端(veth-jail)放入 jail_ns 命名空间
 ip link set veth-jail netns jail_ns
 # 为两个 veth 接口配置 IP (可以自行更改)
-ip netns exec jail ip addr add 10.0.0.1/24 dev veth-jail
+ip netns exec jail_ns ip addr add 10.0.0.1/24 dev veth-jail
 ip addr add 10.0.0.2/24 dev veth-host
 # 启用两个 veth 接口
-ip netns exec jail ip link set veth-jail up
+ip netns exec jail_ns ip link set veth-jail up
 ip link set veth-host up
 
 # 在 host net namespace 设置  ens33 为 veth-host 通过 NAT 转发数据包 （可选的，bp-judger不需要这个）
@@ -44,7 +55,7 @@ ip link set veth-host up
 # iptables -t nat -A POSTROUTING -s 10.0.0.0/24 -o ens33 -j MASQUERADE
 # 注意：上面三个设置iptables是可选的
 
-# 设置 jail_ns 的 iptables，只放行对特定端口的连接
+# @@@ 设置 jail_ns 的 iptables，只放行对特定端口的连接 @@@
 # 进入 jail_ns 
 ip netns exec jail /bin/bash
 # 设置 OUTPUT chain 的默认行为为 DROP
