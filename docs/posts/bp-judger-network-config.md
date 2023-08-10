@@ -36,12 +36,13 @@ ip addr add 10.0.0.2/24 dev veth-host
 ip netns exec jail ip link set veth-jail up
 ip link set veth-host up
 
-# 在 host net namespace 设置  ens33 为 veth-host 通过 NAT 转发数据包
+# 在 host net namespace 设置  ens33 为 veth-host 通过 NAT 转发数据包 （可选的，bp-judger不需要这个）
 # (从外部看，veth-host 出站的数据包就像是从 ens33 出站的数据包)
 # !!请把 ens33 换成你的对应环境里面的设备
-iptables -A FORWARD -i veth-host -o ens33 -j ACCEPT
-iptables -A FORWARD -i ens33 -o veth-host -j ACCEPT
-iptables -t nat -A POSTROUTING -s 10.0.0.0/24 -o ens33 -j MASQUERADE
+# iptables -A FORWARD -i veth-host -o ens33 -j ACCEPT
+# iptables -A FORWARD -i ens33 -o veth-host -j ACCEPT
+# iptables -t nat -A POSTROUTING -s 10.0.0.0/24 -o ens33 -j MASQUERADE
+# 注意：上面三个设置iptables是可选的
 
 # 设置 jail_ns 的 iptables，只放行对特定端口的连接
 # 进入 jail_ns 
