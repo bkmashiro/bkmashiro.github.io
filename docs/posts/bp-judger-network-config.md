@@ -1,5 +1,7 @@
 # BP-Judger 网络配置
 
+![image-20230810223804311](./assets/image-20230810223804311.png)
+
 ## Motivation
 
 由于`gRPC`需要通过网络来发起调用
