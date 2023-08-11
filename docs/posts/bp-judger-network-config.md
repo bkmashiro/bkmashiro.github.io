@@ -18,8 +18,10 @@
 
 ::: tip
 建议您使用这个Perl脚本快速部署网络 
+
 [link](https://codeberg.org/adrian-blx/setup-ns/src/branch/master/setup-ns.pl)
-然后直接跳至配置iptables规则 (See: # @@@ 设置 jail_ns 的 iptables，只放行对特定端口的连接 @@@)
+
+然后直接跳至配置iptables规则
 :::
 
 ::: danger
