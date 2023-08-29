@@ -29,6 +29,7 @@
 
    ```bash
    cd blog
+   pnpm i # 安装依赖 如果没有安装pnpm，请先安装
    pnpm dev
    ```
 
