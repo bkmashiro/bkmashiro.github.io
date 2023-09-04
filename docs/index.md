@@ -22,3 +22,7 @@ features:
   - title: Minecraft
     details: Survival pro gamer, interested in redstone, command and pixel art.
 ---
+<!-- <script setup>
+import MatterDemo from './components/matter-demo.vue'
+</script>
+<matter-demo></matter-demo> -->

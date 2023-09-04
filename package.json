@@ -7,5 +7,9 @@
     "dev": "vitepress dev docs",
     "build": "vitepress build docs",
     "preview": "vitepress preview docs"
+  },
+  "dependencies": {
+    "html2canvas": "^1.4.1",
+    "matter-js": "^0.19.0"
   }
 }
