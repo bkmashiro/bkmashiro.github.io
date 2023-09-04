@@ -1,29 +1,44 @@
 {
-  "hash": "efd577df",
-  "browserHash": "16bf2bc2",
+  "hash": "2cf0a6f7",
+  "browserHash": "7b68a76f",
   "optimized": {
     "vue": {
       "src": "../../../../node_modules/.pnpm/vue@3.3.4/node_modules/vue/dist/vue.runtime.esm-bundler.js",
       "file": "vue.js",
-      "fileHash": "c878f66f",
+      "fileHash": "09f11f3f",
       "needsInterop": false
     },
     "vitepress > @vue/devtools-api": {
       "src": "../../../../node_modules/.pnpm/@vue+devtools-api@6.5.0/node_modules/@vue/devtools-api/lib/esm/index.js",
       "file": "vitepress___@vue_devtools-api.js",
-      "fileHash": "045c3f3a",
+      "fileHash": "77a75e7f",
       "needsInterop": false
     },
     "@theme/index": {
       "src": "../../../../node_modules/.pnpm/vitepress@1.0.0-beta.4_@algolia+client-search@4.19.1_search-insights@2.7.0/node_modules/vitepress/dist/client/theme-default/index.js",
       "file": "@theme_index.js",
-      "fileHash": "6eea9f49",
+      "fileHash": "43be5cca",
+      "needsInterop": false
+    },
+    "matter-js": {
+      "src": "../../../../node_modules/.pnpm/matter-js@0.19.0/node_modules/matter-js/build/matter.js",
+      "file": "matter-js.js",
+      "fileHash": "2fd21c47",
+      "needsInterop": true
+    },
+    "html2canvas": {
+      "src": "../../../../node_modules/.pnpm/html2canvas@1.4.1/node_modules/html2canvas/dist/html2canvas.esm.js",
+      "file": "html2canvas.js",
+      "fileHash": "16dea8a4",
       "needsInterop": false
     }
   },
   "chunks": {
     "chunk-67UUJLDS": {
       "file": "chunk-67UUJLDS.js"
+    },
+    "chunk-76J2PTFD": {
+      "file": "chunk-76J2PTFD.js"
     }
   }
 }
