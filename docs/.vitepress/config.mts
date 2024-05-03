@@ -56,7 +56,7 @@ const cfg = defineConfig({
     ]
   },
   cleanUrls: true,
-  
+  base
 })
 
 export default cfg
