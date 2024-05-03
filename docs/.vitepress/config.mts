@@ -7,7 +7,7 @@ import { blogTheme } from './blog-theme'
 // 通常需要修改 base 路径，通常为“/仓库名/”
 // @ts-ignore
 const base = process.env.GITHUB_ACTIONS === 'true'
-  ? '/bkmashiro.github.io/'
+  ? '/'
   : '/'
 
 // Vitepress 默认配置
