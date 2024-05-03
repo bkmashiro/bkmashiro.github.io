@@ -1,0 +1,34 @@
+{
+  "name": "vitepress-blog",
+  "version": "1.0.0",
+  "private": true,
+  "author": "粥里有勺糖",
+  "license": "MIT",
+  "scripts": {
+    "dev": "vitepress dev docs",
+    "build": "NODE_ENV=production vitepress build docs",
+    "serve": "vitepress serve docs"
+  },
+  "dependencies": {
+    "@element-plus/icons-vue": "^2.3.1",
+    "@sugarat/theme": "^0.3.3",
+    "element-plus": "^2.7.2",
+    "vue": "3.4.26"
+  },
+  "directories": {
+    "doc": "docs"
+  },
+  "devDependencies": {
+    "sass": "^1.76.0",
+    "typescript": "^5.4.5",
+    "vitepress": "1.1.4"
+  },
+  "pnpm": {
+    "peerDependencyRules": {
+      "ignoreMissing": [
+        "@algolia/client-search",
+        "search-insights"
+      ]
+    }
+  }
+}
