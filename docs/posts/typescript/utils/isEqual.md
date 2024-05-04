@@ -15,7 +15,7 @@ publish: false
 俺们对于严格相等的定义是: 两个类型必须完全相同.
 
 ::: warning
-我们这里说的不是"可分配性", 而是"完全相同".
+俺们这里说的不是"可分配性", 而是"完全相同".
 
 例如, `string`和`string`是相同的, `string`和`'sometext'`是不同的.
 :::
@@ -57,21 +57,21 @@ type B = 1 | 2
 type X = IsEqual<A, B> // boolean
 ```
 
-这里错误的推导出了`X`是`boolean`, 但是`A`和`B`是相等的, 我们期待的结果是`true`. 这与TypeScript的`extends`对于联合类型的分发特性有关.
+这里错误的推导出了`X`是`boolean`, 但是`A`和`B`是相等的, 俺们期待的结果是`true`. 这与TypeScript的`extends`对于联合类型的分发特性有关.
 
 更加进阶的读者可能会想到使用下面的方式:
 ```ts
 type IsEqual<T, U> = [T] extends [U] ? [U] extends [T] ? true : false : false
 ```
-我们把`T`, `U`放进元组, 由于元组是不可变的, 这样就可以避免联合类型的分发特性. 但是这种方式并不完美, 只有一个问题, 即在这个情况下, `any`会与任何类型相等(除了`never`), 这并不是我们想要的, 比如:
+俺们把`T`, `U`放进元组, 由于元组是不可变的, 这样就可以避免联合类型的分发特性. 但是这种方式并不完美, 只有一个问题, 即在这个情况下, `any`会与任何类型相等(除了`never`), 这并不是俺们想要的, 比如:
 
 ```ts
 type s = IsEqual<any, number> // true
 ```
-我们期望的结果是`false`, 因为`any`和`number`并不严格的相等.
+俺们期望的结果是`false`, 因为`any`和`number`并不严格的相等.
 
 ## 解答
-我们使用
+俺们使用
 ```ts
 type Equals<X, Y> =
     (<T>() => T extends X ? 1 : 2) extends
@@ -109,10 +109,10 @@ type s =
 存在这样的`T`, 使得`(<T>() => T extends X ? 1 : 2)`不等于`(<T>() => T extends Y ? 1 : 2)`, 所以`X`和`Y`不相等.
 
 ```ts
-// 让我们仔细观察这个反例
-// 让我们代入 T is string, X is any, Y is number
+// 让俺们仔细观察这个反例
+// 让俺们代入 T is string, X is any, Y is number
 
-// 我们求解第二个extends左右两项的类型
+// 俺们求解第二个extends左右两项的类型
 () => string extends any ? 1 : 2 is 1
 () => string extends number ? 1 : 2 is 2
 
@@ -123,7 +123,7 @@ type s =
 那么是否当且仅当`X`和`Y`严格相等时, `(<T>() => T extends X ? 1 : 2)`才等于`(<T>() => T extends Y ? 1 : 2)`呢?
 
 #### 数学证明
-为了便于书写, 我们约定以下的写法:
+为了便于书写, 俺们约定以下的写法:
 $$
 a \in b \text{ 表示 } a \text{ extends } b
 $$
@@ -165,7 +165,7 @@ $$
 \end{aligned}
 $$
 
-于是我们得到了结论, `Equals`可以判断两个类型是否严格相等.
+于是俺们得到了结论, `Equals`可以判断两个类型是否严格相等.
 
 这对于`any`和联合类型都是有效的.
 ```ts
