@@ -151,15 +151,15 @@ $$
 \begin{aligned}
 &\text{if} \quad X = Y \quad \text{then} \\
 
-&\text{Obviously,}\ \forall T, (T \in X \Rightarrow 1) \land (T \notin X \Rightarrow 2) = (T \in Y \Rightarrow 1) \land (T \notin Y \Rightarrow 2) \\
+&\quad \text{Obviously,}\ \forall T, (T \in X \Rightarrow 1) \land (T \notin X \Rightarrow 2) = (T \in Y \Rightarrow 1) \land (T \notin Y \Rightarrow 2) \\
 
 &\text{if} \quad X \neq Y \quad \\
 &\text{if}\  \not\exists t, t \in X \neq t \in Y \quad \text{then} \\
-&\forall t, t \in X \equiv t \in Y \\
-&\text{by } X \neq Y \Rightarrow \exists t, t \in X \neq t \in Y \\
-&\text{this is a contradiction} \\
+&\quad \forall t, t \in X \equiv t \in Y \\
+&\quad \text{by } X \neq Y \Rightarrow \exists t, t \in X \neq t \in Y \\
+&\quad \text{this is a contradiction} \\
 &\therefore \exists t, t \in X \neq t \in Y \\
-&\exist T, (T \in X \Rightarrow 1) \land (T \notin X \Rightarrow 2) \neq (T \in Y \Rightarrow 1) \land (T \notin Y \Rightarrow 2) \\
+&\exists T, (T \in X \Rightarrow 1) \land (T \notin X \Rightarrow 2) \neq (T \in Y \Rightarrow 1) \land (T \notin Y \Rightarrow 2) \\
 
 &\therefore \forall X, Y, \mathrm{Eq}<X, Y> \text{ is true if and only if } X = Y
 \end{aligned}

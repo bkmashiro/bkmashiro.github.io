@@ -56,7 +56,10 @@ const cfg = defineConfig({
     ]
   },
   cleanUrls: true,
-  base
+  base,
+  markdown: {
+    math: true
+  }
 })
 
 export default cfg
