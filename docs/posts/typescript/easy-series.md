@@ -385,7 +385,7 @@ type MyReadonly<T> = {
 `[P in keyof T]: T[P]` 是一个映射类型, 用于遍历对象的所有属性.
 
 ::: tip
-### Mapping Modifiers
+#### Mapping Modifiers
 - `+` - 添加修饰符. 
 - `-` - 移除修饰符. 
 
