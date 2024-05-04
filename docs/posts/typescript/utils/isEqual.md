@@ -153,14 +153,10 @@ $$
 
 &\quad \text{Obviously,}\ \forall T, (T \in X \Rightarrow 1) \land (T \notin X \Rightarrow 2) = (T \in Y \Rightarrow 1) \land (T \notin Y \Rightarrow 2) \\
 
-&\text{if} \quad X \neq Y \quad \\
-&\text{if}\  \not\exists t, t \in X \neq t \in Y \quad \text{then} \\
-&\quad \forall t, t \in X \equiv t \in Y \\
-&\quad \text{by } X \neq Y \Rightarrow \exists t, t \in X \neq t \in Y \\
-&\quad \text{this is a contradiction} \\
-&\therefore \exists t, t \in X \neq t \in Y \\
-&\exists T, (T \in X \Rightarrow 1) \land (T \notin X \Rightarrow 2) \neq (T \in Y \Rightarrow 1) \land (T \notin Y \Rightarrow 2) \\
-
+&\text{if} \quad X \neq Y \quad \text{then} \\
+&\quad \exists t, t \in X \neq t \in Y \\
+&\therefore \exists T, (T \in X \Rightarrow 1) \land (T \notin X \Rightarrow 2) \neq (T \in Y \Rightarrow 1) \land (T \notin Y \Rightarrow 2) \\
+&\therefore \mathrm{Eq}<X, Y> = \text{false} \\
 &\therefore \forall X, Y, \mathrm{Eq}<X, Y> \text{ is true if and only if } X = Y
 \end{aligned}
 $$
