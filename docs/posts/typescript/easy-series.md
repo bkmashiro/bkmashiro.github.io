@@ -68,13 +68,14 @@ TypeScript 推断其是对的, 在俺的编辑器中, 没有报错. 证明俺对
 - 189 - Awaited
 - 898 - Includes
 - 3312 - Parameters
-- 7 - 对象属性值的类型
+- 7 - 对象属性只读
 - 18 - 获取元组长度
 - 268 - If
 - 57 - Push
-- 43 - 实现 Exclude
-- 533 - Concat
 - 3060 - Unshift
+- 533 - Concat
+- 43 - 实现 Exclude
+- 11 - 元组转换为对象
 
 ---
 
@@ -111,7 +112,7 @@ type T = {
 type K = "c" | "d";
 ```
 
-`K` 中的属性 `c` 和 `d` 在 `T` 中是不存在的, 但是我们尝试在 `P` 中取到这两个属性, 这是不安全的.
+`K` 中的属性 `c` 和 `d` 在 `T` 中是不存在的, 但是俺们尝试在 `P` 中取到这两个属性, 这是不安全的.
 
 于是俺们需要约束 `K` 为 `T` 的键.
 
@@ -261,16 +262,16 @@ interface PromiseLike<T> {
 MyAwaited<V>;
 ```
 
-对于这个`V`, 我们讨论下面的 2 种情况:
+对于这个`V`, 俺们讨论下面的 2 种情况:
 
-- (recursive) 如果`V`是`PromiseLike<any>`, 那么我们继续解包.
-- (base) 如果`V`不是`PromiseLike<any>`, 那么我们返回`V`.
+- (recursive) 如果`V`是`PromiseLike<any>`, 那么俺们继续解包.
+- (base) 如果`V`不是`PromiseLike<any>`, 那么俺们返回`V`.
 
 于是俺们写:
 
 - `V` 是 `PromiseLike<U>`, 那么返回 `MyAwaited<U>`. (递归条件,继续递归解包)
 
-  比如`V = Promise<Promise<number>>`, 那么`U = Promise<number>`, 我们应该返回`MyAwaited<U>`. 而`MyAwaited<U>`又匹配了递归条件, 于是我们继续解包, 直到`V`不再是`PromiseLike<any>`. `MyAwaited<U> = MyAwaited<Promise<number>>`的结果是`number`.
+  比如`V = Promise<Promise<number>>`, 那么`U = Promise<number>`, 俺们应该返回`MyAwaited<U>`. 而`MyAwaited<U>`又匹配了递归条件, 于是俺们继续解包, 直到`V`不再是`PromiseLike<any>`. `MyAwaited<U> = MyAwaited<Promise<number>>`的结果是`number`.
 
 - `V` 不是 `PromiseLike<U>`, 那么返回 `V`. (基线条件,离开递归)
 
@@ -313,6 +314,7 @@ type Includes<T extends any[], U> = T extends []
 ```
 
 这里用到了`IsEqual`工具类型, 用于比较两个类型是否严格相等.
+
 ```ts
 export type IsEqual<X, Y> = (<T>() => T extends X ? 1 : 2) extends <
   T
@@ -320,16 +322,254 @@ export type IsEqual<X, Y> = (<T>() => T extends X ? 1 : 2) extends <
   ? true
   : false;
 ```
+
 关于`IsEqual`为啥这么写,俺在这先不展开讲,读者可以自行查阅资料.
-注意: 
+注意:
+
 ```ts
 U extends V && V extends U
 ```
-这样的关系不能说明U和V是严格相等的.
+
+这样的关系不能说明 U 和 V 是严格相等的.
 关于这个辩论, 请参考 [这里](https://github.com/microsoft/TypeScript/issues/27024#issuecomment-421529650).
 
 这样就完成了这道题目.
 
 ---
 
-TO BE CONTINUED...
+### 3312 - Parameters
+
+[3312 - Parameters](https://github.com/type-challenges/type-challenges/blob/main/questions/03312-easy-parameters/README.zh-CN.md)
+
+这道题目要求俺写一个类型 `MyParameters<T>`, 使得 `MyParameters<(arg1: number, arg2: string) => void>` 的结果是 `[number, string]`.
+即提取函数的参数类型.
+
+本题较为简单, 即`infer`关键字的基本使用.
+
+俺写下下面的代码:
+
+```ts
+type MyParameters<T extends (...args: any) => any> = T extends (
+  ...args: infer P
+) => any
+  ? P
+  : never;
+```
+
+这里在`extend`条件类型用到了`infer`关键字. `infer P` 是一个占位符, 表示待推断的类型. 如果 TS 能够找到符合条件的类型, 那么`P`就是这个类型.
+
+这样就完成了这道题目.
+
+---
+
+### 7 - 对象属性只读
+
+[7 - Readonly](https://tsch.js.org/7/zh-CN)
+
+泛型 `Readonly<T>` 会接收一个 _泛型参数_，并返回一个完全一样的类型，只是所有属性都会是只读 (readonly) 的。
+
+也就是不可以再对该对象的属性赋值。
+
+这里需要用到的知识: 映射类型 (Mapped Type) 与 `readonly` 修饰符.
+
+俺写下下面的代码:
+
+```ts
+type MyReadonly<T> = {
+  readonly [P in keyof T]: T[P];
+};
+```
+
+在前面加上`readonly`修饰符, 就可以将对象的属性变为只读.
+
+`[P in keyof T]: T[P]` 是一个映射类型, 用于遍历对象的所有属性.
+
+::: tip
+### Mapping Modifiers
+- `+` - 添加修饰符. 
+- `-` - 移除修饰符. 
+
+`+` 与 `-` 修饰符可以用于添加或移除修饰符.
+不写默认为`+`.
+
+``` ts
+// 移除 readonly 修饰符
+type CreateMutable<Type> = {
+  -readonly [Property in keyof Type]: Type[Property];
+};
+
+// 移除 optional 修饰符
+type Concrete<Type> = {
+  [Property in keyof Type]-?: Type[Property];
+};
+```
+:::
+
+这样就完成了这道题目.
+
+---
+
+### 18 - 获取元组长度
+
+[18 - Tuple Length](https://tsch.js.org/18/zh-CN)
+创建一个`Length`泛型，这个泛型接受一个只读的元组，返回这个元组的长度。
+
+本题较为简单, 直接获取`T`的`length`属性即可.
+
+俺写下下面的代码:
+
+```ts
+type Length<T extends readonly any[]> = T['length']
+```
+
+注意到, `T`被约束为`readonly any[]`, 这样可以保证`T`是一个元组.
+
+这样就完成了这道题目.
+
+---
+
+### 268 - If
+
+[268 - If](https://tsch.js.org/268/zh-CN)
+
+创建一个`If`泛型，接受三个泛型参数，如果第一个参数是`true`，则返回第二个参数，否则返回第三个参数。
+
+本题较为简单, 只需要用到条件类型即可.
+
+俺写下下面的代码:
+
+```ts
+type If<C extends boolean, T, F> = C extends true ? T : F;
+```
+
+注意到, `C`被约束为`boolean`, 这样可以保证`C`是一个布尔值.
+
+这样就完成了这道题目.
+
+---
+
+### 57 - Push
+
+[57 - Push](https://tsch.js.org/57/zh-CN)
+
+创建一个`Push`泛型，接受一个数组类型，一个要添加的元素，返回一个新数组。
+
+例如, `Push<[1, 2], 3>` 应该返回 `[1, 2, 3]`.
+
+```ts
+type Push<T extends readonly unknown[], U> = [...T, U]
+```
+
+这里用到了扩展运算符`...`, 用于将数组`T`(因此约束`T`为元组)展开, 然后添加元素`U`, 返回重新构建的数组.
+
+这样就完成了这道题目.
+
+---
+
+### 3060 - Unshift
+
+[3060 - Unshift](https://tsch.js.org/3060/zh-CN)
+
+本题与上一题类似, 只不过是在数组的头部添加元素.
+
+创建一个`Unshift`泛型，接受一个数组类型，一个要添加的元素，返回一个新数组。
+
+例如, `Unshift<[1, 2], 0>` 应该返回 `[0, 1, 2]`.
+
+```ts
+type Unshift<T extends readonly unknown[], U> = [U, ...T]
+```
+
+这里用到了扩展运算符`...`, 用于将数组`T`(因此约束`T`为元组)展开, 然后添加元素`U`, 返回重新构建的数组.
+
+这样就完成了这道题目.
+
+---
+
+### 533 - Concat
+
+[533 - Concat](https://tsch.js.org/533/zh-CN)
+
+创建一个`Concat`泛型，接受两个数组类型，返回这两个数组的组合。
+
+本题与上两题类似, 只不过是将两个数组合并.
+
+```ts
+type Concat<T extends readonly unknown[], U extends readonly unknown[]> = [...T, ...U]
+```
+
+这里用到了扩展运算符`...`, 用于将数组`T`和`U`(因此约束`T`和`U`为元组)展开, 然后合并两个数组, 返回重新构建的数组.
+
+这样就完成了这道题目.
+
+---
+
+### 43 - 实现 Exclude
+
+[43 - Exclude](https://tsch.js.org/43/zh-CN)
+
+创建一个`Exclude`泛型，接受两个泛型参数，从第一个泛型中排除可以赋值给第二个泛型的类型。
+
+这里会用到条件类型的一个技巧, 当条件类型的条件为一个联合类型时, TS 会分发(distribute)这个条件类型.
+
+例如, 假设 `U` 是一个联合类型 `U1 | U2 | U3`, 那么 `T extends U` 会被分发为 `T extends U1 | T extends U2 | T extends U3`.
+
+对于本题, 俺们可以用这个技巧来排除 `U` 中的类型.
+
+本题要求俺写一个类型 `MyExclude<T, U>`, 使得 `MyExclude<'a' | 'b' | 'c', 'a'>` 的结果是 `'b' | 'c'`.
+
+```ts
+type MyExclude<T, U> = T extends U ? never : T
+```
+
+利用了条件类型的分发特性, 当 `T` 是一个联合类型时, `T extends U` 会被分发为 `T extends 'a' | T extends 'b' | T extends 'c'`.
+
+这样就完成了这道题目.
+
+---
+
+### 11 - 元组转换为对象
+
+[11 - Tuple to Object](https://tsch.js.org/11/zh-CN)
+
+创建一个`TupleToObject`泛型，接受一个数组类型，将这个数组转换为一个对象，键/值对的键是数组的第一个元素，值是数组的第二个元素。
+
+例如, `TupleToObject<[1, 'a']>`, 应该返回 `{ 1: 1, a: 'a' }`.
+
+```ts
+type TupleToObject<T extends readonly any[]> = {
+  [P in T[number]]: P;
+}
+```
+
+这里用到了映射类型, 用于遍历元组的所有元素.
+`T[number]` 是元组的所有元素的联合类型. (数组的索引是数字, 所以这里是`T[number]`)
+`[P in T[number]]: P` 是一个映射类型, 用于遍历元组的所有元素, 并将元素作为键, 元素本身作为值.
+
+这样就完成了这道题目.
+
+---
+
+## 总结
+
+在本章内, 俺们完成了所有的 easy 系列的 TypeChallenge.
+
+俺们学习了很多关于 TypeScript 的知识, 包括:
+
+- 映射类型
+- 条件类型
+- `infer` 关键字
+- `readonly` 修饰符
+- 扩展运算符
+- 分发条件类型
+- 数组技巧
+
+每个题目会用到以上技巧的组合, 俺们通过这些题目, 熟悉了这些技巧的使用.
+
+easy 系列的题目包含了基础的要点, 如果您依然有感到困惑的点, 请务必搞明白例题, 并多多练习, 举一反三.
+
+easy 系列的题目包含了绝大多数问题的基本方法, 之后的高级系列, 本质上也是在这些基础上的组合与拓展.
+
+如果您有任何问题与建议, 欢迎在评论区交流, 俺与大家一起讨论.
+
+在下一章, 俺们将继续完成 medium 系列的 TypeChallenge. 
