@@ -4,7 +4,7 @@ import { getThemeConfig } from '@sugarat/theme/node'
 // 开启RSS支持（RSS配置）
 // import type { Theme } from '@sugarat/theme'
 
-// const baseUrl = 'https://sugarat.top'
+const baseUrl = 'https://blog.yuzhes.com'
 // const RSS: Theme.RSSOptions = {
 //   title: '粥里有勺糖',
 //   baseUrl,
@@ -119,6 +119,22 @@ const blogTheme = getThemeConfig({
       inputPosition: 'top'
     },
     mobileMinify: true
+  },
+  search: 'pagefind',
+  authorList: [
+    {
+      nickname: 'baka_mashiro',
+      url: 'https://yuzhes.com',
+      des: '本站村长'
+    }
+  ],
+  RSS: {
+    title: 'baka_mashiro\'s cave',
+    baseUrl,
+    description: 'bakamashiro\'s cave',
+    language: 'zh-cn',
+    favicon: 'https://blog.yuzhes.com/favicon.ico',
+    copyright: `Copyright (c) ${new Date().getFullYear()} baka_mashiro`,
   }
 })
 
