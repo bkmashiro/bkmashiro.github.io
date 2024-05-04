@@ -332,7 +332,10 @@ U extends V && V extends U
 ```
 
 这样的关系不能说明 U 和 V 是严格相等的.
+
 关于这个辩论, 请参考 [这里](https://github.com/microsoft/TypeScript/issues/27024#issuecomment-421529650).
+
+在本博客中也有对此问题的[讨论](./utils/isEqual.md)
 
 这样就完成了这道题目.
 
