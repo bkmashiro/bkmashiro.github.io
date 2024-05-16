@@ -74,7 +74,7 @@ type GetChars<S> =
 ```ts
 function GetChar<S extends string>(s: S): string {
   if (s.length === 0) return '';
-  // or is not valid in ts, just for illustration
+  // or is not valid in TS, just for illustration
   return s[0] or GetChar(s.slice(1)); 
 }
 ```
@@ -98,9 +98,10 @@ function GetChar<S extends string>(s: S): string {
   return GetCharHelper(s, '');
 }
 
-function GetCharHelper<S extends string>(s: S, acc: string): string {
+function GetCharHelper<S extends string>(s: S, acc: StringUnion): string {
   if (s.length === 0) return acc;
-  return GetCharHelper(s.slice(1), acc + s[0]);
+  // or and StringUnion is not valid in TS, just for illustration
+  return GetCharHelper(s.slice(1), acc or s[0]);
 }
 ```
 
