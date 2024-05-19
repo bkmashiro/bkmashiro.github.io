@@ -35,7 +35,7 @@ sticky: 2
 - [108-Trim](./medium/0108.md)
 - [110-Capitalize](./medium/0110.md)
 - [116-Replace](./medium/0116.md)
-- 119-ReplaceAll
+- [119-ReplaceAll](./medium/0119.md)
 - 191-Append Argument
 - 296-Permutation
 - 298-Length of String
