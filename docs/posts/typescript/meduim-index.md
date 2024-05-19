@@ -31,9 +31,9 @@ sticky: 2
 - [16-Pop](./medium/0016.md)
 - [20-Promise.all](./medium/0020.md)
 - [62-Type Lookup](./medium/0062.md)
-- 106-Trim Left
-- 108-Trim
-- 110-Capitalize
+- [106-Trim Left](./medium/0106.md)
+- [108-Trim](./medium/0108.md)
+- [110-Capitalize](./medium/0110.md)
 - 116-Replace
 - 119-ReplaceAll
 - 191-Append Argument
