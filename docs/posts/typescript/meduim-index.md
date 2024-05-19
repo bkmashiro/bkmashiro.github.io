@@ -21,16 +21,16 @@ sticky: 2
 
 ## 题目列表
 
-- 2-Get Return Type
-- 3-Omit
-- 8-Readonly 2
-- 9-Deep Readonly
-- 10-Tuple to Union
-- 12-Chainable Options
-- 15-Last of Array
-- 16-Pop
-- 20-Promise.all
-- 62-Type Lookup
+- [2-Get Return Type](./medium/0002.md)
+- [3-Omit](./medium/0003.md)
+- [8-Readonly 2](./medium/0008.md)
+- [9-Deep Readonly](./medium/0009.md)
+- [10-Tuple to Union](./medium/0010.md)
+- [12-Chainable Options](./medium/0012.md)
+- [15-Last of Array](./medium/0015.md)
+- [16-Pop](./medium/0016.md)
+- [20-Promise.all](./medium/002)
+- [62-Type Lookup](./medium/0062.md)
 - 106-Trim Left
 - 108-Trim
 - 110-Capitalize
