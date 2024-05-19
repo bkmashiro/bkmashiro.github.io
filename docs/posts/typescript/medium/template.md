@@ -18,3 +18,6 @@ hidden: true
 TODO
 
 ## 解答
+
+```ts
+```
