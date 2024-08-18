@@ -3,8 +3,8 @@ home: true
 layout: BlogHome
 icon: home
 title: Blog Home
-heroImage: logo.png
-heroText: baka_mashiro 's blog
+heroImage: /logo.png
+heroText: baka_mashiro's blog
 tagline: programming, life, and everything
 heroFullScreen: true
 projects:
