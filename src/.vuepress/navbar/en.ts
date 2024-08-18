@@ -3,45 +3,62 @@ import { navbar } from "vuepress-theme-hope";
 export const enNavbar = navbar([
   "/",
   {
-    text: "Posts",
+    text: "Blog",
     icon: "pen-to-square",
-    prefix: "/posts/",
+    prefix: "/",
     children: [
       {
-        text: "Apple",
+        text: "typescript",
         icon: "pen-to-square",
-        prefix: "apple/",
+        prefix: "typescript",
         children: [
-          { text: "Apple1", icon: "pen-to-square", link: "1" },
-          { text: "Apple2", icon: "pen-to-square", link: "2" },
+          { text: "index", icon: "pen-to-square", link: "index" },
+          { text: "easy series", icon: "pen-to-square", link: "easy-series" },
+          { text: "medium series", icon: "pen-to-square", link: "medium-index" },
         ],
       },
-      {
-        text: "Banana",
-        icon: "pen-to-square",
-        prefix: "banana/",
-        children: [
-          {
-            text: "Banana 1",
-            icon: "pen-to-square",
-            link: "1",
-          },
-          {
-            text: "Banana 2",
-            icon: "pen-to-square",
-            link: "2",
-          },
-        ],
-      },
-      { text: "Cherry", icon: "pen-to-square", link: "cherry" },
-      { text: "Dragon Fruit", icon: "pen-to-square", link: "dragonfruit" },
-      "tomato",
-      "strawberry",
     ],
   },
-  {
-    text: "V2 Docs",
-    icon: "book",
-    link: "https://theme-hope.vuejs.press/",
-  },
+  // {
+  //   text: "Posts",
+  //   icon: "pen-to-square",
+  //   prefix: "/posts/",
+  //   children: [
+  //     {
+  //       text: "Apple",
+  //       icon: "pen-to-square",
+  //       prefix: "apple/",
+  //       children: [
+  //         { text: "Apple1", icon: "pen-to-square", link: "1" },
+  //         { text: "Apple2", icon: "pen-to-square", link: "2" },
+  //       ],
+  //     },
+  //     {
+  //       text: "Banana",
+  //       icon: "pen-to-square",
+  //       prefix: "banana/",
+  //       children: [
+  //         {
+  //           text: "Banana 1",
+  //           icon: "pen-to-square",
+  //           link: "1",
+  //         },
+  //         {
+  //           text: "Banana 2",
+  //           icon: "pen-to-square",
+  //           link: "2",
+  //         },
+  //       ],
+  //     },
+  //     { text: "Cherry", icon: "pen-to-square", link: "cherry" },
+  //     { text: "Dragon Fruit", icon: "pen-to-square", link: "dragonfruit" },
+  //     "tomato",
+  //     "strawberry",
+  //   ],
+  // },
+  // {
+  //   text: "V2 Docs",
+  //   icon: "book",
+  //   link: "https://theme-hope.vuejs.press/",
+  // },
 ]);
