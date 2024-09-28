@@ -11,7 +11,10 @@
     "docs:update-package": "pnpm dlx vp-update"
   },
   "devDependencies": {
+    "@vheemstra/vite-plugin-imagemin": "^2.0.0",
     "@vuepress/bundler-vite": "2.0.0-rc.14",
+    "imagemin-mozjpeg": "^10.0.0",
+    "imagemin-webp": "^8.0.0",
     "vue": "^3.4.31",
     "vuepress": "2.0.0-rc.14",
     "vuepress-theme-hope": "2.0.0-rc.52"

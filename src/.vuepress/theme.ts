@@ -170,6 +170,7 @@ export default hopeTheme({
       // sandpack: true,
     },
 
+
     // install @vuepress/plugin-pwa and uncomment these if you want a PWA
     // pwa: {
     //   favicon: "/favicon.ico",

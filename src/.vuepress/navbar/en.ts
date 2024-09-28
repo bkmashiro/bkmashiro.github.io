@@ -10,7 +10,7 @@ export const enNavbar = navbar([
       {
         text: "typescript",
         icon: "pen-to-square",
-        prefix: "typescript",
+        prefix: "posts",
         children: [
           { text: "index", icon: "pen-to-square", link: "index" },
           { text: "easy series", icon: "pen-to-square", link: "easy-series" },
