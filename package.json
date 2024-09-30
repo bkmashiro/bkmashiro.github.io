@@ -15,6 +15,7 @@
     "@vuepress/bundler-vite": "2.0.0-rc.14",
     "imagemin-mozjpeg": "^10.0.0",
     "imagemin-webp": "^8.0.0",
+    "vite-plugin-imagemin": "^0.6.1",
     "vue": "^3.4.31",
     "vuepress": "2.0.0-rc.14",
     "vuepress-theme-hope": "2.0.0-rc.52"
