@@ -6,10 +6,10 @@
 
 * translation: On rainy days, who enjoys the rain, baka_mashiro, I wonder? *
 
-![Trapped on window](../../.vuepress/public/assets/photos/DSC00263.JPG)
+![rain drops trapped on window](../../.vuepress/public/assets/photos/DSC00263.JPG)
 
 ## Rainbow
-![七色の光](../../.vuepress/public/assets/photos/DSC00259.JPG)
+![rainbow](../../.vuepress/public/assets/photos/DSC00259.JPG)
 
 ## Legacy
 ![The mottled castle](../../.vuepress/public/assets/photos/DSC00257.JPG)
