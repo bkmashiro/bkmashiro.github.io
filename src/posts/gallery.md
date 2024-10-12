@@ -5,7 +5,7 @@
 ### Waterford
 
 [river-suir](gallery/river-suir.md)
-[walking-tour](gallery/walki.md)
+[walking-tour](gallery/walk.md)
 [museum](gallery/museum.md)
 
 ### Misc
