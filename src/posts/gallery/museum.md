@@ -1,5 +1,7 @@
 # Treasures
 
+<!-- more -->
+
 ::: tip
 Due to lighting and glass reflection in museums, only a few photos are displayed here.
 :::

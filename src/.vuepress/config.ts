@@ -31,7 +31,11 @@ export default defineUserConfig({
   // shouldPrefetch: false,
   plugins: [
     ViteImageOptimizer({
-
+      test: /\.(jpe?g|png|gif|tiff|webp|svg|avif|JPG|PNG|JEPG)$/i,
+      jpeg: {
+        quality: 80,
+        mozjpeg: true,
+      }
     })
   ],
 
