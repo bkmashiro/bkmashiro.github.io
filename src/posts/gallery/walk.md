@@ -1,6 +1,7 @@
 # Misc
 
 ## Ame (雨)
+<!-- more -->
 
 ### 雨の日は 雨を楽しむ baka_mashiro かな
 
