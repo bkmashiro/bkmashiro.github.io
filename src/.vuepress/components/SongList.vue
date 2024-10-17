@@ -1,11 +1,11 @@
 <template>
-  <ul>
+  <div>
     <!-- <li v-for="(song, index) in songs" :key="index">{{ song }}</li> -->
 
     <Song v-for="(song, index) in songs"
           :key="index"
           :song="song" />
-  </ul>
+  </div>
 </template>
 
 <script setup>
