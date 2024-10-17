@@ -2,7 +2,15 @@
   "compilerOptions": {
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
-    "target": "ES2022"
+    "target": "ES2022",
+    "paths": {
+      "~/*": [
+        "./*"
+      ],
+      "@/*": [
+        "./*"
+      ]
+    }
   },
   "include": [
     "src/.vuepress/**/*.ts",
