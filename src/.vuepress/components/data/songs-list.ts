@@ -15,7 +15,7 @@ export const jpop_top_50: {
       "In this concept album, Happy End attempted to paint a musical picture of Tokyo before the 1964 Summer Olympics, through which sweeping changes transformed the city forever.",
     genre: "Rock and roll",
     cover: "01.jpg",
-    link: "https://music.apple.com/us/album/%E9%A2%A8%E8%A1%97%E3%82%8D%E3%81%BE%E3%82%93/1675259114",
+    link: "https://music.apple.com/album/%E9%A2%A8%E8%A1%97%E3%82%8D%E3%81%BE%E3%82%93/1675259114",
   },
   {
     title: "A LONG VACATION",
@@ -24,7 +24,7 @@ export const jpop_top_50: {
     description: `It has been called one of the greatest Japanese rock albums of all time, including by Rolling Stone Japan.`,
     genre: "pop",
     cover: "02.jpg",
-    link: "https://music.apple.com/us/album/a-long-vacation/1556260397",
+    link: "https://music.apple.com/album/a-long-vacation/1556260397",
   },
   {
     title: "Misslim",
@@ -33,13 +33,13 @@ export const jpop_top_50: {
     description: `The album title Misslim is derived from the word "Miss" and "Slim" after the slim appearance of Yumi Arai at that time.`,
     genre: "pop",
     cover: "03.jpg",
-    link: "https://music.apple.com/us/album/misslim/1436010441",
+    link: "https://music.apple.com/album/misslim/1436010441",
   },
   {
     title: "Caramel Mama",
     artist: "Tin Pan Alley",
     published_at: "1975-11-25",
-    description: `In spite of that, Caramel Mama is a compilation of songs that do a good job of showcasing Tin Pan Alley's versatility, fluidity, and discipline as a band. *Also shout out again to Japanese study expert Moritz Sommet for his help with research on the band.`,
+    description: `In spite of that, Caramel Mama is a compilation of songs that do a good job of showcasing Tin Pan Alley's versatility, fluidity, and discipline as a band. *Also shout out again to Japanese study expert Moritz Sommet for his help with research on the band.  (this album is only available in Japan Region on Apple Music)`,
     genre: "funk/spirituals/R&B",
     cover: "05.jpg",
     link: "https://music.apple.com/jp/album/%E3%82%AD%E3%83%A3%E3%83%A9%E3%83%A1%E3%83%AB-%E3%83%9E%E3%83%9E/1404189461",
@@ -48,10 +48,10 @@ export const jpop_top_50: {
     title: "IV - Maybe Tomorrow",
     artist: "REBECCA",
     published_at: "1985",
-    description: ``,
+    description: `REBECCA IV ~Maybe Tomorrow~ is the fourth studio album by REBECCA. It was released on LP and CD on November 1, 1985.`,
     genre: "pop",
     cover: "mabye_tomorrow.jpg",
-    link: "",
+    link: "https://music.apple.com/cn/album/rebecca-iv-maybe-tomorrow/1536717779",
   },
   {
     title: "ADVENTURE",
@@ -60,7 +60,7 @@ export const jpop_top_50: {
     description: `The album blends '80s Japanese pop with City Pop and light electronic influences, showcasing Kikuchi's sweet yet maturing voice.`,
     genre: "pop",
     cover: "04.jpg",
-    link: "https://music.apple.com/us/album/adventure/529393370",
+    link: "https://music.apple.com/album/adventure/529393370",
   },
 
   {
@@ -70,7 +70,7 @@ export const jpop_top_50: {
     description: `横尾忠則の描いたジャケットも印象的な通算4枚目のアルバム。井上鑑、ジョン・ギブリン、アラン・マーフィー、山木秀夫の4人によるプロジェクトで、人間の愚かさを感じさせる歌詞が印象的な「5000本の樫の木」「7月のCAMEL」、女性の話し声の加工が面白い「A Moment In A Morning」、琴と井上鑑ユニットとの融合がユニークな「架空庭園論」と続き、霧の中を彷徨う様な印象を受ける「FOREST OF THOUGHT」など、全曲を通して人間と自然の共存についての深いテーマ性を持つ作品となっている。`,
     genre: "electro",
     cover: "06.jpg",
-    link: "https://music.apple.com/us/album/kakuuteienron/1442300601",
+    link: "https://music.apple.com/album/kakuuteienron/1442300601",
   },
   {
     title: "東京の野蛮",
@@ -79,7 +79,7 @@ export const jpop_top_50: {
     description: `『東京の野蛮』（とうきょうのやばん）は、「戸川純」名義で発売された戸川純のベスト・アルバム。`,
     genre: "pop",
     cover: "07.jpg",
-    link: "https://music.apple.com/us/album/tokyo-no-yaban/1529359129",
+    link: "https://music.apple.com/album/tokyo-no-yaban/1529359129",
   },
   {
     title: "RIDE ON TIME (ライド・オン・タイム)",
@@ -88,7 +88,7 @@ export const jpop_top_50: {
     description: `Ride on Time is the sixth single by Japanese singer-songwriter Tatsuro Yamashita, released in May 1980. This was his first single to enter the Oricon Singles Chart, peaking in at number three. Some sources claim that this was the beginning of the genre called \"City pop\".`,
     genre: "pop",
     cover: "08.jpg",
-    link: "https://music.apple.com/us/album/ride-on-time-%E5%B1%B1%E4%B8%8B%E9%81%94%E9%83%8E/270494033?i=270494054",
+    link: "https://music.apple.com/album/ride-on-time-%E5%B1%B1%E4%B8%8B%E9%81%94%E9%83%8E/270494033?i=270494054",
   },
   {
     title: "Twilight Zone",
@@ -97,7 +97,7 @@ export const jpop_top_50: {
     description: `RCA時代最後のアルバムである本作は、吉田がかねてからやりたいと望んできたソウル、ジャズ、ゴスペルに影響を受けたオリジナル作品を初めてのびのびとやることができたアルバムだった。`,
     genre: "jazz",
     cover: "09.jpg",
-    link: "https://music.apple.com/jp/album/twilight-zone/1536908399",
+    link: "https://music.apple.com/album/twilight-zone/1536908399",
   },
   {
     title: "LIGHT'N UP (ライトゥン・アップ)",
@@ -106,25 +106,25 @@ export const jpop_top_50: {
     description: `本作は前作『MONSTERS IN TOWN』同様、1981年に制作されていた。レコーディングは東京とニューヨークで行われ、ミックス・ダウンは全曲ニューヨークで兄の吉田保が担当している。ニューヨークでのレコーディングでは当時、すでにメンバーが変わっていたブレッカー・ブラザーズのホーン・セクションをオリジナル・メンバーに戻してセッションが行われた。`,
     genre: "funk/spirituals/R&B",
     cover: "10.jpg",
-    link: "https://music.apple.com/jp/album/lightn-up/1536910122",
+    link: "https://music.apple.com/album/lightn-up/1536910122",
   },
   {
     title: "FLAPPER",
     artist: "吉田美奈子",
     published_at: "1976",
-    description: ``,
+    description: `Third album by Minako Yoshida orginally released in March 1976. 2020 remastering by Bernie Grundman, pressed at the Sony Shizuoka factory. Considered a classic album that includes the hit single Yume de Aetara.`,
     genre: "funk/spirituals/R&B",
     cover: "12.jpg",
-    link: "",
+    link: "https://music.apple.com/album/flapper/1536910960",
   },
   {
     title: "モノクローム",
     artist: "吉田美奈子",
     published_at: "1980",
-    description: `funk/spirituals/R&B`,
-    genre: "",
+    description: `『MONOCHROME』（モノクローム）は、1980年10月21日に発売された吉田美奈子通算7作目のスタジオ・アルバム。`,
+    genre: "funk/spirituals/R&B",
     cover: "13.jpg",
-    link: "",
+    link: "https://music.apple.com/jp/album/monochrome/1536909116",
   },
   {
     title: "Pizzicatomania!",
@@ -133,7 +133,7 @@ export const jpop_top_50: {
     description: ``,
     genre: "electro",
     cover: "14.jpg",
-    link: "",
+    link: "https://music.apple.com/artist/pizzicato-five/2959831",
   },
   {
     title: "Future Listening!",
@@ -142,7 +142,7 @@ export const jpop_top_50: {
     description: ``,
     genre: "electro",
     cover: "15.jpg",
-    link: "",
+    link: "https://music.apple.com/album/future-listening/1743190664",
   },
   {
     title: "Dr. Head's World Tower",
@@ -151,7 +151,7 @@ export const jpop_top_50: {
     description: ``,
     genre: "electro",
     cover: "16.jpg",
-    link: "",
+    link: "https://music.apple.com/artist/flippers-guitar/166888104",
   },
   {
     title: "Camera Talk",
@@ -160,7 +160,7 @@ export const jpop_top_50: {
     description: ``,
     genre: "pop",
     cover: "17.jpg",
-    link: "",
+    link: "https://music.apple.com/album/camera-talk-remastered-2006/290714279",
   },
   {
     title: "黒船",
@@ -169,7 +169,7 @@ export const jpop_top_50: {
     description: ``,
     genre: "pop",
     cover: "18.jpg",
-    link: "",
+    link: "https://music.apple.com/album/black-ship-remastered-2023/1696267545",
   },
   {
     title: "空洞です",
@@ -178,7 +178,7 @@ export const jpop_top_50: {
     description: ``,
     genre: "pop",
     cover: "19.jpg",
-    link: "",
+    link: "https://music.apple.com/album/hollow-me/1535500874?i=1535500886",
   },
   {
     title: "神田川",
@@ -187,7 +187,7 @@ export const jpop_top_50: {
     description: ``,
     genre: "folk",
     cover: "20.jpg",
-    link: "",
+    link: "https://music.apple.com/album/%E3%81%8B%E3%81%90%E3%82%84%E5%A7%AB-kaguyahime-best-dreamin/552292665",
   },
   {
     title: "恋人よ",
@@ -196,7 +196,7 @@ export const jpop_top_50: {
     description: ``,
     genre: "pop",
     cover: "21.jpg",
-    link: "",
+    link: "https://music.apple.com/album/%E6%81%8B%E4%BA%BA%E3%82%88/1536093755",
   },
   {
     title: "泰安洋行",
@@ -205,7 +205,7 @@ export const jpop_top_50: {
     description: ``,
     genre: "pop",
     cover: "22.jpg",
-    link: "",
+    link: "https://music.apple.com/jp/album/%E6%B3%B0%E5%AE%89%E6%B4%8B%E8%A1%8C/1404190104",
   },
   {
     title: "Yellow Magic Orchestra",
@@ -214,7 +214,7 @@ export const jpop_top_50: {
     description: ``,
     genre: "electro",
     cover: "23.jpg",
-    link: "",
+    link: "https://music.apple.com/album/yellow-magic-orchestra/1291831607",
   },
   {
     title: "綺麗",
@@ -223,7 +223,7 @@ export const jpop_top_50: {
     description: ``,
     genre: "pop",
     cover: "24.jpg",
-    link: "",
+    link: "https://music.apple.com/album/kirei/949260030",
   },
   {
     title: "氷の世界",
@@ -232,7 +232,7 @@ export const jpop_top_50: {
     description: ``,
     genre: "folk",
     cover: "25.jpg",
-    link: "",
+    link: "https://music.apple.com/album/koorino-sekai-remastered-2018/1434427965",
   },
   {
     title: "流線形'80",
@@ -241,7 +241,7 @@ export const jpop_top_50: {
     description: ``,
     genre: "pop",
     cover: "26.jpg",
-    link: "",
+    link: "https://music.apple.com/album/streamline-80-ryusenkei80/1436012629",
   },
   {
     title: "ひこうき雲",
@@ -250,7 +250,7 @@ export const jpop_top_50: {
     description: ``,
     genre: "pop",
     cover: "27.jpg",
-    link: "",
+    link: "https://music.apple.com/album/vapor-trail-hikouki-gumo-single/1436012098",
   },
   {
     title: "Timely!!",
@@ -259,7 +259,7 @@ export const jpop_top_50: {
     description: ``,
     genre: "funk/spirituals/R&B",
     cover: "28.jpg",
-    link: "",
+    link: "https://music.apple.com/album/timely/283306771",
   },{
     title: "Romantique",
     artist: "大貫妙子",
@@ -267,7 +267,7 @@ export const jpop_top_50: {
     description: ``,
     genre: "pop",
     cover: "29.jpg",
-    link: "",
+    link: "https://music.apple.com/album/romantique-mastered-by-bernie-grundman/1597424537",
   },{
     title: "扉の冬",
     artist: "吉田美奈子",
@@ -275,7 +275,7 @@ export const jpop_top_50: {
     description: ``,
     genre: "folk",
     cover: "30.jpg",
-    link: "",
+    link: "https://music.apple.com/album/%E6%89%89%E3%81%AE%E5%86%AC/1329384684",
   },{
     title: "Japanese Girl",
     artist: "矢野顕子 / Akiko Yano",
