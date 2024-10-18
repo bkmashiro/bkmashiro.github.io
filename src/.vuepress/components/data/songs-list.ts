@@ -51,7 +51,7 @@ export const jpop_top_50: {
     description: `REBECCA IV ~Maybe Tomorrow~ is the fourth studio album by REBECCA. It was released on LP and CD on November 1, 1985.`,
     genre: "pop",
     cover: "mabye_tomorrow.jpg",
-    link: "https://music.apple.com/cn/album/rebecca-iv-maybe-tomorrow/1536717779",
+    link: "https://music.apple.com/album/rebecca-iv-maybe-tomorrow/1536717779",
   },
   {
     title: "ADVENTURE",
