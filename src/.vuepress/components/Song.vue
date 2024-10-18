@@ -5,7 +5,12 @@
          class="song-cover" />
     <div class="song-info">
       <h3 class="song-title">
-        <a :href="song.link" target="_blank">
+        <p v-if="no"
+           class="song-number">
+          #{{ no }}
+        </p>
+        <a :href="song.link"
+           target="_blank">
           {{ song.title }}
         </a>
       </h3>
@@ -27,11 +32,21 @@ const props = defineProps<{
     genre: string,
     cover: string,
     link: string,
+  },
+  no: {
+    type: Number,
+    required: false,
   }
 }>()
 </script>
 
 <style scoped>
+.song-number {
+  font-size: 24px;
+  font-weight: bold;
+  margin: 0 16px 0 0;
+}
+
 .song-card {
   display: flex;
   flex-direction: column;
@@ -68,6 +83,9 @@ const props = defineProps<{
   font-size: 18px;
   font-weight: bold;
   margin: 0 0 8px;
+
+  display: flex;
+  align-items: baseline;
 }
 
 .song-artist {

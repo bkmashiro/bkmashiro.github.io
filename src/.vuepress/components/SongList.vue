@@ -4,6 +4,7 @@
 
     <Song v-for="(song, index) in songs"
           :key="index"
+          :no="index + 1"
           :song="song" />
   </div>
 </template>
