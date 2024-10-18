@@ -35,7 +35,8 @@ const props = defineProps<{
 .song-card {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  /* justify-content: space-between; */
+  justify-content: flex-start;
   width: 300px;
   padding: 16px;
   margin: 16px;

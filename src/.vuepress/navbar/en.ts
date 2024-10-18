@@ -13,8 +13,8 @@ export const enNavbar = navbar([
         prefix: "posts",
         children: [
           { text: "index", icon: "pen-to-square", link: "index" },
-          { text: "easy series", icon: "pen-to-square", link: "easy-series" },
-          { text: "medium series", icon: "pen-to-square", link: "medium-index" },
+          { text: "easy series", icon: "pen-to-square", link: "typescript/easy-series" },
+          { text: "medium series", icon: "pen-to-square", link: "typescript/medium-index" },
         ],
       },
     ],
