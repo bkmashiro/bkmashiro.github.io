@@ -13,6 +13,18 @@
            target="_blank">
           {{ song.title }}
         </a>
+        <div v-if="isRestrictedJp && !isArtistOnly"
+             class="hint-text">
+          <p>(Avaliable in Apple Music Japan)</p>
+        </div>
+        <div v-if="isArtistOnly && !isRestrictedJp"
+             class="hint-text">
+          <p>(Artist page Only)</p>
+        </div>
+        <div v-if="isArtistOnly && isRestrictedJp"
+             class="hint-text">
+          <p>(Artist page avaliable in Apple Music Japan)</p>
+        </div>
       </h3>
       <p class="song-artist">{{ song.artist }}</p>
       <p class="song-genre">{{ song.genre }}</p>
@@ -23,6 +35,8 @@
 </template>
 
 <script lang="ts" setup>
+import { computed } from 'vue';
+
 const props = defineProps<{
   song: {
     title: string,
@@ -38,9 +52,19 @@ const props = defineProps<{
     required: false,
   }
 }>()
+
+const isRestrictedJp = computed(() => props.song.link.startsWith("https://music.apple.com/jp"))
+const isArtistOnly = computed(() => props.song.link.startsWith("https://music.apple.com/artist") ||
+  props.song.link.startsWith("https://music.apple.com/jp/artist"))
+
 </script>
 
 <style scoped>
+.hint-text {
+  font-size: 14px;
+  color: #888;
+}
+
 .song-number {
   font-size: 24px;
   font-weight: bold;
