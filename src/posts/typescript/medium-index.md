@@ -1,6 +1,6 @@
 ---
 description: TypeChallenge - Meduim series
-title: 类型体操 - 中级系列 导航
+title: TypeChallenge - Meduim series Index
 readingTime: false
 tag:
   - TypeScript
@@ -9,19 +9,24 @@ outline: [2, 3]
 sticky: 2
 ---
 
-# 类型体操 - 中级系列 导航
+# TypeChallenge - Meduim series Index
 
-## 介绍
+## Introduction
 
-由于中级系列的题目较多，为了方便大家查阅，俺在这提供了一个导航，方便大伙查找。
+<!-- 由于中级系列的题目较多，为了方便大家查阅，俺在这提供了一个导航，方便大伙查找。 -->
+
+Due to the large number of medium series questions, in order to facilitate everyone to check, I provide a navigation here for everyone to check.
 
 <!-- more -->
 
 ::: tip
-在中高级系列中, 俺可能会复用之前写过的工具类型. 俺不会重复其代码, 但会在题目中提供其链接, 方便大家查看.
+<!-- 在中高级系列中, 俺可能会复用之前写过的工具类型. 俺不会重复其代码, 但会在题目中提供其链接, 方便大家查看. -->
+In the medium and advanced series, I may reuse the tool types I have written before. I will not repeat the code, but will provide a link to it in the question for everyone to check.
 :::
 
-## 题目列表
+<!-- ## 题目列表 -->
+
+## Question List
 
 - [2-Get Return Type](./medium/0002.md)
 - [3-Omit](./medium/0003.md)
