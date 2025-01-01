@@ -10,4 +10,6 @@
 
 (Now it's still 2024 at UTC+0, so I'll leave the rest to the future self.)
 
-...
+## Goal of 2025
+
++ Well, I don't know yet. Let's see. Just hope everything goes well.
