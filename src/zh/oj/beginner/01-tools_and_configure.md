@@ -63,10 +63,10 @@ curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
 然后用`nvm`装`node.js` 18+版本
 
 ```bash
-nvm i 18
+nvm i 20
 ```
 
-== 运行 Leverage
+## 运行 Leverage
 
 Note: 先配置好SSH，并且把你加进去，才能clone这个组织仓库.
 
