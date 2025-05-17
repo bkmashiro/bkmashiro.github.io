@@ -41,6 +41,15 @@ https://docs.github.com/en/authentication/connecting-to-github-with-ssh/adding-a
 
 https://docs.github.com/en/authentication/managing-commit-signature-verification/generating-a-new-gpg-key
 
+配置用户名和email
+
+```bash
+git config --global user.name "Your Name"
+git config --global user.email "your.email@example.com"
+```
+
+注意: 这个邮箱最好是 GitHub 分配的 noreply 邮箱 [Find it here](https://github.com/settings/emails#:~:text=Primary%20email%20address)
+
 ### 配置node.js
 
 OJ 跑在 node 平台上,所以要装
