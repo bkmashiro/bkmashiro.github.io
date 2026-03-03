@@ -1,5 +1,6 @@
 ---
 draft: true
+article: false
 ---
 
 # Matured 32 Days Wagyu
