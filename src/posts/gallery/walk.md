@@ -7,18 +7,18 @@
 
 * translation: On rainy days, who enjoys the rain, baka_mashiro, I wonder? *
 
-![rain drops trapped on window](../../.vuepress/public/assets/photos/DSC00263.JPG)
+![rain drops trapped on window](../../.vuepress/public/assets/photos/DSC00263.jpg)
 
 ## Rainbow
-![rainbow](../../.vuepress/public/assets/photos/DSC00259.JPG)
+![rainbow](../../.vuepress/public/assets/photos/DSC00259.jpg)
 
 ## Legacy
-![The mottled castle](../../.vuepress/public/assets/photos/DSC00257.JPG)
+![The mottled castle](../../.vuepress/public/assets/photos/DSC00257.jpg)
 
 ## Toki (時)
 
 ### 固体状態での時間
-![時の流れに 逆らうことはできない](../../.vuepress/public/assets/photos/DSC00204.JPG)
+![時の流れに 逆らうことはできない](../../.vuepress/public/assets/photos/DSC00204.jpg)
 
 ## Statue
-![LUKE WADDING STATUE](../../.vuepress/public/assets/photos/DSC00201.JPG)
+![LUKE WADDING STATUE](../../.vuepress/public/assets/photos/DSC00201.jpg)
