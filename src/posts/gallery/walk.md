@@ -1,3 +1,7 @@
+---
+draft: true
+---
+
 # Misc
 
 ## Ame (雨)

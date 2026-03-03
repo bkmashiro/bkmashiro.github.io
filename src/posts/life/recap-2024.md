@@ -1,3 +1,7 @@
+---
+draft: true
+---
+
 # See You 2024
 
 ## Recap of 2024
