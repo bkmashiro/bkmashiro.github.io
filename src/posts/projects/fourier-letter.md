@@ -110,7 +110,7 @@ For my 512-point letter paths, **80–100 harmonics** give clean sharp corners w
 
 ## Live Demo
 
-The full demo is [here](/demos/fourier) — all five letters animating simultaneously, each in its own color.
+The full demo is [here](/demos/fourier.html) — all five letters animating simultaneously, each in its own color.
 
 Source: ~200 lines of vanilla JS, no libraries, pure canvas. The DFT is just a nested loop over the sample points.
 

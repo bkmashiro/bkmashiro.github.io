@@ -110,7 +110,7 @@ const minX = points.reduce((m, p) => Math.min(m, p.x), Infinity)
 
 ## 在线 Demo
 
-[点这里看 Demo](/demos/fourier)——五个字母同时动画，各自不同颜色。
+[点这里看 Demo](/demos/fourier.html)——五个字母同时动画，各自不同颜色。
 
 约 200 行原生 JS，不依赖任何库，纯 canvas。DFT 就是一个对采样点的双重循环。
 
