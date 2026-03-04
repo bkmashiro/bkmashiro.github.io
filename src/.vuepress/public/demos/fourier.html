@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fourier Epicycles – YUZHE (All)</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        background: #080808;
+        overflow: hidden;
+        width: 100vw;
+        height: 100vh;
+      }
+      canvas {
+        display: block;
+      }
+      #info {
+        position: fixed;
+        top: 16px;
+        right: 20px;
+        color: rgba(255, 255, 255, 0.45);
+        font-family: 'SF Mono', monospace;
+        font-size: 12px;
+        letter-spacing: 0.08em;
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="c"></canvas>
+    <div id="info">drawing YUZHE</div>
+    <script>
+      // ── Letter waypoints in [0,1] space — CLOSED LOOPS ───────────────────────
+      const LETTERS = {
+        Y: [
+          { x: 0.5, y: 0.45 },
+          { x: 0.15, y: 0 },
+          { x: 0.5, y: 0.45 },
+          { x: 0.85, y: 0 },
+          { x: 0.5, y: 0.45 },
+          { x: 0.5, y: 1 },
+          { x: 0.5, y: 0.45 },
+        ],
+        U: [
+          { x: 0.5, y: 1 },
+          { x: 0.35, y: 0.97 },
+          { x: 0.2, y: 0.87 },
+          { x: 0.15, y: 0.68 },
+          { x: 0.15, y: 0 },
+          { x: 0.15, y: 0.68 },
+          { x: 0.2, y: 0.87 },
+          { x: 0.35, y: 0.97 },
+          { x: 0.5, y: 1 },
+          { x: 0.65, y: 0.97 },
+          { x: 0.8, y: 0.87 },
+          { x: 0.85, y: 0.68 },
+          { x: 0.85, y: 0 },
+          { x: 0.85, y: 0.68 },
+          { x: 0.8, y: 0.87 },
+          { x: 0.65, y: 0.97 },
+          { x: 0.5, y: 1 },
+        ],
+        Z: [
+          { x: 0.15, y: 0 },
+          { x: 0.85, y: 0 },
+          { x: 0.15, y: 1 },
+          { x: 0.85, y: 1 },
+          { x: 0.15, y: 1 },
+          { x: 0.85, y: 0 },
+          { x: 0.15, y: 0 },
+        ],
+        H: [
+          { x: 0.15, y: 0 },
+          { x: 0.15, y: 1 },
+          { x: 0.15, y: 0.5 },
+          { x: 0.85, y: 0.5 },
+          { x: 0.85, y: 1 },
+          { x: 0.85, y: 0 },
+          { x: 0.85, y: 0.5 },
+          { x: 0.15, y: 0.5 },
+          { x: 0.15, y: 0 },
+        ],
+        E: [
+          { x: 0.85, y: 0 },
+          { x: 0.15, y: 0 },
+          { x: 0.15, y: 0.5 },
+          { x: 0.75, y: 0.5 },
+          { x: 0.15, y: 0.5 },
+          { x: 0.15, y: 1 },
+          { x: 0.85, y: 1 },
+          { x: 0.15, y: 1 },
+          { x: 0.15, y: 0 },
+          { x: 0.85, y: 0 },
+        ],
+      }
+      const ORDER = ['Y', 'U', 'Z', 'H', 'E']
+      const N = 128
+      const N_HARM = 60
+      const T_STEP = 0.004
+      const TRAIL = 1200
+
+      // ── Canvas ────────────────────────────────────────────────────────────────
+      const canvas = document.getElementById('c')
+      const ctx = canvas.getContext('2d')
+      let W,
+        H,
+        letterW,
+        letterH,
+        offY,
+        offXs = []
+
+      function layout() {
+        W = canvas.width = window.innerWidth
+        H = canvas.height = window.innerHeight
+        letterW = Math.min(W / 6, H * 0.55)
+        letterH = letterW
+        const totalW = 5 * letterW
+        const startX = (W - totalW) / 2
+        offXs = ORDER.map((_, i) => startX + i * letterW)
+        offY = (H - letterH) / 2
+      }
+
+      // ── Resample waypoints to N equal-time points ─────────────────────────────
+      function resample(wpts, ox, oy, scale) {
+        const L = wpts.length
+        const pts = []
+        for (let i = 0; i < N; i++) {
+          const pos = L * (i / N)
+          const a = Math.floor(pos) % L
+          const b = (a + 1) % L
+          const frac = pos - Math.floor(pos)
+          pts.push({
+            x: ox + (wpts[a].x + frac * (wpts[b].x - wpts[a].x)) * scale,
+            y: oy + (wpts[a].y + frac * (wpts[b].y - wpts[a].y)) * scale,
+          })
+        }
+        return pts
+      }
+
+      // ── DFT with signed frequencies ───────────────────────────────────────────
+      function dft(pts) {
+        const result = []
+        for (let k = 0; k < N; k++) {
+          let re = 0,
+            im = 0
+          for (let n = 0; n < N; n++) {
+            const θ = (2 * Math.PI * k * n) / N
+            re += pts[n].x * Math.cos(θ) + pts[n].y * Math.sin(θ)
+            im += pts[n].y * Math.cos(θ) - pts[n].x * Math.sin(θ)
+          }
+          re /= N
+          im /= N
+          const freq = k <= N / 2 ? k : k - N
+          result.push({ freq, amp: Math.hypot(re, im), phase: Math.atan2(im, re) })
+        }
+        return result.sort((a, b) => b.amp - a.amp).slice(0, N_HARM)
+      }
+
+      // ── State ─────────────────────────────────────────────────────────────────
+      let letters = []
+      let t = 0,
+        fading = false,
+        fa = 1
+
+      function initLetters() {
+        letters = ORDER.map((key, i) => {
+          const pts = resample(LETTERS[key], offXs[i], offY, letterW)
+          const freqs = dft(pts)
+          return { key, freqs, trail: [] }
+        })
+        t = 0
+        fading = false
+        fa = 1
+      }
+
+      layout()
+      initLetters()
+      window.addEventListener('resize', () => {
+        layout()
+        initLetters()
+      })
+
+      // ── Draw trail ────────────────────────────────────────────────────────────
+      function drawTrail(trail, alpha) {
+        if (trail.length < 2) return
+        ctx.lineWidth = 1.8
+        for (let i = 1; i < trail.length; i++) {
+          ctx.strokeStyle = `rgba(255,255,255,${((i / trail.length) * alpha).toFixed(3)})`
+          ctx.beginPath()
+          ctx.moveTo(trail[i - 1].x, trail[i - 1].y)
+          ctx.lineTo(trail[i].x, trail[i].y)
+          ctx.stroke()
+        }
+      }
+
+      // ── Draw loop ─────────────────────────────────────────────────────────────
+      function frame() {
+        requestAnimationFrame(frame)
+        ctx.fillStyle = '#080808'
+        ctx.fillRect(0, 0, W, H)
+
+        if (fading) {
+          fa -= 0.04
+          if (fa <= 0) {
+            initLetters()
+            return
+          }
+          for (const letter of letters) drawTrail(letter.trail, fa)
+          return
+        }
+
+        t += T_STEP
+        if (t >= 1) {
+          fading = true
+          return
+        }
+
+        for (const letter of letters) {
+          const { freqs, trail } = letter
+          let px = 0,
+            py = 0
+
+          const arms = freqs.map((f) => {
+            const a = 2 * Math.PI * f.freq * t + f.phase
+            const x2 = px + f.amp * Math.cos(a)
+            const y2 = py + f.amp * Math.sin(a)
+            const arm = { x1: px, y1: py, x2, y2, r: f.amp }
+            px = x2
+            py = y2
+            return arm
+          })
+
+          // Circles
+          ctx.lineWidth = 0.3
+          ctx.strokeStyle = 'rgba(255,255,255,0.08)'
+          for (const a of arms) {
+            if (a.r < 1) continue
+            ctx.beginPath()
+            ctx.arc(a.x1, a.y1, a.r, 0, Math.PI * 2)
+            ctx.stroke()
+          }
+
+          // Rods
+          ctx.lineWidth = 0.4
+          ctx.strokeStyle = 'rgba(255,255,255,0.25)'
+          ctx.beginPath()
+          for (const a of arms) {
+            ctx.moveTo(a.x1, a.y1)
+            ctx.lineTo(a.x2, a.y2)
+          }
+          ctx.stroke()
+
+          // Trail
+          trail.push({ x: px, y: py })
+          if (trail.length > TRAIL) trail.shift()
+          drawTrail(trail, 1)
+
+          // Pen glow
+          ctx.save()
+          ctx.shadowColor = '#fff'
+          ctx.shadowBlur = 14
+          ctx.fillStyle = '#fff'
+          ctx.beginPath()
+          ctx.arc(px, py, 3, 0, Math.PI * 2)
+          ctx.fill()
+          ctx.restore()
+        }
+      }
+
+      frame()
+    </script>
+  </body>
+</html>
