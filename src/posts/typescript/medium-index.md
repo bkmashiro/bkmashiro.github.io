@@ -67,7 +67,7 @@ In the medium and advanced series, I may reuse the tool types I have written bef
 - 2757-PartialByKeys
 - 2759-RequiredByKeys
 - 2793-Mutable
-- 2852-OmitByType
+- [2852-OmitByType](./medium/2852.md)
 - 2946-ObjectEntries
 - 3062-Shift
 - 3188-Tuple to Nested Object
