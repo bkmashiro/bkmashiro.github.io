@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Fourier Epicycles – YUZHE (All)</title>
+    <title>Fourier Epicycles – EULER</title>
     <style>
       * {
         margin: 0;
@@ -33,7 +33,7 @@
   </head>
   <body>
     <canvas id="c"></canvas>
-    <div id="info">drawing YUZHE</div>
+    <div id="info">drawing EULER</div>
     <script>
       // ── Letter waypoints in [0,1] space — CLOSED LOOPS ───────────────────────
       const LETTERS = {
@@ -97,8 +97,22 @@
           { x: 0.15, y: 0 },
           { x: 0.85, y: 0 },
         ],
+        L: [
+          { x: 0.15, y: 0 },
+          { x: 0.15, y: 1 }, { x: 0.85, y: 1 },
+          { x: 0.15, y: 1 }, { x: 0.15, y: 0 },
+        ],
+        R: [
+          { x: 0.15, y: 0 },
+          { x: 0.15, y: 1 },
+          { x: 0.15, y: 0.5 },
+          { x: 0.85, y: 1 },
+          { x: 0.15, y: 0.5 },
+          { x: 0.8,  y: 0.05 }, { x: 0.85, y: 0.2 }, { x: 0.85, y: 0.35 }, { x: 0.8, y: 0.5 }, { x: 0.15, y: 0.5 },
+          { x: 0.15, y: 0 },
+        ],
       }
-      const ORDER = ['Y', 'U', 'Z', 'H', 'E']
+      const ORDER = ['E', 'U', 'L', 'E', 'R']
       const N = 128
       const N_HARM = 60
       const T_STEP = 0.004
