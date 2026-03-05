@@ -123,5 +123,5 @@ In the medium and advanced series, I may reuse the tool types I have written bef
 - 29785-Deep Omit
 - 30301-IsOdd
 - 30430-Tower of hanoi
-- 30958-Pascal's triangle
+- [30958-Pascal's triangle](./medium/30958.md)
 - 30970-IsFixedStringLiteralType
