@@ -74,7 +74,7 @@ In the medium and advanced series, I may reuse the tool types I have written bef
 - 3192-Reverse
 - 3196-Flip Arguments
 - 3243-FlattenDepth
-- 3326-BEM style string
+- [3326-BEM style string](./medium/3326.md)
 - 3376-InorderTraversal
 - 4179-Flip
 - 4182-Fibonacci Sequence
