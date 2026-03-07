@@ -44,7 +44,7 @@ In the medium and advanced series, I may reuse the tool types I have written bef
 - [116-Replace](./medium/0116.md)
 - [119-ReplaceAll](./medium/0119.md)
 - 191-Append Argument
-- 296-Permutation
+- [296-Permutation](./medium/0296.md)
 - 298-Length of String
 - 459-Flatten
 - 527-Append to object
