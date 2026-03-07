@@ -38,8 +38,11 @@ Standard OS-level isolation is off the table:
 - **No root** → no user namespaces, no `unshare`, no `nsjail`
 - **No KVM** → no Firecracker, no microVMs
 - **No FUSE** (probably) → no overlay filesystems at the process level
+- **No CAP_BPF** → rules out eBPF-based syscall filtering (which could reduce attack surface by ~55%, per arXiv 2302.10366)
 
-Lambda already applies a `seccomp-bpf` filter of its own. We can layer on top of it, but we can't go beneath it.
+Lambda already applies a `seccomp-bpf` filter of its own. We can layer on top of it, but we can't go beneath it. And it's worth noting: Lambda itself runs _inside_ Firecracker MicroVMs — so the outer isolation exists, but we need _inner_ isolation within the same Lambda instance across student invocations. Firecracker's jailer design (seccomp + namespace + filesystem isolation) is still instructive even if we can't replicate it directly.
+
+One thing we don't actually know yet: can Lambda instances load _new_ seccomp filters, or is the filter already locked by the time user code runs? That's empirical — we need to deploy a probe script to find out.
 
 ## The Defense Matrix
 
@@ -133,11 +136,27 @@ This covers ~90% of the threat surface with low complexity, no root, and reasona
 
 WASM goes on the roadmap as the long-term path for languages where the toolchain supports it. Python is the priority — Pyodide is production-ready enough.
 
+## The shimmy Integration Point
+
+Before touching anything, we mapped [shimmy](https://github.com/lambda-feedback/shimmy) — the Go shim that manages evaluation functions for Lambda Feedback. Current state: it has no sandboxing at all. The worker lifecycle (spawn → evaluate → respond → idle) is the natural integration point for any isolation we add.
+
+The fork-per-invocation approach slots in cleanly here: shimmy already manages worker processes. We'd hook into the invocation path to fork, apply seccomp and rlimits in the child, run the student code, then discard the process.
+
+## Open Questions
+
+The threat model is clear; some implementation questions aren't:
+
+1. **Can we load new seccomp filters inside Lambda?** Lambda's existing filter might already be locked with `SECCOMP_FILTER_FLAG_TSYNC`. Only empirical testing will tell.
+2. **Is `fork()` rate-limited?** Lambda might throttle process creation. If so, we'd need a worker pool with reset-on-reuse rather than true fork-per-invocation.
+3. **Can `prctl()` help?** `PR_SET_NO_NEW_PRIVS` is a low-cost hardening step we can almost certainly apply without root.
+4. **Is Pyodide viable for Lambda's memory limits?** Pyodide adds ~30MB to the process. Lambda's default is 128MB. Tight.
+
 ## What's Next
 
-- Read the papers: [Firecracker (NSDI'20)](https://www.usenix.org/system/files/nsdi20-paper-agache.pdf), syscall interposition survey
-- Understand shimmy's current architecture before touching anything
-- Verify what seccomp actually allows inside Lambda (empirical testing beats assumptions)
+- Deploy a probe script to real Lambda: map what syscalls, capabilities, and kernel features are actually available
+- Read the papers: [Firecracker (NSDI'20)](https://www.usenix.org/system/files/nsdi20-paper-agache.pdf), syscall interposition survey ([arXiv 2302.10366](https://arxiv.org/abs/2302.10366))
+- Prototype `fork() + seccomp + rlimit` inside shimmy's invocation path
+- Benchmark overhead (isolation cost) vs security gain
 - Supervisor meeting in two weeks
 
 The interesting constraint here — userspace-only, no OS changes — forces creative solutions. That's what makes it a research project rather than a configuration problem.
