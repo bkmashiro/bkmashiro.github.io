@@ -22,21 +22,33 @@ The project is called **AVM** — [github.com/aivmem/avm](https://github.com/aiv
 The core idea: agent memories live at paths like `/memory/private/akashi/trading/btc_lesson.md`. A SQLite database stores the actual content with metadata (importance score, tags, TTL). A Python API provides structured access:
 
 ```python
-agent = vfs.agent_memory("akashi")
+from avm import AVM
 
-# Write
-agent.remember("RSI > 70 on NVDA → average -12% in 5 days",
-               importance=0.9, tags=["trading", "nvda"])
+avm = AVM()
+agent = avm.agent_memory("akashi")
+
+# Write with metadata
+agent.remember(
+    "RSI > 70 on NVDA → average -12% in 5 days",
+    title="nvda_rsi_rule",      # optional filename
+    importance=0.9,              # 0.0–1.0, affects recall ranking
+    tags=["trading", "nvda"]
+)
 
 # Token-budget-controlled recall
 context = agent.recall("NVDA risk", max_tokens=2000)
 # Returns compact markdown: most relevant memories within budget
 
-# Cross-agent sharing
-agent.share("/memory/private/akashi/market_regime.md", "shared/trading")
+# Cross-agent sharing: share directly via namespace= param
+agent.remember(
+    "Market regime: risk-off, reduce exposure",
+    namespace="market"          # → /memory/shared/market/
+)
 ```
 
 The `recall()` method is the key piece. Instead of loading everything, it scores candidates by **importance × recency × semantic relevance**, selects as many as fit within `max_tokens`, and returns a compact summary — not the raw file content. The agent gets a controlled-size context block, not an ever-growing dump.
+
+Three scoring strategies are available: `RECENCY` (newest first), `IMPORTANCE` (score first), and `BALANCED` (default — combines both with semantic similarity).
 
 ## Benchmarks
 
