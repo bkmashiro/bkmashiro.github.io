@@ -17,7 +17,7 @@ We wanted something better: a virtual filesystem for agent memory. Write memorie
 
 ## AVM: Agent Virtual Memory
 
-The project is called **AVM** — [github.com/bkmashiro/vfs](https://github.com/bkmashiro/vfs).
+The project is called **AVM** — [github.com/aivmem/avm](https://github.com/aivmem/avm).
 
 The core idea: agent memories live at paths like `/memory/private/akashi/trading/btc_lesson.md`. A SQLite database stores the actual content with metadata (importance score, tags, TTL). A Python API provides structured access:
 
