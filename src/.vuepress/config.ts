@@ -23,6 +23,11 @@ export default defineUserConfig({
       title: "BakaWorks",
       description: "baka_mashiro's blog",
     },
+    "/ja/": {
+      lang: "ja-JP",
+      title: "BakaWorks",
+      description: "baka_mashiroのブログ",
+    },
   },
 
   theme,

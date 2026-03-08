@@ -1,7 +1,7 @@
 import { hopeTheme } from "vuepress-theme-hope";
 
-import { enNavbar, zhNavbar } from "./navbar/index.js";
-import { enSidebar, zhSidebar } from "./sidebar/index.js";
+import { enNavbar, zhNavbar, jaNavbar } from "./navbar/index.js";
+import { enSidebar, zhSidebar, jaSidebar } from "./sidebar/index.js";
 
 export default hopeTheme({
   hostname: "https://blog.yuzhes.com",
@@ -44,6 +44,31 @@ export default hopeTheme({
 
       metaLocales: {
         editLink: "Edit this page on GitHub",
+      },
+    },
+
+    /**
+     * Japanese locale config
+     */
+    "/ja/": {
+      // navbar
+      navbar: jaNavbar,
+
+      // sidebar
+      sidebar: jaSidebar,
+
+      footer: "baka_mashiro © 2024 All Rights Reserved",
+
+      displayFooter: true,
+
+      blog: {
+        description: "CSエンジニア",
+        intro: "/ja/intro.html",
+      },
+
+      // page meta
+      metaLocales: {
+        editLink: "GitHubでこのページを編集",
       },
     },
 
