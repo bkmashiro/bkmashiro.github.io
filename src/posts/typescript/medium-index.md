@@ -55,7 +55,7 @@ In the medium and advanced series, I may reuse the tool types I have written bef
 - 645-Diff
 - 949-AnyOf
 - 1042-IsNever
-- 1097-IsUnion
+- [1097-IsUnion](./medium/1097.md)
 - 1130-ReplaceKeys
 - 1367-Remove Index Signature
 - 1978-Percentage Parser
