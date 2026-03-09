@@ -33,7 +33,7 @@ export default hopeTheme({
       // sidebar
       sidebar: enSidebar,
 
-      footer: "baka_mashiro © 2024 All Rights Reserved",
+      footer: 'baka_mashiro © 2024 All Rights Reserved &nbsp;|&nbsp; <a href="https://icp.gov.moe/?keyword=20261101" target="_blank" style="color:inherit;opacity:0.65;text-decoration:none;">萌ICP备20261101号</a>',
 
       displayFooter: true,
 
@@ -57,7 +57,7 @@ export default hopeTheme({
       // sidebar
       sidebar: jaSidebar,
 
-      footer: "baka_mashiro © 2024 All Rights Reserved",
+      footer: 'baka_mashiro © 2024 All Rights Reserved &nbsp;|&nbsp; <a href="https://icp.gov.moe/?keyword=20261101" target="_blank" style="color:inherit;opacity:0.65;text-decoration:none;">萌ICP備20261101号</a>',
 
       displayFooter: true,
 
@@ -82,7 +82,7 @@ export default hopeTheme({
       // sidebar
       sidebar: zhSidebar,
 
-      footer: "baka_mashiro © 2024 All Rights Reserved",
+      footer: 'baka_mashiro © 2024 All Rights Reserved &nbsp;|&nbsp; <a href="https://icp.gov.moe/?keyword=20261101" target="_blank" style="color:inherit;opacity:0.65;text-decoration:none;">萌ICP备20261101号</a>',
 
       displayFooter: true,
 
