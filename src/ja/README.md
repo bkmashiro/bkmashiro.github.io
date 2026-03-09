@@ -14,5 +14,5 @@ projects:
     desc: 技術プロジェクトの紹介と解説
     link: /ja/projects/
 
-footer: 'Made with ❤️ by baka_mashiro<br><a href="https://icp.gov.moe/?keyword=20261101" target="_blank" style="color:inherit;opacity:0.65;text-decoration:none;">萌ICP备20261101号</a>'
+footer: '<a href="https://icp.gov.moe/?keyword=20261101" target="_blank" style="color:inherit;opacity:0.65;text-decoration:none;">萌ICP备20261101号</a>'
 ---
