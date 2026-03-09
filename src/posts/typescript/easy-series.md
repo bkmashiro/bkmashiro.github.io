@@ -1,4 +1,5 @@
 ---
+date: 2024-08-18
 description: TypeChallenge - Easy Series
 title: TypeChallenge - Easy Series
 readingTime: true

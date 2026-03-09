@@ -1,4 +1,5 @@
 ---
+date: 2024-08-18
 description: TypeChallenge - Meduim series
 title: TypeChallenge - Meduim series Index
 readingTime: false

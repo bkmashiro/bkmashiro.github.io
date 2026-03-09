@@ -1,4 +1,5 @@
 ---
+date: 2024-08-18
 description: TypeChallenge - Easy series
 title: 类型体操 - 简单系列
 readingTime: true

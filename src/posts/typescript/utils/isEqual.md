@@ -1,4 +1,5 @@
 ---
+date: 2024-08-18
 description: 在TS中判断类型严格相等
 title: IsEqual
 readingTime: true

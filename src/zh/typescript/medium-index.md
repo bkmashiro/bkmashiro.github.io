@@ -1,4 +1,5 @@
 ---
+date: 2024-08-18
 description: TypeChallenge - Meduim series
 title: 类型体操 - 中级系列 导航
 readingTime: false
