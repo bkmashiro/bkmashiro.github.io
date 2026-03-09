@@ -11,7 +11,7 @@ tag:
 description: "We built a WASM-based sandbox for shimmy with ephemeral mode, fine-grained WASI capabilities, and a security model that doesn't need syscall filters — because there are no syscalls."
 ---
 
-The previous two posts covered [the threat model](/posts/serverless-sandbox) and [the seccomp sandbox](/posts/shimmy-sandbox-research). This one is about going further: a WebAssembly execution environment where the security properties come from the compilation target, not from OS-level filters.
+The previous two posts covered [the threat model](/posts/projects/serverless-sandbox) and [the seccomp sandbox](/posts/projects/shimmy-sandbox-research). This one is about going further: a WebAssembly execution environment where the security properties come from the compilation target, not from OS-level filters.
 
 ## Why WASM Security is Different
 

@@ -11,7 +11,7 @@ tag:
 description: "我们为 shimmy 构建了一个 WASM 沙箱，带临时执行模式、细粒度 WASI 能力控制，以及一个不需要 syscall 过滤器的安全模型——因为根本没有 syscall。"
 ---
 
-前两篇文章覆盖了[威胁模型](/posts/serverless-sandbox-zh)和 [seccomp 沙箱](/posts/shimmy-sandbox-research-zh)。这篇讲更进一步：一个基于 WebAssembly 的执行环境，安全属性来自编译目标本身，而不是 OS 级别的过滤器。
+前两篇文章覆盖了[威胁模型](/zh/projects/serverless-sandbox)和 [seccomp 沙箱](/zh/projects/shimmy-sandbox-research)。这篇讲更进一步：一个基于 WebAssembly 的执行环境，安全属性来自编译目标本身，而不是 OS 级别的过滤器。
 
 ## 为什么 WASM 的安全模型不同
 
