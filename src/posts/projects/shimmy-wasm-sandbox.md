@@ -207,8 +207,6 @@ The Python caveat is real: Pyodide requires a browser JS engine, MicroPython has
 ## What's Next
 
 1. **Module caching** — same source → skip recompilation
-2. **AOT compilation** — precompile to native code for better warm performance
-3. **Python WASM** — watch the MicroPython/WASI-threads ecosystem; reassess in 12–18 months
-4. **Streaming compilation** — start execution before compilation finishes
+2. **Python WASM** — watch the MicroPython/WASI-threads ecosystem; reassess in 12–18 months
 
 The endpoint is a hybrid: Python through Sandlock until the WASM Python ecosystem matures, everything else through WASM now.
