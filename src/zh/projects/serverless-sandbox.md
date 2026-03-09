@@ -23,7 +23,7 @@ outline: [2, 3]
 
 ```
 [Lambda 实例]
-├── /tmp          ← 可写，跨 invocation 持久
+├── /tmp          ← 可写，持久化在 warm window 内
 ├── 环境变量       ← 可能包含 secrets
 ├── 进程内存       ← Python 模块全局变量在 warm start 中存活
 └── 网络           ← outbound 默认开放
@@ -38,29 +38,24 @@ A 同学可以往 `/tmp` 写文件，B 同学可以读到。极端情况下，A 
 - **没有 root** → 没有 user namespaces，没有 `unshare`，没有 `nsjail`
 - **没有 KVM** → 没有 Firecracker，没有 microVM
 - **没有 FUSE**（大概率）→ 无法在进程级别做 overlay 文件系统
-- **没有 CAP_BPF** → eBPF 级别的 syscall 过滤也没有（该方案理论上能减少约 55% 的攻击面，见 arXiv 2302.10366）
 
 Lambda 本身已经加了一层 `seccomp-bpf` 过滤器。我们可以叠加，但无法绕过。
-
-这里有个值得注意的细节：Lambda 本身运行在 Firecracker MicroVM 里——所以外层隔离是存在的，但我们需要的是**同一个 Lambda 实例内部**跨 invocation 的隔离。Firecracker 的 jailer 设计（seccomp + namespace + 文件系统隔离）仍然具有参考价值，即便我们无法直接复现。
-
-还有一个实际上我们并不知道答案的问题：Lambda 实例能不能加载**新的** seccomp 过滤器？还是启动时就已经被锁死了？只能靠实测回答。
 
 ## 防护矩阵
 
 在可用工具和可防御攻击之间做个映射：
 
-| 攻击类型     | seccomp | rlimit | env 清洗 | /tmp 清理 |
-| ------------ | ------- | ------ | -------- | --------- |
-| Fork 炸弹    | ✅      | ✅     | —        | —         |
-| 内存炸弹     | —       | ✅     | —        | —         |
-| 磁盘炸弹     | —       | ✅     | —        | ✅        |
-| /tmp 窥探    | —       | —      | —        | ✅        |
-| 环境变量泄漏 | ⚠️      | —      | ✅       | —         |
-| /proc 读取   | ⚠️      | —      | —        | —         |
-| 反向 Shell   | ✅      | —      | —        | —         |
-| 网络外传     | ✅      | —      | —        | —         |
-| setuid       | ✅      | —      | —        | —         |
+| 攻击类型 | seccomp | rlimit | env 清洗 | /tmp 清理 |
+|--------|---------|--------|----------|-----------|
+| Fork 炸弹 | ✅ | ✅ | — | — |
+| 内存炸弹 | — | ✅ | — | — |
+| 磁盘炸弹 | — | ✅ | — | ✅ |
+| /tmp 窥探 | — | — | — | ✅ |
+| 环境变量泄漏 | ⚠️ | — | ✅ | — |
+| /proc 读取 | ⚠️ | — | — | — |
+| 反向 Shell | ✅ | — | — | — |
+| 网络外传 | ✅ | — | — | — |
+| setuid | ✅ | — | — | — |
 
 缺口：`/proc` 读取和环境变量泄漏。`seccomp` 挡不住 `getenv()`——那是内存读取，不是 syscall。用 BPF 参数过滤 `/proc` 访问又太脆，容易误杀。
 
@@ -137,27 +132,11 @@ Lambda invocation
 
 WASM 放进路线图，作为支持语言工具链完善后的长期方向。Python 优先——Pyodide 已经够成熟了。
 
-## shimmy 的集成点
-
-在动任何代码之前，我们先摸清了 [shimmy](https://github.com/lambda-feedback/shimmy) 的架构——它是管理 Lambda Feedback 评测函数的 Go shim。现状：**完全没有沙箱**。worker 的生命周期（启动 → 评测 → 返回结果 → 空闲）是集成隔离方案的天然切入点。
-
-fork-per-invocation 方案在这里接入很自然：shimmy 本来就在管 worker 进程，我们只需要 hook 进 invocation 路径——fork 一个子进程，在子进程里应用 seccomp 和 rlimit，跑完学生代码，丢掉这个进程。
-
-## 还没答案的问题
-
-威胁模型是清晰的；实现上有几个问题还没有答案：
-
-1. **Lambda 里能不能加载新的 seccomp 过滤器？** Lambda 现有的过滤器可能已经用 `SECCOMP_FILTER_FLAG_TSYNC` 锁死了。只能靠实测。
-2. **`fork()` 有没有速率限制？** Lambda 可能会限制进程创建。如果有限制，就需要换成带重置的 worker pool，而不是真正的 fork-per-invocation。
-3. **`prctl()` 能不能帮上忙？** `PR_SET_NO_NEW_PRIVS` 是一个几乎不需要任何权限就能用的加固手段。
-4. **Pyodide 在 Lambda 的内存限制下能活吗？** Pyodide 大约 30MB，Lambda 默认 128MB 内存。很紧张。
-
 ## 接下来
 
-- 向真实 Lambda 部署一个探针脚本：实测可用的 syscall、capability 和内核特性
-- 读论文：[Firecracker (NSDI'20)](https://www.usenix.org/system/files/nsdi20-paper-agache.pdf)，syscall interposition 综述（[arXiv 2302.10366](https://arxiv.org/abs/2302.10366)）
-- 在 shimmy 的 invocation 路径里原型化 `fork() + seccomp + rlimit`
-- 测量隔离方案的性能开销 vs 安全收益
+- 读论文：[Firecracker (NSDI'20)](https://www.usenix.org/system/files/nsdi20-paper-agache.pdf)，syscall interposition 综述
+- 搞清楚 shimmy 的现有架构，动代码之前先看懂
+- 实测 Lambda 里 seccomp 实际放行了哪些 syscall（经验数据比假设可靠）
 - 两周后约 supervisor meeting
 
 「只能用 userspace、不能碰 OS」这个约束逼着你想创意解法。这也是它是一个研究课题而不是配置问题的原因。
