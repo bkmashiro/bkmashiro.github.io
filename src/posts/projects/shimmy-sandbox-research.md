@@ -15,7 +15,7 @@ outline: [2, 3]
 
 ---
 
-Last week I wrote about the [threat model](/posts/serverless-sandbox) for running student code in AWS Lambda. This week we built the thing and tried to break it.
+Last week I wrote about the [threat model](/posts/projects/serverless-sandbox) for running student code in AWS Lambda. This week we built the thing and tried to break it.
 
 The result: `sandbox_exec`, a 224-line C program that wraps student submissions in a seccomp-bpf filter, enforces resource limits, and passes the 5-round red-team gauntlet.
 
