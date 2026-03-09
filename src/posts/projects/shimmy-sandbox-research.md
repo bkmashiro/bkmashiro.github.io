@@ -23,15 +23,17 @@ The result: `sandbox_exec`, a 224-line C program that wraps student submissions 
 
 We evaluated three approaches before writing a line of code:
 
-| Approach                | Isolation | Latency  | Lambda?       | Python?    |
-| ----------------------- | --------- | -------- | ------------- | ---------- |
-| **seccomp (userspace)** | Process   | ~1.5ms   | ✅            | ✅ Full    |
-| Namespaces (root)       | Container | ~5ms     | ❌ needs root | ✅ Full    |
-| WebAssembly (Pyodide)   | VM        | ~10–50ms | ✅            | ⚠️ Limited |
+| Approach                | Isolation | Latency  | Userspace | Lambda | Python?    |
+| ----------------------- | --------- | -------- | :-------: | :----: | ---------- |
+| **seccomp (userspace)** | Process   | ~1.5ms   | ✅        | ⚠️     | ✅ Full    |
+| Namespaces (root)       | Container | ~5ms     | ❌        | ❌     | ✅ Full    |
+| WebAssembly (Pyodide)   | VM        | ~10–50ms | ✅        | ✅     | ⚠️ Limited |
 
-Lambda gives you no root and no KVM. Namespaces are out. WebAssembly's Pyodide startup overhead is real, and C extensions (numpy, scipy) don't compile to WASM cleanly — which matters for a math homework grader.
+> **Note on Lambda:** seccomp-bpf is marked ⚠️ — it exists at the kernel level, but Firecracker applies its own seccomp filter that **blocks users from installing additional filters**. `sandbox_exec` runs as-is on full userspace Linux (Docker, VMs, bare metal). On Lambda, the defense stack shifts to rlimits + env cleanup + language-level sandboxes.
 
-The seccomp path wins: fast, rootless, full Python support.
+Lambda gives you no root and no KVM. Namespaces are out. WebAssembly's Pyodide startup overhead is real, and C extensions (numpy, scipy) don't compile to WASM cleanly.
+
+The seccomp path wins **in userspace**: fast, rootless, full Python support. For Lambda specifically, it still contributes rlimit-based resource controls as a baseline.
 
 ## What sandbox_exec Does
 
@@ -121,9 +123,9 @@ rm -rf /tmp/* /var/tmp/* /dev/shm/*
 
 ## What's Next
 
-This phase is done. The seccomp sandbox covers the Lambda constraints well. The open items are:
+This phase is done. `sandbox_exec` provides solid protection in full userspace Linux environments. The Lambda picture turned out more complicated — Firecracker's seccomp layer prevents users from stacking their own filters, so seccomp is effectively unavailable on Lambda. The open items are:
 
-- **Lambda real-environment testing** — all of this was Docker-simulated; we need to verify seccomp behavior on actual Lambda instances (AWS account pending activation)
+- **Lambda real-environment testing** — all of this was Docker-simulated; we need to verify which protections actually hold on Lambda (rlimits ✅, seccomp ❌)
 - **shimmy PR** — the C code and Go integration need to go upstream
 - **WebAssembly research** — WASM starts as a limitation but becomes interesting for languages where the constraint of "no C extensions" doesn't matter (pure Python scripts, JS)
 

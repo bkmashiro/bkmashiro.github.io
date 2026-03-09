@@ -23,15 +23,17 @@ outline: [2, 3]
 
 在写第一行代码之前，我们评估了三条路：
 
-| 方案                   | 隔离级别 | 延迟     | Lambda 可用 | Python 支持 |
-| ---------------------- | -------- | -------- | ----------- | ----------- |
-| **seccomp（用户态）**  | 进程     | ~1.5ms   | ✅          | ✅ 完整     |
-| Namespace（需 root）   | 容器     | ~5ms     | ❌          | ✅ 完整     |
-| WebAssembly（Pyodide） | 虚拟机   | ~10–50ms | ✅          | ⚠️ 受限     |
+| 方案                   | 隔离级别 | 延迟     | 完整用户态 | Lambda | Python 支持 |
+| ---------------------- | -------- | -------- | :--------: | :----: | ----------- |
+| **seccomp（用户态）**  | 进程     | ~1.5ms   | ✅         | ⚠️     | ✅ 完整     |
+| Namespace（需 root）   | 容器     | ~5ms     | ❌         | ❌     | ✅ 完整     |
+| WebAssembly（Pyodide） | 虚拟机   | ~10–50ms | ✅         | ✅     | ⚠️ 受限     |
 
-Lambda 没有 root，没有 KVM。Namespace 方案直接排除。WebAssembly 的 Pyodide 启动开销是真实存在的，而且 numpy、scipy 这类 C 扩展无法干净地编译到 WASM——对一个数学作业评测器来说这是硬伤。
+> **注：** seccomp-bpf 在 Lambda 中标记为 ⚠️——内核层面存在，但 Firecracker 自身已施加 seccomp 过滤器，**会阻止用户再叠加新的过滤器**。本文的 `sandbox_exec` 方案在完整用户态 Linux（Docker 容器、普通 VM、裸机）上可直接运行；Lambda 场景需要改用 rlimit + env 清理 + 语言级沙箱的组合。
 
-seccomp 路线胜出：快、无 root 需求、完整 Python 支持。
+Namespace 方案直接排除（需 root）。WebAssembly 的 Pyodide 启动开销是真实存在的，而且 numpy、scipy 这类 C 扩展无法干净地编译到 WASM——对一个数学作业评测器来说这是硬伤。
+
+seccomp 路线在用户态环境胜出：快、无 root 需求、完整 Python 支持。作为 Lambda 场景下的防御基线，它依然提供了 rlimit 资源限制这一层。
 
 ## sandbox_exec 做了什么
 
@@ -121,9 +123,9 @@ rm -rf /tmp/* /var/tmp/* /dev/shm/*
 
 ## 下一步
 
-这个阶段结束了。seccomp 沙箱很好地覆盖了 Lambda 约束下的威胁面。剩余工作：
+这个阶段结束了。`sandbox_exec` 在完整用户态 Linux 环境下提供了扎实的保护；Lambda 上的情况比预期复杂——Firecracker 的 seccomp 层使用户无法叠加自己的过滤器，seccomp 这一层在 Lambda 中实际上不可用。剩余工作：
 
-- **Lambda 真实环境测试** — 目前所有测试都在 Docker 模拟环境里，需要在真实 Lambda 实例上验证 seccomp 行为（AWS 账号激活中）
+- **Lambda 真实环境测试** — 目前所有测试都在 Docker 模拟环境里，需要验证 Lambda 上哪些保护真正生效（rlimit ✅，seccomp ❌）
 - **向 shimmy 提 PR** — C 代码和 Go 集成需要合并进主仓库
 - **WebAssembly 研究** — WASM 目前是局限，但对于不依赖 C 扩展的场景（纯 Python、JS）值得深入——它能彻底关闭 `/proc` 和环境变量泄漏的缺口，代价是 Pyodide 的启动时间
 
