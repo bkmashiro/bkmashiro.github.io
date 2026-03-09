@@ -11,6 +11,10 @@ tag:
 outline: [2, 3]
 ---
 
+**Update 2026-03-09:** `sandbox_exec` has since evolved into **Sandlock** — a modular, full-stack sandbox with strict mode, language-level sandboxes (Python/JS), a source scanner, and LD_PRELOAD hooks. See [Sandlock v1.4: From Single File to Full-Stack Sandbox](/posts/projects/sandlock-v14) and the [GitHub repo](https://github.com/bkmashiro/Sandlock).
+
+---
+
 Last week I wrote about the [threat model](/posts/serverless-sandbox) for running student code in AWS Lambda. This week we built the thing and tried to break it.
 
 The result: `sandbox_exec`, a 224-line C program that wraps student submissions in a seccomp-bpf filter, enforces resource limits, and passes the 5-round red-team gauntlet.

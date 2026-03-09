@@ -11,6 +11,10 @@ tag:
 outline: [2, 3]
 ---
 
+**更新 2026-03-09：** `sandbox_exec` 已演化为 **Sandlock**——模块化全栈沙箱，增加了 strict mode、语言级沙箱（Python/JS）、源码扫描器和 LD_PRELOAD hook。参见 [Sandlock v1.4：从单文件到全栈沙箱](/zh/projects/sandlock-v14) 和 [GitHub 仓库](https://github.com/bkmashiro/Sandlock)。
+
+---
+
 上周我写了在 AWS Lambda 里运行学生代码的[威胁模型](/zh/projects/serverless-sandbox)。这周我们把它造出来，然后亲手去打它。
 
 结果是 `sandbox_exec`：一个 224 行的 C 程序，用 seccomp-bpf 过滤器包裹学生提交的代码，加上资源限制，经过五轮红队对抗验证。
