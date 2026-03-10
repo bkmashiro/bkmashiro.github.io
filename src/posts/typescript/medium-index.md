@@ -66,6 +66,7 @@ In the medium and advanced series, I may reuse the tool types I have written bef
 - 2688-StartsWith
 - 2693-EndsWith
 - 2757-PartialByKeys
+- [2757-PartialByKeys](./medium/2757.md)
 - 2759-RequiredByKeys
 - 2793-Mutable
 - [2852-OmitByType](./medium/2852.md)
