@@ -524,21 +524,22 @@ The ideal is tests first. The real constraint is that you often inherit code wit
 | Prometheus `/metrics` endpoint | ✅ |
 | Health check endpoint | ✅ |
 | Database indexes optimized | ✅ |
-| **Real heng judge integration** | 🔲 Pending |
+| User API key system (`lev_` prefix) | ✅ |
+| **botzone-neo judge integration** | ✅ |
+| **Multi-player (N-player) support** | ✅ |
+| **MCP server (13 tools)** | ✅ |
 | **Production deployment** | 🔲 Pending |
-
-The one remaining piece is connecting a real `heng-controller` instance with real judge nodes. The integration is designed and mocked — `JudgeTxWorker` sends HMAC-signed HTTP requests to the controller URL from config; `HengController` receives callbacks and enqueues them. The contract is defined. Plugging in the real endpoint is configuration, not architecture.
 
 ### Next Steps
 
-1. **Connect real heng judge nodes** — configure `HENG_URL`, `HENG_AK`, `HENG_SK`, run the system with real code evaluation
-2. **Production deployment** — Docker Compose stack, Nginx reverse proxy, TLS, environment-specific configs
-3. **Load test under realistic conditions** — k6 with actual contest-scale traffic (100+ concurrent submissions)
-4. **Monitoring** — Grafana dashboards on the Prometheus metrics, alerting on queue depth and error rates
+1. **Production deployment** — Nginx reverse proxy, TLS, environment-specific configs
+2. **shimmy upstream PR** — Submit our sandbox improvements to lambda-feedback/shimmy
+3. **Sandlock Phase 2** — Linux cgroups memory enforcement in SandlockBackend
+4. **Load test** — k6 with realistic contest-scale traffic
 
 The foundation is solid. The interesting problems from here are operational, not architectural.
 
-> **中文摘要：** 当前生产就绪清单已全部完成，唯一待办项是接入真实的 heng 评测机——集成契约已定义，只需配置 `HENG_URL`/`HENG_AK`/`HENG_SK` 即可。下一步：接入真实评测节点、Docker 生产部署、k6 压测验证、以及基于 Prometheus + Grafana 的监控告警体系。
+> **中文摘要：** 当前生产就绪清单已全部完成，botzone-neo 裁判引擎集成完毕，MCP 服务器（13 工具）已上线，支持 N 人对战。下一步：生产部署、shimmy 上游 PR、Sandlock Phase 2 内存控制、k6 压测验证。
 
 ---
 
@@ -556,3 +557,5 @@ Some codebases earn the rewrite. This one did.
 - [Security Audit of a Refactored NestJS App](/posts/projects/leverage-security-audit)
 - [Leverage OJ Frontend Rewrite: Nuxt 4 + Naive UI SPA](/posts/projects/leverage-frontend-refactor)
 - [Redis Sorted Sets for Real-Time OJ Rankings](/posts/projects/oj-ranking-redis)
+- [Building a Production Code Judge: botzone-neo Technical Deep Dive](/posts/projects/botzone-neo-judge-engine)
+- [AI-Driven Game Design: Building a Bot Competition Platform with MCP](/posts/projects/leverage-ai-game-design)
