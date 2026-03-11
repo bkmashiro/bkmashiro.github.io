@@ -119,5 +119,6 @@ sticky: 2
 - 29785-Deep Omit
 - 30301-IsOdd
 - 30430-Tower of hanoi
+- [0599-Merge](./medium/0599.md)
 - [30958-Pascal's triangle](./medium/30958.md)
 - 30970-IsFixedStringLiteralType
