@@ -42,7 +42,7 @@ sticky: 2
 - 191-Append Argument
 - [296-全排列](./medium/0296.md)
 - 298-Length of String
-- 459-Flatten
+- [459-Flatten](./medium/0459.md)
 - 527-Append to object
 - 529-Absolute
 - 531-String to Union
