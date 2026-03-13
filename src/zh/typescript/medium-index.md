@@ -41,7 +41,7 @@ sticky: 2
 - [119-ReplaceAll](./medium/0119.md)
 - 191-Append Argument
 - [296-全排列](./medium/0296.md)
-- 298-Length of String
+- [298-字符串的长度](./medium/0298.md)
 - [459-Flatten](./medium/0459.md)
 - 527-Append to object
 - 529-Absolute
