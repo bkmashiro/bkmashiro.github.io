@@ -48,7 +48,7 @@ In the medium and advanced series, I may reuse the tool types I have written bef
 - [296-Permutation](./medium/0296.md)
 - [298-Length of String](./medium/0298.md)
 - [459-Flatten](./medium/0459.md)
-- 527-Append to object
+- [527-Append to Object](./medium/0527.md)
 - 529-Absolute
 - 531-String to Union
 - 599-Merge

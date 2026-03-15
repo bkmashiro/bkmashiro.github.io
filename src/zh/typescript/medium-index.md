@@ -43,7 +43,7 @@ sticky: 2
 - [296-全排列](./medium/0296.md)
 - [298-字符串的长度](./medium/0298.md)
 - [459-Flatten](./medium/0459.md)
-- 527-Append to object
+- [527-Append to Object](./medium/0527.md)
 - 529-Absolute
 - 531-String to Union
 - 599-Merge
