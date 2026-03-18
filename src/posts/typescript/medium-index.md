@@ -50,7 +50,7 @@ In the medium and advanced series, I may reuse the tool types I have written bef
 - [459-Flatten](./medium/0459.md)
 - [527-Append to Object](./medium/0527.md)
 - [529-Absolute](./medium/0529.md)
-- 531-String to Union
+- [531-String to Union](./medium/0531.md)
 - 599-Merge
 - 612-KebabCase
 - 645-Diff

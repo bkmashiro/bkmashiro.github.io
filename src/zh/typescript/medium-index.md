@@ -45,7 +45,7 @@ sticky: 2
 - [459-Flatten](./medium/0459.md)
 - [527-Append to Object](./medium/0527.md)
 - [529-Absolute](./medium/0529.md)
-- 531-String to Union
+- [531-字符串转联合类型](./medium/0531.md)
 - 599-Merge
 - 612-KebabCase
 - 645-Diff
