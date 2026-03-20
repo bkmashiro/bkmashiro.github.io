@@ -160,3 +160,94 @@ JavaScript 的 `Function.prototype.length` 返回**必填参数数量**，默认
 ---
 
 > 类型系统应该为用户服务，不是让用户为类型系统服务。——但有时候值得多写几个 overload。
+
+---
+
+## v2.0.0 发布到 npm
+
+[![npm version](https://img.shields.io/npm/v/typed-pipeline?style=flat-square&color=cb3837&logo=npm)](https://www.npmjs.com/package/typed-pipeline)
+[![npm downloads](https://img.shields.io/npm/dm/typed-pipeline?style=flat-square&color=blue)](https://www.npmjs.com/package/typed-pipeline)
+
+`typed-pipeline` v2.0.0 正式发布到 npm！经过多轮重构，这个版本终于把所有优点集齐，并且 API 稳定到可以对外发布的程度。
+
+```bash
+npm install typed-pipeline
+```
+
+### 完整用法示例
+
+以下是涵盖全部新特性的完整示例：
+
+```ts
+import { Pipeline } from 'typed-pipeline'
+
+const pipeline = new Pipeline<number>()
+  // 1. 基础步骤 — 参数类型自动推断，无需标注
+  .pipe(n => n * 2)                          // n: number ✓ 自动推断
+
+  // 保存中间值，后续步骤可跨步骤引用
+  .saveAs('doubled')                         // TSaved = { doubled: number }
+
+  // 2. $$-aware 步骤 — $$ 自动推断为上一步输出类型，额外参数带默认值
+  .pipe(($$ , bonus = 3) => $$ + bonus)      // $$: number ✓ 自动推断
+
+  .saveAs('incremented')                     // TSaved = { doubled: number, incremented: number }
+
+  // 3. $-accessor 步骤 — 通过第二个必填参数 $ 访问所有已保存的中间值
+  .pipe((current, $) => ({
+    current,
+    doubled: $['doubled'],                   // number ✓ 类型安全
+    incremented: $['incremented'],           // number ✓
+    sum: current + $['doubled'],
+  }))
+
+  // 4. inject / withSaved — 手动注入或读取已保存的值
+  // （下面演示 concat 场景：把多个管道合并）
+
+await pipeline.run(5)
+// doubled = 10
+// incremented = 10 + 3 = 13
+// current = 13 * 2 = 26（注：$$ 步骤输出再经 $-accessor 处理）
+// => { current: 26, doubled: 10, incremented: 13, sum: 36 }
+```
+
+#### inject / withSaved / concat 示例
+
+```ts
+import { Pipeline } from 'typed-pipeline'
+
+// 子管道：对数字做格式化
+const formatter = new Pipeline<number>()
+  .pipe(n => `¥${n.toFixed(2)}`)
+
+// 主管道：注入外部值，concat 拼接子管道
+const main = new Pipeline<number>()
+  .pipe(n => n * 100)
+  .saveAs('cents')
+  .inject({ taxRate: 0.08 })               // 注入外部常量，后续 $ 可读
+  .pipe((amount, $) => amount * (1 + $['taxRate']))
+  .saveAs('total')
+  .concat(formatter)                        // 拼接子管道，类型自动衔接
+
+const result = await main.run(9.99)
+// => "¥1078.92"
+```
+
+---
+
+### 原理速查
+
+运行时通过 `Function.prototype.length`（**必填**参数数量，默认参数不计入）区分三种步骤类型，编译时 overload 顺序与运行时规则完全对称：
+
+| `fn.length` | 步骤类型 | 调用方式 | 典型写法 |
+|:-----------:|----------|----------|----------|
+| `1` | **PlainStep** | `fn(input)` | `n => n * 2` |
+| `1`（有默认参数） | **PrevStep**（$$-aware）| `fn(input)` | `($$, bonus = 3) => $$ + bonus` |
+| `2` | **SavedStep**（$-accessor）| `fn(input, savedMap)` | `(current, $) => current + $['doubled']` |
+
+> **为什么 PrevStep 的 `fn.length` 也是 1？**
+> JavaScript 中默认参数不计入 `length`，所以 `($$, bonus = 3) => ...` 的 `length === 1`，与 PlainStep 区分靠的是 TypeScript overload 的类型检查——编译期 brand 类型 `Prev<T>` 确保第一个参数被标注为"上一步输出"，运行时则统一只传一个参数。
+
+---
+
+> `typed-pipeline` 的核心哲学：**让类型系统的语义与运行时的行为完全对称**——overload 如何匹配，`fn.length` 就如何判断，两者用同一把尺子量。
