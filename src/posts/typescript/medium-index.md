@@ -51,8 +51,8 @@ In the medium and advanced series, I may reuse the tool types I have written bef
 - [527-Append to Object](./medium/0527.md)
 - [529-Absolute](./medium/0529.md)
 - [531-String to Union](./medium/0531.md)
-- 599-Merge
-- 612-KebabCase
+- [599-Merge](./medium/0599.md)
+- [612-KebabCase](./medium/0612.md)
 - 645-Diff
 - 949-AnyOf
 - 1042-IsNever

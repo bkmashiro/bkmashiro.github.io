@@ -46,8 +46,8 @@ sticky: 2
 - [527-Append to Object](./medium/0527.md)
 - [529-Absolute](./medium/0529.md)
 - [531-字符串转联合类型](./medium/0531.md)
-- 599-Merge
-- 612-KebabCase
+- [599-Merge](./medium/0599.md)
+- [612-KebabCase](./medium/0612.md)
 - 645-Diff
 - 949-AnyOf
 - 1042-IsNever
