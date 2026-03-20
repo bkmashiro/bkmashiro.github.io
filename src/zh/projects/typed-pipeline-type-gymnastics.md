@@ -243,6 +243,42 @@ export function fpipe(...steps: AnyStep[]): (input: unknown) => Promise<unknown>
 
 ---
 
+## 番外：为什么 Pipeline 类能做到参数自动推断
+
+`fpipe(...)` 函数式 API 需要手动标注参数类型，但 `Pipeline` 类不需要：
+
+```ts
+// Pipeline 类：自动推断 ✅
+new Pipeline<number>()
+  .pipe(n => n * 2)   // n: number，不用写
+  .pipe(n => `${n}`)  // n: number，不用写
+
+// fpipe：需要手动标注 ❌
+fpipe(
+  (x: number) => x * 2,
+  (n: number) => `${n}`,  // 必须写 n: number
+)
+```
+
+原因：TypeScript 的 contextual typing 在**逐步调用**时工作，在 **rest 参数**时不工作。
+
+`.pipe(n => ...)` 是独立调用，`TOutput` 在调用时已经确定，TS 能推断 `n` 的类型。`fpipe(s1, s2, s3)` 是一次调用三个参数同时传入，TS 没有"先确定 s1 的输出再推断 s2 的输入"的机制。
+
+另一个关键是 **Overload vs Union**：
+
+```ts
+// ❌ Union — TS 不知道对哪个类型做 contextual typing
+pipe<TNext>(step: PlainStep<TOutput, TNext> | PrevStep<TOutput, TNext>): ...
+
+// ✅ Overload — TS 对每个候选分别尝试，找到匹配的
+pipe<TNext>(step: PlainStep<TOutput, TNext>): ...
+pipe<TNext>(step: PrevStep<TOutput, TNext>): ...
+```
+
+Overload 分开后，两种步骤（普通步骤和 `$$-aware` 步骤）都能自动推断参数类型。
+
+---
+
 ## 总结
 
 用到的每个技法：
@@ -254,5 +290,6 @@ export function fpipe(...steps: AnyStep[]): (input: unknown) => Promise<unknown>
 - **模板字面量类型** — 在编译错误信息里嵌入步骤索引，让报错可读
 - **`unique symbol` brand** — 名义类型，区分 `Prev<T>` 和普通 `T`
 - **数组下标加法** — 在类型层做 +1，绕过类型系统没有算术的限制
+- **Overload vs Union** — 联合类型无法 contextual typing，overload 逐个匹配可以
 
 代码在 [bkmashiro/typed-pipeline](https://github.com/bkmashiro/typed-pipeline/blob/main/src/fpipe.ts)。
