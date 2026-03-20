@@ -38,7 +38,7 @@ const pipeline = pipe(
 
 ---
 
-## 第一次重构：Pipeline<In, Out>
+## 第一次重构：`Pipeline<In, Out>`
 
 第一版重构目标是"干净"：双泛型、`run(input)`、可读类型。
 
@@ -116,7 +116,7 @@ async run(input: TInput): Promise<TOutput> {
 |------|------|------|------|
 | 参数自动推断 | ✅ | ❌ | ✅ |
 | `run(input)` 外部 seed | ❌ | ✅ | ✅ |
-| $$-aware 步骤 | ✅（Symbol 魔法）| ❌ | ✅（Prev<T> brand）|
+| $$-aware 步骤 | ✅（Symbol 魔法）| ❌ | ✅（`Prev<T>` brand）|
 | 类型可读性 | ❌ `Conditional<GetFlag...>` | ✅ | ✅ |
 | 运行时复杂度 | ❌ `Lazy.of(Multicast)` | ✅ 5行 | ✅ 10行 |
 
