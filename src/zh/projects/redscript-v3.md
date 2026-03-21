@@ -3,6 +3,13 @@ title: "RedScript v3.0 — match 表达式、for-each 迭代与 stdlib 大扩充
 date: 2026-03-21
 tags: [redscript, minecraft, compiler, gamedev]
 description: "RedScript v3.0 带来了 match 模式匹配、for item in array 迭代语法，以及 state/dialog/scheduler 三个新 stdlib 模块，让 MC datapack 开发更简洁。"
+readingTime: true
+tag:
+  - RedScript
+  - Minecraft
+  - 编译器
+  - GameDev
+outline: [2, 3]
 ---
 
 # RedScript v3.0 — match 表达式、for-each 迭代与 stdlib 大扩充
@@ -145,3 +152,5 @@ fn game_tick() {
 ---
 
 📖 完整文档：[redscript-docs.pages.dev](https://redscript-docs.pages.dev)
+
+上一篇：[RedScript 2.6：stdlib 扩展、事件系统与 MC 集成测试](./redscript-v2.6.md)
