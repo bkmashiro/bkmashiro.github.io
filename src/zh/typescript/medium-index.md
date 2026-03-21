@@ -48,7 +48,7 @@ sticky: 2
 - [531-字符串转联合类型](./medium/0531.md)
 - [599-Merge](./medium/0599.md)
 - [612-KebabCase](./medium/0612.md)
-- 645-Diff
+- [645-Diff 差集](./medium/0645.md)
 - 949-AnyOf
 - 1042-IsNever
 - [1097-IsUnion](./medium/1097.md)
