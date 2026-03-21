@@ -1,4 +1,5 @@
 ---
+article: false
 date: 2024-08-18
 description: TypeChallenge - Easy Series
 title: TypeChallenge - Easy Series
@@ -9,6 +10,7 @@ tag:
 outline: [2, 3]  
 sticky: 3  
 ---
+article: false
 
 # TypeChallenge - Easy Series
 
@@ -80,6 +82,7 @@ They are:
 - 11 - Tuple to Object
 
 ---
+article: false
 
 ### 004 - Implement Pick
 
@@ -129,6 +132,7 @@ type MyPick<T, K extends keyof T> = { [P in K]: T[P] };
 And that’s it, the challenge is completed.
 
 ---
+article: false
 
 ### 014 - First of Array
 
@@ -211,6 +215,7 @@ Subtypes have more behaviors than their supertypes.
 And that’s it, the challenge is completed.
 
 ---
+article: false
 
 ### 189 - Awaited
 
@@ -283,6 +288,7 @@ In the end, the first level of recursion extracts `U` from the `Promise`, the se
 We get `MyAwaited<Promise<number>>` as `number`, completing the challenge.
 
 ---
+article: false
 
 ### 898 - Includes
 
@@ -331,6 +337,7 @@ When the `Equal<F, U>` condition returns true, we return true; otherwise, we rec
 This approach is clear and readable, and it solves the problem.
 
 ---
+article: false
 
 ### 3312 - Parameters
 
@@ -355,6 +362,7 @@ type MyParameters<T extends (...args: any[]) => any> = T extends (
 If `T` is a function type, we use `infer` to infer the parameters (`P`). Then, we return `P`. If `T` is not a function, we return `never`.
 
 ---
+article: false
 
 ### 7 - Readonly
 
@@ -373,6 +381,7 @@ type MyReadonly<T> = { readonly [K in keyof T]: T[K] };
 We iterate over the keys of `T` using a mapped type and apply `readonly` to each property.
 
 ---
+article: false
 
 ### 18 - Length of Tuple
 
@@ -389,6 +398,7 @@ type Length<T extends readonly any[]> = T["length"];
 We constrain `T` to be a tuple or array and then return its length.
 
 ---
+article: false
 
 ### 268 - If
 
@@ -405,6 +415,7 @@ type If<C extends boolean, T, F> = C extends true ? T : F;
 If `C` is true, return `T`; otherwise, return `F`.
 
 ---
+article: false
 
 ### 57 - Push
 
@@ -421,6 +432,7 @@ type Push<T extends any[], U> = [...T, U];
 We spread the elements of `T` and add `U` to the end.
 
 ---
+article: false
 
 ### 3060 - Unshift
 
@@ -437,6 +449,7 @@ type Unshift<T extends any[], U> = [U, ...T];
 We add `U` to the beginning of `T` and spread the elements of `T`.
 
 ---
+article: false
 
 ### 533 - Concat
 
@@ -453,6 +466,7 @@ type Concat<T extends any[], U extends any[]> = [...T, ...U];
 We spread the elements of `T` and `U` into a new array.
 
 ---
+article: false
 
 ### 43 - Exclude
 
@@ -469,6 +483,7 @@ type MyExclude<T, U> = T extends U ? never : T;
 We use a conditional type to exclude the types in `U` from `T`.
 
 ---
+article: false
 
 ### 11 - Tuple to Object
 
@@ -487,6 +502,7 @@ type TupleToObject<T extends readonly any[]> = {
 We iterate over the elements of `T` using `T[number]` and create an object where each key is a tuple value and each value is the corresponding tuple value.
 
 ---
+article: false
 
 ## Conclusion
 

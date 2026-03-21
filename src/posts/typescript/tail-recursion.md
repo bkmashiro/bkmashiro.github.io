@@ -1,4 +1,5 @@
 ---
+article: false
 date: 2024-08-18
 description: Tail Recursion
 title: Tail Recursion
@@ -8,6 +9,7 @@ tag:
   - Algorithm
 outline: [2, 3]
 ---
+article: false
 
 # Tail Recursion
 <!-- more -->
