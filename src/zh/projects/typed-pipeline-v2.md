@@ -1,253 +1,142 @@
 ---
-title: "typed-pipeline 重构：从 $$ 魔法到最完整版"
-date: 2026-03-20
-description: "把一个用符号魔法实现的 TypeScript Pipeline 库重构——保留旧版的参数自动推断优点，加入 run(input) 外部 seed、$$-aware 步骤注入、parallel/saveAs，最终融合成一个「全都要」的版本。"
+title: "typed-pipeline v2 — 类型安全的异步管道库"
+date: 2026-03-21
+tags: [typescript, typed-pipeline, async, library-design]
+description: "typed-pipeline v2.0 的核心设计：为什么回到 Pipeline 类、AsyncPipeline 如何处理异步步骤、parallel 的元组推断，以及 saveAs 的快照语义。"
 readingTime: true
 tag:
   - TypeScript
-  - 类型系统
-  - 重构
-  - 函数式
+  - typed-pipeline
+  - 异步
+  - 库设计
 outline: [2, 3]
 ---
 
-`typed-pipeline` 是我之前做的一个 TypeScript 管道组合库。重构过程走了一些弯路，最终找到了兼顾所有优点的方案。
+`typed-pipeline` v2.0 的目标不是把 API 做得更花，而是把三个经常互相冲突的东西放进同一个设计里：链式可读性、异步可组合性，以及 TypeScript 级别的类型安全。
 
-- GitHub: [bkmashiro/typed-pipeline](https://github.com/bkmashiro/typed-pipeline)
-
----
-
-## 旧版：符号魔法
-
-旧版的核心设计是一个叫 `$$` 的 Symbol，表示"上一步的结果"：
-
-```ts
-const pipeline = pipe(
-  (x: number) => x * 2,
-  ($$, y: number) => $$ + y,  // $$ = 前一步结果
-)
-```
-
-旧版有一个真正的优点：**参数类型自动推断**。`.pipe(n => n * 2)` 里的 `n` 不需要标注类型，TypeScript 从链式上下文自动推断。
-
-但代价也很高：
-
-- `WarpedValue<T>` + `Lazy<T>` 包装类型污染用户代码
-- `run()` 没有外部输入——第一步必须是无参函数
-- 300+ 行类型工具（`Conditional<GetFlagAndEquals<...>>`），大半是在打补丁
+在 v1 里，我已经验证了“管道 + 上一步结果推断”这条路线可行；问题是旧实现依赖太多技巧性结构，运行时和类型层都不够直。v2 的设计决策因此很明确：运行时必须像普通库一样可读，类型系统必须只表达真正存在的语义，而不是为了补洞引入一层又一层工具类型。
 
 ---
 
-## 第一次重构：`Pipeline<In, Out>`
+## 为什么回到 `Pipeline` 类
 
-第一版重构目标是"干净"：双泛型、`run(input)`、可读类型。
+v2 最重要的决定，是放弃纯函数式拼装器，回到 `new Pipeline<TInput>()` 这种类式 API。
 
-```ts
-const pipeline = new Pipeline<number>()
-  .pipe((n) => n * 2)
-  .pipe((n) => `value: ${n}`)
+原因很现实。类把“当前输出类型”“已保存快照”“待执行步骤”三块状态聚合在一个实例上，链式调用时 TypeScript 可以沿着 `this` 的泛型继续推断。相比之下，纯函数 `pipe(a, b, c)` 虽然短，但一旦要支持 `.saveAs()`、`.parallel()`、`.tap()` 这种会改变上下文的操作，类型签名很快会膨胀到不可维护。
 
-await pipeline.run(5)  // "value: 10"
-```
-
-但发现丢了旧版的优点——**参数类型不再自动推断**，每个步骤都要写类型标注。
-
-原因是 `pipe(step: Step<TOutput, TNext>)` 是单个签名，TypeScript 对联合类型无法做 contextual typing。
-
----
-
-## 最终版：融合所有优点
-
-关键发现：用 **overload 把 PlainStep 和 PrevStep 分开**，TypeScript 就能对每个签名分别做 contextual typing。
+`Pipeline<TIn, TOut, TSaved>` 这个三泛型模型基本对应真实运行时：
 
 ```ts
-// Overload 1: 普通步骤 — 参数类型自动推断
-pipe<TNext>(step: PlainStep<TOutput, TNext>): Pipeline<TInput, TNext, TSaved>
-// Overload 2: $$-aware 步骤 — $$ 自动推断为上一步输出类型
-pipe<TNext>(step: PrevStep<TOutput, TNext>): Pipeline<TInput, TNext, TSaved>
-```
-
-最终 API：
-
-```ts
-const pipeline = new Pipeline<number>()
-  .pipe(n => n * 2)                      // ✅ n 自动推断 number，不用标注
-  .pipe(($$ , bonus = 3) => $$ + bonus)  // ✅ $$ 自动推断 number
-  .tap(n => console.log('current:', n))  // ✅ 副作用，值不变
-  .parallel(                             // ✅ 并发，返回精确元组
-    n => n + 1,
-    n => n * 2,
-  )
-  .saveAs('result')                      // ✅ 快照，类型安全
-  .run(5)                                // ✅ 外部 seed
-```
-
-全部特性，零类型标注（除了 `Pipeline<number>` 的初始类型）。
-
----
-
-## $$-aware 步骤
-
-`Prev<T>` 是带 brand 的类型标记：
-
-```ts
-export type Prev<T> = T & { readonly __fpipe_prev__: unique symbol }
-```
-
-`PrevStep<TIn, TOut>` 要求第一个参数是 `Prev<TIn>`，额外参数必须有默认值（这样运行时只需要传一个参数）。
-
-运行时检测 `fn.length >= 2` 来判断是否是 $$-aware 步骤：
-
-```ts
-async run(input: TInput): Promise<TOutput> {
-  const result = this.action.length >= 2
-    ? await (this.action as PrevStep<TInput, TOutput>)(input as Prev<TInput>)
-    : await (this.action as PlainStep<TInput, TOutput>)(input)
-  this.after.emit(result)
-  return result
+class Pipeline<TInput, TOutput = TInput, TSaved = {}> {
+  pipe<TNext>(step: Step<TOutput, TNext, TSaved>): Pipeline<TInput, TNext, TSaved>
+  saveAs<TKey extends string>(key: TKey): Pipeline<TInput, TOutput, TSaved & Record<TKey, TOutput>>
+  run(input: TInput): Promise<TOutput>
 }
 ```
 
----
-
-## 三种设计的对比
-
-| 特性 | 旧版 `Pipeline<Prev>` | 重构 v1 | 最终版 |
-|------|------|------|------|
-| 参数自动推断 | ✅ | ❌ | ✅ |
-| `run(input)` 外部 seed | ❌ | ✅ | ✅ |
-| $$-aware 步骤 | ✅（Symbol 魔法）| ❌ | ✅（`Prev<T>` brand）|
-| 类型可读性 | ❌ `Conditional<GetFlag...>` | ✅ | ✅ |
-| 运行时复杂度 | ❌ `Lazy.of(Multicast)` | ✅ 5行 | ✅ 10行 |
-
-Overload 是这个设计的核心：联合类型无法做 contextual typing，但 overload 可以分别匹配，TypeScript 的类型推断引擎会从每个 overload 候选里找到能匹配的那个。
+`TInput` 是外部 seed 类型，`TOutput` 是当前步骤链尾部的值，`TSaved` 是所有 `saveAs()` 形成的命名快照。这个模型的好处是，用户看见的每个泛型都能在运行时找到对应物，不存在“只为类型体操存在”的幽灵概念。
 
 ---
 
-## 后记：保存中间值并跨步骤注入
+## `AsyncPipeline` 不是另一套 DSL
 
-重构完成后又加了一个特性：**带类型的中间值跨步骤注入**。
+第二个设计决策是把异步当成默认能力，而不是额外插件。现实里的数据处理步骤常常混合同步计算、数据库查询、HTTP 请求和副作用，如果同步管道和异步管道是两套 API，用户迟早会在中间遇到边界摩擦。
+
+所以 v2 里 `Pipeline` 的步骤返回 `MaybePromise<T>`，而 `AsyncPipeline` 更像一个语义别名：它强调“这条链明确以异步为主”，但底层调度模型与 `Pipeline` 一致，都是逐步 `await` 前一个步骤的结果。
+
+```ts
+const p = new AsyncPipeline<UserId>()
+  .pipe(id => loadUser(id))
+  .pipe(async user => ({
+    ...user,
+    posts: await loadPosts(user.id),
+  }))
+  .pipe(user => user.posts.length)
+
+const count = await p.run("u_42")
+```
+
+这背后的关键不是“支持 Promise”这么简单，而是保证每个步骤看到的输入类型是 `Awaited<上一步输出>`。也就是说，异步只改变调度，不改变用户的心智模型。写第三步的人不需要关心第二步到底是同步函数还是 `async` 函数，只需要知道它最终产出的值是什么。
+
+---
+
+## `parallel` 步骤的设计
+
+很多管道库有并行能力，但常见做法是把并行结果降成 `unknown[]` 或宽泛数组类型。这样运行时能工作，类型层却丢了信息。v2 的 `parallel` 选择另一条路：把“并行”视为“对同一输入运行多个子步骤，并保留结果元组形状”。
 
 ```ts
 const p = new Pipeline<number>()
-  .pipe(n => n * 2).saveAs('doubled')
-  .pipe(n => n + 1).saveAs('incremented')
-  .pipe(n => n * 3)                          // 普通步骤
-  .pipe((current, $) => ({                   // $ 注入全部已保存值
-    current,
-    doubled: $['doubled'],                   // number ✓ 类型安全
-    incremented: $['incremented'],           // number ✓
-    sum: current + $['doubled'],
+  .parallel(
+    n => n + 1,
+    async n => n * 2,
+    n => `v=${n}`,
+  )
+
+const result = await p.run(5)
+// [6, 10, "v=5"]
+```
+
+这里返回值不是 `(number | string)[]`，而是精确的 `[number, number, string]`。实现上，`parallel` 会把当前输出 `TOutput` 作为每个分支的统一输入，再通过变长元组映射得到结果：
+
+```ts
+type ParallelResult<TIn, TSteps extends readonly AnyStep[]> = {
+  [K in keyof TSteps]: StepOutput<TSteps[K], TIn>
+}
+```
+
+运行时则只是一次 `Promise.all`。这正是 v2 的总体风格：把复杂性尽量收束在“与用户收益直接相关”的位置。并发调度本身没有必要复杂，真正值得保留的是分支结果的精确形状，因为后续步骤往往会直接解构这个元组。
+
+---
+
+## `saveAs` 的语义：保存快照，不是保存引用名
+
+`saveAs` 是 v2 里最容易被误解、但也最关键的 API。它的语义不是“给当前值取一个别名”，而是“把当前步骤的输出快照加入已保存上下文，供后续步骤显式读取”。
+
+```ts
+const p = new Pipeline<number>()
+  .pipe(n => n * 2)
+  .saveAs("doubled")
+  .pipe(n => n + 3)
+  .pipe((current, $) => current + $.doubled)
+```
+
+这里 `$.doubled` 永远是保存时的值 `10`，而不是“某个会跟着 current 一起变化的引用”。如果把 `saveAs` 设计成别名，后续优化、并行步骤、甚至重复运行都很容易出现语义歧义：到底读的是链上当前位置，还是历史节点？
+
+v2 选择快照语义后，事情就很清楚了：
+
+- `saveAs("x")` 发生在某一个确定步骤之后。
+- 它把那一刻的输出写入内部 `saved` 对象。
+- 后续步骤只能读取，不能隐式回写。
+
+于是 `TSaved` 的类型也自然成立。`saveAs("doubled")` 后，后面的步骤拿到的 `$` 类型就是 `{ doubled: number }`；再保存一次 `"formatted"`，类型就扩展成 `{ doubled: number; formatted: string }`。类型系统描述的，正是历史快照集合。
+
+---
+
+## 一个完整例子
+
+把这些设计拼起来，v2 的典型用法会像这样：
+
+```ts
+const pipeline = new AsyncPipeline<string>()
+  .pipe(id => loadUser(id))
+  .saveAs("user")
+  .parallel(
+    user => loadProfile(user.id),
+    user => loadTeams(user.id),
+  )
+  .pipe(async ([profile, teams], $) => ({
+    id: $.user.id,
+    profile,
+    teams,
   }))
-
-await p.run(5)
-// doubled=10, incremented=11, current=33
-// => { current: 33, doubled: 10, incremented: 11, sum: 43 }
 ```
 
-`(current, $)` 是第三种步骤类型——**SavedStep**。它和 PlainStep、PrevStep 的区分方式很骚：
-
-JavaScript 的 `Function.prototype.length` 返回**必填参数数量**，默认参数不计入：
-
-```ts
-(n => n * 2).length           // 1  → PlainStep
-(($$, bonus = 3) => $$).length // 1  → PrevStep（默认参数不算）
-((current, $) => $).length    // 2  → SavedStep（两个必填）
-```
-
-运行时只需要判断 `fn.length === 2` 就能区分 SavedStep，然后注入 `$` 对象。类型层的 overload 顺序匹配同样的信息——**运行时的 `fn.length` 和编译时的 overload 匹配，用的是同一个自然属性（参数数量），两层完全对称**。
+这段代码里，类负责承载上下文；异步步骤自然串联；`parallel` 保留 `[Profile, Team[]]` 的元组结构；`saveAs` 提供稳定的历史快照。四个特性不是硬拼在一起，而是围绕同一个状态模型展开。
 
 ---
 
-> 类型系统应该为用户服务，不是让用户为类型系统服务。——但有时候值得多写几个 overload。
+## 结语
 
----
+我对 v2 最满意的地方，不是“功能更多”，而是每个功能终于有了稳定边界。`Pipeline` 负责链式状态，`AsyncPipeline` 负责异步心智模型，`parallel` 负责同输入多分支，`saveAs` 负责历史快照。它们组合起来像一个库，而不是一组聪明但彼此松散的技巧。
 
-## v2.0.0 发布到 npm
-
-[![npm version](https://img.shields.io/npm/v/typed-pipeline?style=flat-square&color=cb3837&logo=npm)](https://www.npmjs.com/package/typed-pipeline)
-[![npm downloads](https://img.shields.io/npm/dm/typed-pipeline?style=flat-square&color=blue)](https://www.npmjs.com/package/typed-pipeline)
-
-`typed-pipeline` v2.0.0 正式发布到 npm！经过多轮重构，这个版本终于把所有优点集齐，并且 API 稳定到可以对外发布的程度。
-
-```bash
-npm install typed-pipeline
-```
-
-### 完整用法示例
-
-以下是涵盖全部新特性的完整示例：
-
-```ts
-import { Pipeline } from 'typed-pipeline'
-
-const pipeline = new Pipeline<number>()
-  // 1. 基础步骤 — 参数类型自动推断，无需标注
-  .pipe(n => n * 2)                          // n: number ✓ 自动推断
-
-  // 保存中间值，后续步骤可跨步骤引用
-  .saveAs('doubled')                         // TSaved = { doubled: number }
-
-  // 2. $$-aware 步骤 — $$ 自动推断为上一步输出类型，额外参数带默认值
-  .pipe(($$ , bonus = 3) => $$ + bonus)      // $$: number ✓ 自动推断
-
-  .saveAs('incremented')                     // TSaved = { doubled: number, incremented: number }
-
-  // 3. $-accessor 步骤 — 通过第二个必填参数 $ 访问所有已保存的中间值
-  .pipe((current, $) => ({
-    current,
-    doubled: $['doubled'],                   // number ✓ 类型安全
-    incremented: $['incremented'],           // number ✓
-    sum: current + $['doubled'],
-  }))
-
-  // 4. inject / withSaved — 手动注入或读取已保存的值
-  // （下面演示 concat 场景：把多个管道合并）
-
-await pipeline.run(5)
-// doubled = 10
-// incremented = 10 + 3 = 13
-// current = 13 * 2 = 26（注：$$ 步骤输出再经 $-accessor 处理）
-// => { current: 26, doubled: 10, incremented: 13, sum: 36 }
-```
-
-#### inject / withSaved / concat 示例
-
-```ts
-import { Pipeline } from 'typed-pipeline'
-
-// 子管道：对数字做格式化
-const formatter = new Pipeline<number>()
-  .pipe(n => `¥${n.toFixed(2)}`)
-
-// 主管道：注入外部值，concat 拼接子管道
-const main = new Pipeline<number>()
-  .pipe(n => n * 100)
-  .saveAs('cents')
-  .inject({ taxRate: 0.08 })               // 注入外部常量，后续 $ 可读
-  .pipe((amount, $) => amount * (1 + $['taxRate']))
-  .saveAs('total')
-  .concat(formatter)                        // 拼接子管道，类型自动衔接
-
-const result = await main.run(9.99)
-// => "¥1078.92"
-```
-
----
-
-### 原理速查
-
-运行时通过 `Function.prototype.length`（**必填**参数数量，默认参数不计入）区分三种步骤类型，编译时 overload 顺序与运行时规则完全对称：
-
-| `fn.length` | 步骤类型 | 调用方式 | 典型写法 |
-|:-----------:|----------|----------|----------|
-| `1` | **PlainStep** | `fn(input)` | `n => n * 2` |
-| `1`（有默认参数） | **PrevStep**（$$-aware）| `fn(input)` | `($$, bonus = 3) => $$ + bonus` |
-| `2` | **SavedStep**（$-accessor）| `fn(input, savedMap)` | `(current, $) => current + $['doubled']` |
-
-> **为什么 PrevStep 的 `fn.length` 也是 1？**
-> JavaScript 中默认参数不计入 `length`，所以 `($$, bonus = 3) => ...` 的 `length === 1`，与 PlainStep 区分靠的是 TypeScript overload 的类型检查——编译期 brand 类型 `Prev<T>` 确保第一个参数被标注为"上一步输出"，运行时则统一只传一个参数。
-
----
-
-> `typed-pipeline` 的核心哲学：**让类型系统的语义与运行时的行为完全对称**——overload 如何匹配，`fn.length` 就如何判断，两者用同一把尺子量。
+对 TypeScript 库来说，这一点比多几个花哨 API 更重要：运行时模型越清楚，类型系统就越容易保持诚实。
