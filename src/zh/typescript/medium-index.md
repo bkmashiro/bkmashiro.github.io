@@ -49,7 +49,7 @@ sticky: 2
 - [599-Merge](./medium/0599.md)
 - [612-KebabCase](./medium/0612.md)
 - [645-Diff 差集](./medium/0645.md)
-- 949-AnyOf
+- [949-AnyOf](./medium/0949.md)
 - 1042-IsNever
 - [1097-IsUnion](./medium/1097.md)
 - 1130-ReplaceKeys
