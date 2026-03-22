@@ -227,7 +227,7 @@ How many I/O operations does each action require?
 | search | 2 | fts → batch_read |
 | recall (cold) | 4 | embed → fts → graph → batch |
 
-**Recall is the bottleneck at 4 hops.** Future optimization: topic-level index to reduce cold recall to 1-2 hops.
+**Recall is the bottleneck at 4 hops.** ~~Future optimization: topic-level index to reduce cold recall to 1-2 hops.~~ **Update:** TopicIndex now implemented (see Section 8.1).
 
 ---
 
@@ -279,6 +279,56 @@ Privacy enforcement adds ~1ms overhead but enables proper multi-agent isolation.
 2. **Sub-2ms latency** — fast enough for interactive agent systems
 3. **O(1) scaling** — performance independent of agent count
 4. **Privacy is cheap** — ~1ms overhead is acceptable for proper isolation
+
+### 8.1 TopicIndex: O(1) Recall
+
+*Added 2026-03-22*
+
+The TopicIndex pre-computes topic→path mappings on write, enabling O(1) recall for known topics.
+
+**How it works:**
+
+```python
+# On write: extract and index topics
+def index_path(path, content):
+    topics = extract_topics(content)  # hashtags, proper nouns, frequency
+    for topic in topics:
+        topic_to_paths[topic].add(path)
+    
+# On recall: query topic index first
+def recall(query):
+    # Step 1: Topic index (O(1))
+    topic_results = topic_index.query(query)
+    if len(topic_results) >= k // 2:
+        return topic_results  # 1 hop!
+    
+    # Step 2: Fallback to FTS+embedding (4 hops)
+    return fts_retrieve(query)
+```
+
+**Topic Extraction:**
+- Hashtags: `#trading` → `trading`
+- Proper nouns: `NVDA`, `Bitcoin` → lowercase
+- Frequency-based: top 10 significant words
+- Title words: weighted higher
+
+**Performance:**
+
+| Scenario | Hops | Notes |
+|----------|------|-------|
+| Known topic | 1 | Direct index lookup |
+| Unknown topic | 4 | Fallback to FTS+embedding |
+| Hybrid | 1-2 | Index + partial FTS |
+
+**Specificity Scoring:**
+
+Topics with fewer paths score higher (more specific):
+
+```
+score = 1.0 / (len(paths_for_topic) + 1)
+```
+
+This means "NVDA RSI" scores higher than "market analysis" because it's more specific.
 
 ---
 
@@ -400,7 +450,7 @@ def plot_ablation(df):
 
 4. **Cold start matters.** First-query latency is ~6x higher due to embedding model initialization. Pre-warming the embedding store helps.
 
-5. **Recall needs optimization.** At 4 hops, cold recall is the most expensive operation. Topic-level indexing could reduce this to 1-2 hops.
+5. **Recall optimized with TopicIndex.** ~~At 4 hops, cold recall is the most expensive operation.~~ TopicIndex reduces known-topic recall to 1 hop. Unknown topics still use FTS (4 hops).
 
 6. **Librarian solves multi-agent discovery.** 95% hop reduction with sub-2ms latency. Scales O(1) with agent count.
 

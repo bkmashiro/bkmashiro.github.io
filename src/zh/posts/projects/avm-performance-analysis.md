@@ -227,7 +227,7 @@ AVM 的全部意义在于节省 token。效果如何？
 | search | 2 | fts → batch_read |
 | recall（冷） | 4 | embed → fts → graph → batch |
 
-**Recall 是瓶颈，4 hops。** 未来优化：主题级索引将冷 recall 减少到 1-2 hops。
+**Recall 是瓶颈，4 hops。** ~~未来优化：主题级索引将冷 recall 减少到 1-2 hops。~~ **更新：** TopicIndex 已实现（见 8.1 节）。
 
 ---
 
@@ -280,6 +280,56 @@ Librarian 是一个特权服务，可以看到所有 agent 的元数据，但返
 3. **O(1) 扩展** —— 性能与 agent 数量无关
 4. **隐私很便宜** —— ~1ms 开销对于正确隔离是可接受的
 
+### 8.1 TopicIndex：O(1) Recall
+
+*2026-03-22 新增*
+
+TopicIndex 在写入时预计算 topic→path 映射，为已知 topic 启用 O(1) recall。
+
+**工作原理：**
+
+```python
+# 写入时：提取并索引 topics
+def index_path(path, content):
+    topics = extract_topics(content)  # hashtags、专有名词、词频
+    for topic in topics:
+        topic_to_paths[topic].add(path)
+    
+# 召回时：先查 topic 索引
+def recall(query):
+    # 步骤 1：Topic 索引（O(1)）
+    topic_results = topic_index.query(query)
+    if len(topic_results) >= k // 2:
+        return topic_results  # 1 hop！
+    
+    # 步骤 2：回退到 FTS+embedding（4 hops）
+    return fts_retrieve(query)
+```
+
+**Topic 提取：**
+- Hashtags：`#trading` → `trading`
+- 专有名词：`NVDA`、`Bitcoin` → 小写
+- 基于词频：前 10 个重要词
+- 标题词：权重更高
+
+**性能：**
+
+| 场景 | Hops | 说明 |
+|------|------|------|
+| 已知 topic | 1 | 直接索引查找 |
+| 未知 topic | 4 | 回退到 FTS+embedding |
+| 混合 | 1-2 | 索引 + 部分 FTS |
+
+**特异性评分：**
+
+路径较少的 topic 得分更高（更具体）：
+
+```
+score = 1.0 / (len(paths_for_topic) + 1)
+```
+
+这意味着 "NVDA RSI" 比 "市场分析" 得分更高，因为它更具体。
+
 ---
 
 ## 9. 可视化代码
@@ -330,7 +380,7 @@ def plot_latency_cdf(data):
 
 4. **冷启动很重要。** 首次查询延迟由于 embedding 模型初始化高约 6 倍。预热 embedding 存储有帮助。
 
-5. **Recall 需要优化。** 4 hops 时，冷 recall 是最昂贵的操作。主题级索引可将此减少到 1-2 hops。
+5. **Recall 已用 TopicIndex 优化。** ~~4 hops 时，冷 recall 是最昂贵的操作。~~ TopicIndex 将已知 topic recall 减少到 1 hop。未知 topic 仍使用 FTS（4 hops）。
 
 6. **Librarian 解决多 Agent 发现问题。** 95% hop 减少，亚 2ms 延迟。随 agent 数量 O(1) 扩展。
 
