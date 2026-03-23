@@ -13,7 +13,7 @@ outline: [2, 3]
 
 AVM was designed with theoretical goals: token-aware retrieval, multi-agent isolation, append-only semantics. But theory without measurement is just speculation. This post presents a rigorous performance evaluation of AVM across multiple dimensions, with the goal of understanding where it excels and where the bottlenecks are.
 
-All benchmarks were run on an Apple M1 Pro, 16GB RAM, macOS 24.6.0, Python 3.13.12, SQLite 3.45.0 (WAL mode), with the `all-MiniLM-L6-v2` embedding model.
+All benchmarks were run on an Apple M2 Pro, 16GB RAM, macOS 24.6.0, Python 3.13.12, SQLite 3.45.0 (WAL mode), with the `all-MiniLM-L6-v2` embedding model.
 
 ## Executive Summary
 

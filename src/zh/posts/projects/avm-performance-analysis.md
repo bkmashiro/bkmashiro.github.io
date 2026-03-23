@@ -13,7 +13,7 @@ outline: [2, 3]
 
 AVM 的设计带有理论目标：token 感知检索、多 Agent 隔离、只追加语义。但没有测量的理论只是猜测。本文呈现 AVM 在多个维度上的严格性能评估，目标是理解它在哪里出色、瓶颈在哪里。
 
-所有基准测试在 Apple M1 Pro、16GB RAM、macOS 24.6.0、Python 3.13.12、SQLite 3.45.0（WAL 模式）上运行，使用 `all-MiniLM-L6-v2` embedding 模型。
+所有基准测试在 Apple M2 Pro、16GB RAM、macOS 24.6.0、Python 3.13.12、SQLite 3.45.0（WAL 模式）上运行，使用 `all-MiniLM-L6-v2` embedding 模型。
 
 ## 执行摘要
 
