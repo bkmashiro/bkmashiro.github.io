@@ -330,6 +330,63 @@ score = 1.0 / (len(paths_for_topic) + 1)
 
 这意味着 "NVDA RSI" 比 "市场分析" 得分更高，因为它更具体。
 
+### 8.2 Gossip Protocol：去中心化发现
+
+*2026-03-23 新增*
+
+Librarian 的替代方案：agent 之间无需中央协调器就能发现彼此。
+
+**架构：**
+
+```
+  Agent A              Agent B              Agent C
+  ┌──────┐            ┌──────┐            ┌──────┐
+  │Digest│◀──gossip──▶│Digest│◀──gossip──▶│Digest│
+  │bloom │            │bloom │            │bloom │
+  └──────┘            └──────┘            └──────┘
+```
+
+**Bloom Filter Digest：**
+
+每个 agent 维护一个 bloom filter（1024 位）编码其 topics：
+
+```python
+# 插入 "bitcoin" 到 bloom filter
+hash1("bitcoin") % 1024 → 位 42  → 置 1
+hash2("bitcoin") % 1024 → 位 317 → 置 1
+hash3("bitcoin") % 1024 → 位 891 → 置 1
+
+# 查询 "bitcoin"
+if bits[42] && bits[317] && bits[891]:
+    return "可能知道"  # 可能是假阳性
+else:
+    return "肯定不知道"  # 永远不会假阴性
+```
+
+**特性：**
+
+| 属性 | 值 |
+|------|-----|
+| 每 agent 空间 | 128 字节 |
+| 假阳性率 | <15% |
+| 假阴性率 | 0% |
+| 查询时间 | O(1) |
+
+**Gossip vs Librarian：**
+
+| 方面 | Librarian | Gossip |
+|------|-----------|--------|
+| 架构 | 中心化 | 去中心化 |
+| 单点故障 | 有 | 无 |
+| 一致性 | 强 | 最终 |
+| 隐私 | 可见元数据 | 只看 topic 成员关系 |
+| 复杂度 | 简单 | 协议开销 |
+
+**何时使用：**
+- **Librarian**：需要精确结果，可接受单点
+- **Gossip**：需要容错、隐私或离线能力
+- **两者**：Gossip 做快速本地查询，Librarian 做跨域精确检索
+
 ---
 
 ## 9. 可视化代码
@@ -383,6 +440,8 @@ def plot_latency_cdf(data):
 5. **Recall 已用 TopicIndex 优化。** ~~4 hops 时，冷 recall 是最昂贵的操作。~~ TopicIndex 将已知 topic recall 减少到 1 hop。未知 topic 仍使用 FTS（4 hops）。
 
 6. **Librarian 解决多 Agent 发现问题。** 95% hop 减少，亚 2ms 延迟。随 agent 数量 O(1) 扩展。
+
+7. **Gossip Protocol 实现去中心化发现。** Bloom filter digest 支持 O(1) 本地查询，假阳性率 <15%。无单点故障。
 
 ---
 

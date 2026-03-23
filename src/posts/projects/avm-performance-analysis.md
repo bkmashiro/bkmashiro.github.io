@@ -330,6 +330,63 @@ score = 1.0 / (len(paths_for_topic) + 1)
 
 This means "NVDA RSI" scores higher than "market analysis" because it's more specific.
 
+### 8.2 Gossip Protocol: Decentralized Discovery
+
+*Added 2026-03-23*
+
+An alternative to Librarian: agents discover each other without a central coordinator.
+
+**Architecture:**
+
+```
+  Agent A              Agent B              Agent C
+  ┌──────┐            ┌──────┐            ┌──────┐
+  │Digest│◀──gossip──▶│Digest│◀──gossip──▶│Digest│
+  │bloom │            │bloom │            │bloom │
+  └──────┘            └──────┘            └──────┘
+```
+
+**Bloom Filter Digest:**
+
+Each agent maintains a bloom filter (1024 bits) encoding its topics:
+
+```python
+# Insert "bitcoin" into bloom filter
+hash1("bitcoin") % 1024 → bit 42  → set to 1
+hash2("bitcoin") % 1024 → bit 317 → set to 1
+hash3("bitcoin") % 1024 → bit 891 → set to 1
+
+# Query "bitcoin"
+if bits[42] && bits[317] && bits[891]:
+    return "possibly knows"  # May be false positive
+else:
+    return "definitely doesn't know"  # Never false negative
+```
+
+**Properties:**
+
+| Property | Value |
+|----------|-------|
+| Space per agent | 128 bytes |
+| False positive rate | <15% |
+| False negative rate | 0% |
+| Query time | O(1) |
+
+**Gossip vs Librarian:**
+
+| Aspect | Librarian | Gossip |
+|--------|-----------|--------|
+| Architecture | Centralized | Decentralized |
+| Single point of failure | Yes | No |
+| Consistency | Strong | Eventual |
+| Privacy | Sees metadata | Only topic membership |
+| Complexity | Simple | Protocol overhead |
+
+**When to use:**
+- **Librarian**: Need precise results, acceptable single point
+- **Gossip**: Need resilience, privacy, or offline capability
+- **Both**: Gossip for fast local queries, Librarian for cross-domain
+
 ---
 
 ## 9. Visualization Code
@@ -453,6 +510,8 @@ def plot_ablation(df):
 5. **Recall optimized with TopicIndex.** ~~At 4 hops, cold recall is the most expensive operation.~~ TopicIndex reduces known-topic recall to 1 hop. Unknown topics still use FTS (4 hops).
 
 6. **Librarian solves multi-agent discovery.** 95% hop reduction with sub-2ms latency. Scales O(1) with agent count.
+
+7. **Gossip Protocol for decentralized discovery.** Bloom filter digests enable O(1) local queries with <15% false positive rate. No single point of failure.
 
 ---
 
