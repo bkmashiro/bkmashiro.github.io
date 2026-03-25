@@ -73,7 +73,7 @@ sticky: 2
 - [3326-BEM style string](./medium/3326.md)
 - 3376-InorderTraversal
 - 4179-Flip
-- 4182-Fibonacci Sequence
+- [4182-Fibonacci Sequence](./medium/4182.md)
 - 4260-AllCombinations
 - 4425-Greater Than
 - 4471-Zip
