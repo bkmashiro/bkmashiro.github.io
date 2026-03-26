@@ -53,7 +53,7 @@ sticky: 2
 - [1042-IsNever](./medium/1042.md)
 - [1097-IsUnion](./medium/1097.md)
 - [1130-ReplaceKeys](./medium/1130.md)
-- 1367-Remove Index Signature
+- [1367-Remove Index Signature](./medium/1367.md)
 - 1978-Percentage Parser
 - 2070-Drop Char
 - 2257-MinusOne
