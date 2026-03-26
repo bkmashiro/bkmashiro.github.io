@@ -55,7 +55,7 @@ sticky: 2
 - [1130-ReplaceKeys](./medium/1130.md)
 - [1367-Remove Index Signature](./medium/1367.md)
 - 1978-Percentage Parser
-- 2070-Drop Char
+- [2070-Drop Char（删除字符）](./medium/2070.md)
 - 2257-MinusOne
 - 2595-PickByType
 - 2688-StartsWith
