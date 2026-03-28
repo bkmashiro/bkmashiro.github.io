@@ -71,7 +71,7 @@ In the medium and advanced series, I may reuse the tool types I have written bef
 - 2793-Mutable
 - [2852-OmitByType](./medium/2852.md)
 - [2946-ObjectEntries](./medium/2946.md)
-- 3062-Shift
+- [3062-Shift](./medium/3062.md)
 - 3188-Tuple to Nested Object
 - 3192-Reverse
 - 3196-Flip Arguments
