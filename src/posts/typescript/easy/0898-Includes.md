@@ -136,3 +136,56 @@ This pattern shows up frequently in medium challenges too, so `Includes` is a go
 - [Conditional Types](https://www.typescriptlang.org/docs/handbook/2/conditional-types.html)
 - [Variadic Tuple Types](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-4-0.html#variadic-tuple-types)
 - Recursive tuple processing
+
+## 中文解析
+
+### 类型定义解读
+
+```ts
+// 严格相等辅助类型：通过"双向条件类型"绕过 TS 的结构类型系统
+type Equal<X, Y> =
+  (<T>() => T extends X ? 1 : 2) extends  // 构造一个关于 X 的泛型函数类型
+  (<T>() => T extends Y ? 1 : 2)          // 再构造一个关于 Y 的泛型函数类型
+    ? true                                 // 如果两个函数类型完全一致 → true
+    : false
+
+type Includes<T extends readonly unknown[], U> =
+  T extends [infer First, ...infer Rest]  // 将元组拆分为「头元素」和「剩余元素」
+    ? Equal<First, U> extends true        // 严格比较头元素与目标类型
+      ? true                              // 命中 → 直接返回 true
+      : Includes<Rest, U>                 // 未命中 → 递归检查剩余部分
+    : false                               // 元组为空 → 返回 false
+```
+
+### 逐步分析
+
+**为什么不能直接用 `U extends T[number]`？**
+
+`T[number]` 把元组转成联合类型，再用 `extends` 检查的是"可赋值性"而非"严格相等"。例如：
+- `{} extends {}` 为 true，但 `Equal<{}, {}>` 也是 true——这里没问题
+- `boolean extends true | false` 为 true，但 `Equal<boolean, true>` 为 false——这里就出问题了
+
+官方测试中有 `Includes<[boolean], false>` 期望返回 `false`，用联合检查会错误地返回 `true`。
+
+**`Equal<X, Y>` 的工作原理**
+
+这是利用 TypeScript 内部"延迟类型求值"的技巧：
+1. `<T>() => T extends X ? 1 : 2` 是一个泛型函数类型，TypeScript 只有在 `T` 确定时才能求值。
+2. 两个这样的函数类型仅在 `X` 和 `Y` 完全相同时才被认为是同一类型。
+3. `boolean` 和 `true` 虽然有赋值关系，但它们的延迟条件展开方式不同，所以 `Equal<boolean, true> = false`。
+
+**递归展开示例**
+
+```
+Includes<[1, 2, 3], 2>
+  → Equal<1, 2> = false → Includes<[2, 3], 2>
+  → Equal<2, 2> = true  → true ✅
+```
+
+### 考察知识点
+
+- **条件类型（Conditional Types）**：`T extends U ? A : B` 的基本形式
+- **`infer` 关键字**：在条件类型中提取子类型，`[infer First, ...infer Rest]` 是元组头尾分解的标准模式
+- **分布式条件类型的陷阱**：直接用 `extends` 检查联合类型时会分布展开，导致与预期不符
+- **严格类型相等**：`Equal<X, Y>` 利用延迟泛型函数类型实现精确相等判断，是 type-challenges 中的高频工具类型
+- **尾递归元组遍历**：将问题分解为"处理头元素 + 递归处理剩余"，是处理元组的通用模式
