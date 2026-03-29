@@ -145,3 +145,65 @@ The spread syntax in the result lets both parts compose nicely.
 - [Variadic Tuple Types](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-4-0.html#variadic-tuple-types)
 - [Conditional Types](https://www.typescriptlang.org/docs/handbook/2/conditional-types.html)
 - Recursive tuple processing
+
+## 中文解析
+
+### 类型定义解读
+
+```ts
+type Flatten<T extends readonly unknown[]> =
+  T extends readonly [infer First, ...infer Rest]  // 拆出头元素 First 与剩余 Rest
+    ? First extends readonly unknown[]             // 判断 First 是否还是数组/元组
+      ? [...Flatten<First>, ...Flatten<Rest>]      // 是数组 → 递归展平 First，再接上展平后的 Rest
+      : [First, ...Flatten<Rest>]                  // 不是数组 → 保留 First，继续处理 Rest
+    : []                                           // T 为空元组 → 返回 []
+```
+
+### 逐步分析
+
+**整体思路：头尾递归 + 双重展开**
+
+对于每个元素：
+1. 如果它是数组 → 先展平它（递归），再把结果拼进去
+2. 如果它不是数组 → 直接保留，继续处理剩余
+
+两个子问题在展开时自然合并：`[...flatFirst, ...flatRest]`
+
+**递归展开示例**
+
+```
+Flatten<[1, [2, [3]], 4]>
+
+步骤1: First=1, Rest=[[2,[3]], 4]
+  1 不是数组 → [1, ...Flatten<[[2,[3]], 4]>]
+
+步骤2: First=[2,[3]], Rest=[4]
+  [2,[3]] 是数组 → [...Flatten<[2,[3]]>, ...Flatten<[4]>]
+
+步骤3: Flatten<[2,[3]]>
+  First=2, Rest=[[3]]
+  2 不是数组 → [2, ...Flatten<[[3]]>]
+  First=[3], Rest=[]
+  [3] 是数组 → [...Flatten<[3]>, ...Flatten<[]>]
+  = [...[3], ...[]] = [3]
+  → [2, 3]
+
+步骤4: Flatten<[4]> = [4]
+
+最终: [1, 2, 3, 4] ✅
+```
+
+**为什么两处都要写 `readonly`？**
+
+- 约束 `T extends readonly unknown[]`：接受 readonly 输入
+- 条件模式 `T extends readonly [infer First, ...infer Rest]`：只读元组才能匹配只读模式
+
+如果只在约束处写 `readonly`，但条件分支里的模式不带 `readonly`，那么 `readonly [1, 2]` 就无法匹配该分支，导致直接返回 `[]`。
+
+### 考察知识点
+
+- **双层递归**：同时在"横向"（遍历元组）和"纵向"（深入嵌套层）进行递归，两个维度在展开时自然合并
+- **`infer` 与头尾分解**：`[infer First, ...infer Rest]` 是处理元组的核心模式，相当于 Haskell 的 `x:xs`
+- **嵌套类型判断**：`First extends readonly unknown[]` 用于区分"普通值"和"还需继续展平的数组"
+- **展开语法合并**：`[...A, ...B]` 让递归结果的拼接变得直观，避免了手写 Concat 的繁琐
+- **`readonly` 的传递性**：在操作只读元组时，条件分支的模式也需要对应加 `readonly`，否则匹配失败
