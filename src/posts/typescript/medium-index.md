@@ -75,35 +75,35 @@ In the medium and advanced series, I may reuse the tool types I have written bef
 - [3188-Tuple to Nested Object](./medium/3188-TupleToNestedObject.md)
 - [3192-Reverse](./medium/3192-Reverse.md)
 - [3196-Flip Arguments](./medium/3196-FlipArguments.md)
-- 3243-FlattenDepth
+- [3243-FlattenDepth](./medium/3243-FlattenDepth.md)
 - [3326-BEM style string](./medium/3326.md)
-- 3376-InorderTraversal
+- [3376-InorderTraversal](./medium/3376-InorderTraversal.md)
 - [4179-Flip](./medium/4179-Flip.md)
 - [4182-Fibonacci Sequence](./medium/4182.md)
-- 4260-AllCombinations
-- 4425-Greater Than
-- 4471-Zip
-- 4484-IsTuple
-- 4499-Chunk
-- 4518-Fill
-- 4803-Trim Right
+- [4260-AllCombinations](./medium/4260-AllCombinations.md)
+- [4425-Greater Than](./medium/4425-GreaterThan.md)
+- [4471-Zip](./medium/4471-Zip.md)
+- [4484-IsTuple](./medium/4484-IsTuple.md)
+- [4499-Chunk](./medium/4499-Chunk.md)
+- [4518-Fill](./medium/4518-Fill.md)
+- [4803-Trim Right](./medium/4803-TrimRight.md)
 - [5117-Without](./medium/5117.md)
 - [5140-Trunc](./medium/5140-Trunc.md)
-- 5153-IndexOf
-- 5310-Join
+- [5153-IndexOf](./medium/5153-IndexOf.md)
+- [5310-Join](./medium/5310-Join.md)
 - [5317-LastIndexOf](./medium/5317.md)
 - [5360-Unique](./medium/5360.md)
-- 5821-MapTypes
-- 7544-Construct Tuple
-- 8640-Number Range
-- 8767-Combination
-- 8987-Subsequence
-- 9142-CheckRepeatedChars
-- 9286-FirstUniqueCharIndex
-- 9616-Parse URL Params
-- 9896-GetMiddleElement
-- 9898-Appear only once
-- 9989-Count Element Number To Object
+- [5821-MapTypes](./medium/5821-MapTypes.md)
+- [7544-Construct Tuple](./medium/7544-ConstructTuple.md)
+- [8640-Number Range](./medium/8640-NumberRange.md)
+- [8767-Combination](./medium/8767-Combination.md)
+- [8987-Subsequence](./medium/8987-Subsequence.md)
+- [9142-CheckRepeatedChars](./medium/9142-CheckRepeatedChars.md)
+- [9286-FirstUniqueCharIndex](./medium/9286-FirstUniqueCharIndex.md)
+- [9616-Parse URL Params](./medium/9616-ParseURLParams.md)
+- [9896-GetMiddleElement](./medium/9896-GetMiddleElement.md)
+- [9898-Appear only once](./medium/9898-AppearOnlyOnce.md)
+- [9989-Count Element Number To Object](./medium/9989-CountElementNumberToObject.md)
 - [10969-Integer](./medium/10969-Integer.md)
 - [16259-ToPrimitive](./medium/16259-ToPrimitive.md)
 - [17973-DeepMutable](./medium/17973-DeepMutable.md)
