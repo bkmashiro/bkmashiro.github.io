@@ -64,3 +64,28 @@ TypeScript's `readonly` modifier is a compile-time check only — the JavaScript
 ::: tip
 A normal array (`T[]`) is a **subtype** of a readonly array (`readonly T[]`), because a mutable array can do everything a readonly array can (plus mutation). This is the Liskov Substitution Principle applied to TypeScript's type system.
 :::
+
+## 中文解析
+
+**核心思路：**
+
+实现 `MyReadonly<T>` 的关键是使用**映射类型**（Mapped Types），对 `T` 的每个属性加上 `readonly` 修饰符。
+
+```ts
+// 解法
+type MyReadonly<T> = { readonly [K in keyof T]: T[K] }
+//                   ^^^^^^^^  映射类型修饰符，让每个属性变为只读
+```
+
+**逐步分析：**
+1. `keyof T` — 获取类型 `T` 所有键的联合类型
+2. `[K in keyof T]` — 遍历 `T` 的每一个键 `K`
+3. `readonly` — 给每个属性加上只读修饰
+4. `T[K]` — 保留原属性的值类型不变
+
+**注意：** `readonly` 只是 TypeScript 编译时检查，运行时的 JavaScript 并不会阻止赋值。若需要运行时不可变，应使用 `Object.freeze()`。
+
+**考察知识点：**
+- 映射类型（Mapped Types）
+- `keyof` 操作符
+- `readonly` 修饰符
