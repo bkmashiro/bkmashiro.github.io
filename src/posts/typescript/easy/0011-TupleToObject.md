@@ -58,3 +58,31 @@ These are the only types valid as object keys in TypeScript. Adding this constra
 ::: tip
 `T[number]` works because arrays/tuples have numeric indices. Indexing with `number` asks TypeScript: "what type can I get when I index this array with any number?" — and the answer is the union of all element types.
 :::
+
+## 中文解析
+
+**核心思路：**
+
+将元组转换为对象类型的关键在于 **`T[number]`** 技巧——用 `number` 索引元组/数组类型，可以得到所有元素类型的联合类型。
+
+```ts
+// 解法
+type TupleToObject<T extends readonly (string | number | symbol)[]> = {
+  [K in T[number]]: K
+  // T[number] 将元组元素展开为联合类型，再用映射类型遍历
+}
+```
+
+**逐步分析：**
+1. `T extends readonly (string | number | symbol)[]` — 约束 `T` 为只读元组，且元素必须是合法的对象键类型
+2. `T[number]` — 获取元组所有元素的联合类型。例如 `['a', 'b'][number]` → `'a' | 'b'`
+3. `[K in T[number]]` — 遍历联合类型中的每个值 `K`
+4. `: K` — 键和值相同（自映射）
+
+**为什么需要 `readonly`？**
+`as const` 断言会让元组变成 `readonly`，如果约束不包含 `readonly`，TypeScript 就会拒绝接受 `as const` 元组作为参数。
+
+**考察知识点：**
+- 索引访问类型（Indexed Access Types）— `T[number]`
+- 映射类型（Mapped Types）
+- `as const` 断言与字面量类型
