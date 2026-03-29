@@ -60,11 +60,11 @@ In the medium and advanced series, I may reuse the tool types I have written bef
 - [1097-IsUnion](./medium/1097.md)
 - [1130-ReplaceKeys](./medium/1130.md)
 - [1367-Remove Index Signature](./medium/1367.md)
-- 1978-Percentage Parser
+- [1978-Percentage Parser](./medium/1978.md)
 - [2070-Drop Char](./medium/2070.md)
 - 2257-MinusOne
-- 2595-PickByType
-- 2688-StartsWith
+- [2595-PickByType](./medium/2595.md)
+- [2688-StartsWith](./medium/2688.md)
 - 2693-EndsWith
 - 2757-PartialByKeys
 - [2757-PartialByKeys](./medium/2757.md)
