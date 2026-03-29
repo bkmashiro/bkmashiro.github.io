@@ -74,11 +74,11 @@ In the medium and advanced series, I may reuse the tool types I have written bef
 - [3062-Shift](./medium/3062.md)
 - [3188-Tuple to Nested Object](./medium/3188-TupleToNestedObject.md)
 - [3192-Reverse](./medium/3192-Reverse.md)
-- 3196-Flip Arguments
+- [3196-Flip Arguments](./medium/3196-FlipArguments.md)
 - 3243-FlattenDepth
 - [3326-BEM style string](./medium/3326.md)
 - 3376-InorderTraversal
-- 4179-Flip
+- [4179-Flip](./medium/4179-Flip.md)
 - [4182-Fibonacci Sequence](./medium/4182.md)
 - 4260-AllCombinations
 - 4425-Greater Than
@@ -88,7 +88,7 @@ In the medium and advanced series, I may reuse the tool types I have written bef
 - 4518-Fill
 - 4803-Trim Right
 - [5117-Without](./medium/5117.md)
-- 5140-Trunc
+- [5140-Trunc](./medium/5140-Trunc.md)
 - 5153-IndexOf
 - 5310-Join
 - [5317-LastIndexOf](./medium/5317.md)
