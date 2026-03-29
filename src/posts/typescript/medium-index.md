@@ -31,6 +31,7 @@ In the medium and advanced series, I may reuse the tool types I have written bef
 
 - [2-Get Return Type](./medium/0002.md)
 - [3-Omit](./medium/0003.md)
+- [4-Pick](./medium/0004.md)
 - [8-Readonly 2](./medium/0008.md)
 - [9-Deep Readonly](./medium/0009.md)
 - [10-Tuple to Union](./medium/0010.md)
