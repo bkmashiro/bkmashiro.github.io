@@ -83,3 +83,41 @@ This uses the `infer` keyword to **pattern-match** the tuple structure:
 **Key concepts:**
 - [Conditional Types](https://www.typescriptlang.org/docs/handbook/2/conditional-types.html) — `T extends U ? A : B`
 - [Inferring Within Conditional Types](https://www.typescriptlang.org/docs/handbook/2/conditional-types.html#inferring-within-conditional-types) — the `infer` keyword
+
+## 中文解析
+
+**核心思路：**
+
+取数组第一个元素类型，看似简单，但需要处理**空数组边界情况**。
+
+```ts
+// 方案一：条件类型判断
+type First<T extends any[]> = T extends [] ? never : T[0]
+
+// 方案二：infer 模式匹配（更优雅）
+type First<T extends readonly any[]> = T extends [infer F, ...infer R] ? F : never
+```
+
+**为什么不能直接用 `T[0]`？**
+
+```ts
+type First<T extends any[]> = T[0]  // ❌ 空数组时返回 undefined，而非 never
+```
+
+空元组 `[]` 的索引 `[0]` 类型是 `undefined`，但题目期望返回 `never`。
+
+**方案一解析：**
+- `T extends []` 检查 `T` 是否为空元组
+- 如果是空元组 → 返回 `never`
+- 否则 → 返回 `T[0]`（第一个元素）
+
+**方案二解析（推荐）：**
+- `[infer F, ...infer R]` 是元组**模式匹配**
+- `infer F` 绑定第一个元素的类型
+- `...infer R` 绑定剩余元素的类型（这里用不到）
+- 空元组不匹配此模式 → 返回 `never`
+
+**考察知识点：**
+- 条件类型（Conditional Types）
+- `infer` 关键字（类型推断）
+- 元组模式匹配（Tuple Pattern Matching）
