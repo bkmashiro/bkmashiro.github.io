@@ -54,7 +54,7 @@ sticky: 2
 - [1097-IsUnion](./medium/1097.md)
 - [1130-ReplaceKeys](./medium/1130.md)
 - [1367-Remove Index Signature](./medium/1367.md)
-- 1978-Percentage Parser
+- [1978-百分比解析器](./medium/1978.md)
 - [2070-Drop Char（删除字符）](./medium/2070.md)
 - 2257-MinusOne
 - 2595-PickByType
