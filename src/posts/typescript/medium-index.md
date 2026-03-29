@@ -104,27 +104,27 @@ In the medium and advanced series, I may reuse the tool types I have written bef
 - 9896-GetMiddleElement
 - 9898-Appear only once
 - 9989-Count Element Number To Object
-- 10969-Integer
-- 16259-ToPrimitive
-- 17973-DeepMutable
-- 18142-All
-- 18220-Filter
-- 21104-FindAll
-- 21106-Combination key type
-- 21220-Permutations of Tuple
-- 25170-Replace First
-- 25270-Transpose
-- 26401-JSON Schema to TypeScript
-- 27133-Square
-- 27152-Triangular number
-- 27862-CartesianProduct
-- 27932-MergeAll
-- 27958-CheckRepeatedTuple
-- 28333-Public Type
-- 29650-ExtractToObject
-- 29785-Deep Omit
-- 30301-IsOdd
-- 30430-Tower of hanoi
+- [10969-Integer](./medium/10969-Integer.md)
+- [16259-ToPrimitive](./medium/16259-ToPrimitive.md)
+- [17973-DeepMutable](./medium/17973-DeepMutable.md)
+- [18142-All](./medium/18142-All.md)
+- [18220-Filter](./medium/18220-Filter.md)
+- [21104-FindAll](./medium/21104-FindAll.md)
+- [21106-Combination key type](./medium/21106-CombinationKeyType.md)
+- [21220-Permutations of Tuple](./medium/21220-PermutationsOfTuple.md)
+- [25170-Replace First](./medium/25170-ReplaceFirst.md)
+- [25270-Transpose](./medium/25270-Transpose.md)
+- [26401-JSON Schema to TypeScript](./medium/26401-JSONSchemaToTypeScript.md)
+- [27133-Square](./medium/27133-Square.md)
+- [27152-Triangular number](./medium/27152-TriangularNumber.md)
+- [27862-CartesianProduct](./medium/27862-CartesianProduct.md)
+- [27932-MergeAll](./medium/27932-MergeAll.md)
+- [27958-CheckRepeatedTuple](./medium/27958-CheckRepeatedTuple.md)
+- [28333-Public Type](./medium/28333-PublicType.md)
+- [29650-ExtractToObject](./medium/29650-ExtractToObject.md)
+- [29785-Deep Omit](./medium/29785-DeepOmit.md)
+- [30301-IsOdd](./medium/30301-IsOdd.md)
+- [30430-Tower of hanoi](./medium/30430-TowerOfHanoi.md)
 - [0599-Merge](./medium/0599.md)
 - [30958-Pascal's triangle](./medium/30958.md)
-- 30970-IsFixedStringLiteralType
+- [30970-IsFixedStringLiteralType](./medium/30970-IsFixedStringLiteralType.md)
