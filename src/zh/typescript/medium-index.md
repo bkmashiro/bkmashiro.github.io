@@ -78,7 +78,7 @@ sticky: 2
 - 4425-Greater Than
 - 4471-Zip
 - 4484-IsTuple
-- 4499-Chunk
+- [4499-Chunk](./medium/4499-Chunk.md)
 - 4518-Fill
 - 4803-Trim Right
 - [5117-Without](./medium/5117.md)
