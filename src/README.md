@@ -41,3 +41,5 @@ projects:
 
 footer: '<a href="https://icp.gov.moe/?keyword=20261101" target="_blank" style="color:inherit;opacity:0.65;text-decoration:none;">萌ICP备20261101号</a>'
 ---
+
+<MinecraftFarm />
