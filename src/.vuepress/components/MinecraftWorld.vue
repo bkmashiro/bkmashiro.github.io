@@ -1,212 +1,32 @@
 <template>
-  <div class="mcw-wrapper" ref="wrapperRef" :class="{ shake: shaking }">
+  <div class="mcw-wrapper" ref="wrapperRef">
     <!-- Hint -->
     <div class="mcw-hint" :class="{ hidden: interacted }">Click to interact</div>
 
-    <div class="mcw-scene">
-      <!-- ══ SKY LAYER ══ -->
-      <div class="mcw-sky">
-        <div class="mcw-cloud cloud1"></div>
-        <div class="mcw-cloud cloud2"></div>
-        <div class="mcw-cloud cloud3"></div>
-        <div class="mcw-sun"></div>
-      </div>
-
-      <!-- ══ SURFACE LAYER ══ -->
-      <div class="mcw-surface">
-        <!-- Farm 3x3 -->
-        <div class="mcw-section farm-section">
-          <div class="mcw-farm-grid">
-            <div
-              v-for="(crop, idx) in crops"
-              :key="idx"
-              class="mcw-tile"
-              @click="handleTileClick(idx)"
-              title="Click to grow / harvest"
-            >
-              <div class="mcw-farmland"></div>
-              <div class="mcw-crop" :class="[`stage-${crop.stage}`, { growing: crop.growing }]"></div>
-              <div class="mcw-tile-hover"></div>
-            </div>
-          </div>
-          <div class="mcw-grass-row">
-            <div v-for="i in 3" :key="i" class="mcw-grass-block" :style="grassBlockStyle"></div>
-          </div>
-        </div>
-
-        <!-- Oak Tree -->
-        <div class="mcw-section tree-section">
-          <div class="mcw-tree">
-            <div class="mcw-leaves"></div>
-            <div class="mcw-trunk" :style="trunkStyle"></div>
-            <div class="mcw-trunk" :style="trunkStyle"></div>
-          </div>
-          <div class="mcw-grass-block wide" :style="grassBlockStyle"></div>
-        </div>
-
-        <!-- Sign -->
-        <div class="mcw-section sign-section">
-          <div class="mcw-sign-container" @click="cycleSignMessage" title="Click to change message">
-            <div class="mcw-sign-face" :style="signStyle">
-              <div class="mcw-sign-line name">{{ signMessages[signIdx][0] }}</div>
-              <div class="mcw-sign-line">{{ signMessages[signIdx][1] }}</div>
-              <div class="mcw-sign-line small">{{ signMessages[signIdx][2] }}</div>
-              <div class="mcw-sign-line link">{{ signMessages[signIdx][3] }}</div>
-            </div>
-            <div class="mcw-sign-post" :style="signPostStyle"></div>
-          </div>
-          <div class="mcw-grass-block wide" :style="grassBlockStyle"></div>
-        </div>
-
-        <!-- Door + Pressure Plate -->
-        <div class="mcw-section door-section">
-          <div class="mcw-door-frame">
-            <div class="mcw-door" :class="{ open: doorOpen }" :style="doorStyle"></div>
-            <div class="mcw-door-bg"></div>
-          </div>
-          <div class="mcw-pressure-plate-area">
-            <div
-              class="mcw-grass-block door-grass"
-              :style="grassBlockStyle"
-              @mouseenter="doorOpen = true"
-              @mouseleave="doorOpen = false"
-            >
-              <div class="mcw-pressure-plate" :class="{ pressed: doorOpen }"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ══ UNDERGROUND LAYER ══ -->
-      <div class="mcw-underground">
-        <!-- Underground left filler -->
-        <div class="mcw-ug-row row1">
-          <div class="mcw-stone" v-for="i in 2" :key="i" :style="stoneStyle"></div>
-          <!-- Crafting Table -->
-          <div class="mcw-crafting-table" @click="openCrafting" title="Click to craft">
-            <img v-if="tex.craftingTable" :src="tex.craftingTable" class="block-tex" alt="crafting table" />
-            <template v-else>
-              <div class="ct-top"></div>
-              <div class="ct-front"></div>
-            </template>
-          </div>
-          <!-- TNT + Button -->
-          <div class="mcw-tnt-area">
-            <div class="mcw-tnt" :class="{ flash: tntFlashing }" ref="tntRef">
-              <div class="tnt-label">TNT</div>
-            </div>
-            <div
-              class="mcw-button"
-              :class="{ pressed: buttonPressed }"
-              @click="triggerTNT"
-              title="Don't press this"
-            ></div>
-          </div>
-          <!-- Obsidian blocks -->
-          <div
-            v-for="(obs, oi) in obsidianBlocks"
-            :key="'obs' + oi"
-            class="mcw-obsidian"
-            :class="{ minable: hasPickaxe, cracked1: obs.cracks === 1, cracked2: obs.cracks === 2 }"
-            @click="mineObsidian(oi)"
-            :title="hasPickaxe ? 'Mine obsidian (click 3x)' : 'Need diamond pickaxe'"
-            :style="{ cursor: hasPickaxe ? 'crosshair' : 'default' }"
-          >
-            <img v-if="tex.obsidian" :src="tex.obsidian" class="block-tex" alt="obsidian" />
-            <div class="obs-crack-overlay" v-if="obs.cracks > 0"></div>
-          </div>
-          <div class="mcw-stone" v-for="i in 2" :key="i + 10" :style="stoneStyle"></div>
-        </div>
-
-        <!-- Redstone row -->
-        <div class="mcw-ug-row row2">
-          <div class="mcw-stone" :style="stoneStyle"></div>
-          <!-- Lever -->
-          <div class="mcw-lever-block" @click="toggleLever" title="Pull the lever!">
-            <div class="lever-base"></div>
-            <div class="lever-arm" :class="{ on: leverOn }"></div>
-          </div>
-          <!-- Redstone dust x3 -->
-          <div
-            v-for="(rd, ri) in redstoneTiles"
-            :key="ri"
-            class="mcw-redstone-tile"
-            :class="{ lit: rd.lit }"
-          ></div>
-          <!-- Piston -->
-          <div class="mcw-piston" :class="{ retracted: leverOn }">
-            <div class="piston-body"></div>
-            <div class="piston-head"></div>
-          </div>
-          <!-- Info panel / stone block -->
-          <div class="mcw-info-block" :class="{ revealed: leverOn }">
-            <div class="stone-cover" :class="{ hidden: leverOn }" :style="stoneStyle"></div>
-            <div class="info-panel" :class="{ visible: leverOn, flicker: leverOn && panelFlickering }">
-              <div class="ip-title">🔧 Current Projects</div>
-              <div class="ip-item">• kotodama — iOS app</div>
-              <div class="ip-item">• visual-cs — viz</div>
-              <div class="ip-item">• AVM — memory system</div>
-              <div class="ip-item">• redscript — compiler</div>
-            </div>
-          </div>
-          <div class="mcw-stone" :style="stoneStyle"></div>
-        </div>
-
-        <!-- Portal frame row -->
-        <div class="mcw-ug-row row3 portal-row" v-if="showPortalArea">
-          <div class="portal-hint" v-if="!portalComplete && !portalActive">
-            🟣 You have enough obsidian to build a Nether Portal...
-          </div>
-          <div class="portal-grid">
-            <div
-              v-for="(cell, pi) in portalGrid"
-              :key="pi"
-              class="portal-cell"
-              :class="{
-                'portal-filled': cell,
-                'portal-inner': isPortalInner(pi),
-                'portal-glow': portalActive
-              }"
-              @click="placePortalBlock(pi)"
-              :title="cell ? 'Obsidian' : (isPortalInner(pi) ? (portalActive ? 'Active portal' : 'Empty') : 'Click to place obsidian')"
-            >
-              <img v-if="cell && tex.obsidian" :src="tex.obsidian" class="block-tex" alt="obsidian" />
-              <div v-else-if="cell" class="portal-obs-fallback"></div>
-              <div v-else-if="portalActive && isPortalInner(pi)" class="portal-swirl"></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Bottom stone row -->
-        <div class="mcw-ug-row row3" v-if="!showPortalArea">
-          <div class="mcw-stone" v-for="i in 8" :key="i" :style="stoneStyle"></div>
-        </div>
-      </div>
-
-      <!-- TNT Crater -->
-      <div class="mcw-crater" :class="{ visible: craterVisible }">
-        <div class="crater-msg">
-          <div>💥 You found a secret!</div>
-          <div class="crater-quote">"There are only two hard things</div>
-          <div class="crater-quote"> in CS: cache invalidation,</div>
-          <div class="crater-quote"> naming things, and off-by-one errors."</div>
-        </div>
-      </div>
+    <!-- Three.js canvas -->
+    <div class="mcw-canvas-container">
+      <canvas ref="threeCanvas" class="mcw-three-canvas"></canvas>
+      <!-- Piglin skinview3d overlay canvas -->
+      <canvas
+        ref="piglinCanvas"
+        class="mcw-piglin-canvas"
+        :style="piglinCanvasStyle"
+        @mousedown="onPiglinMouseDown"
+      ></canvas>
+      <!-- Nether death message -->
+      <div v-if="netherDeathMsg" class="nether-death-msg">{{ netherDeathMsg }}</div>
     </div>
 
     <!-- ══ CRAFTING OVERLAY ══ -->
     <div class="mcw-overlay" v-if="craftingOpen" @click.self="craftingOpen = false">
       <div class="mcw-crafting-ui">
         <div class="cui-title">Crafting Table</div>
-
-        <!-- Recipe tabs -->
         <div class="cui-tabs">
           <div class="cui-tab" :class="{ active: craftTab === 'bread' }" @click="craftTab = 'bread'">🍞 Bread</div>
           <div class="cui-tab" :class="{ active: craftTab === 'pickaxe' }" @click="craftTab = 'pickaxe'">⛏️ Pickaxe</div>
-          <div class="cui-tab" :class="{ active: craftTab === 'flint' }" @click="craftTab = 'flint'">🔥 Flint&Steel</div>
+          <div class="cui-tab" :class="{ active: craftTab === 'flint' }" @click="craftTab = 'flint'">🔥 Flint&amp;Steel</div>
         </div>
 
-        <!-- Bread recipe -->
         <template v-if="craftTab === 'bread'">
           <div class="cui-recipe-hint">Recipe: 3+ wheat</div>
           <div class="cui-grid">
@@ -215,55 +35,44 @@
             </div>
           </div>
           <div class="cui-arrow">▶</div>
-          <div class="cui-output" :class="{ ready: craftReady }">
-            <span v-if="craftReady">🍞</span>
-          </div>
+          <div class="cui-output" :class="{ ready: craftReady }"><span v-if="craftReady">🍞</span></div>
           <div class="cui-btn" @click="doCraft">Craft</div>
         </template>
 
-        <!-- Diamond Pickaxe recipe -->
         <template v-if="craftTab === 'pickaxe'">
           <div class="cui-recipe-hint">Recipe: 2 diamonds (top row) + 1 wood (bottom-right)</div>
           <div class="cui-grid2x2">
             <div class="cui-slot2" :class="{ filled: pickaxeSlots[0] }" @click="togglePickaxeSlot(0)">
-              <img v-if="pickaxeSlots[0] && tex.diamond" :src="tex.diamond" class="slot-tex" />
-              <span v-else-if="pickaxeSlots[0]">💎</span>
-              <span v-else class="slot-hint" :title="'Need: diamond (' + (inventory.diamond||0) + ')'">{{ inventory.diamond ? '💎?' : '' }}</span>
+              <span v-if="pickaxeSlots[0]">💎</span>
+              <span v-else class="slot-hint">{{ inventory.diamond ? '💎?' : '' }}</span>
             </div>
             <div class="cui-slot2" :class="{ filled: pickaxeSlots[1] }" @click="togglePickaxeSlot(1)">
-              <img v-if="pickaxeSlots[1] && tex.diamond" :src="tex.diamond" class="slot-tex" />
-              <span v-else-if="pickaxeSlots[1]">💎</span>
+              <span v-if="pickaxeSlots[1]">💎</span>
             </div>
-            <div class="cui-slot2"><!-- empty --></div>
+            <div class="cui-slot2"></div>
             <div class="cui-slot2" :class="{ filled: pickaxeSlots[3] }" @click="togglePickaxeSlot(3)">
-              <img v-if="pickaxeSlots[3] && tex.oakPlanks" :src="tex.oakPlanks" class="slot-tex" />
-              <span v-else-if="pickaxeSlots[3]">🪵</span>
+              <span v-if="pickaxeSlots[3]">🪵</span>
             </div>
           </div>
           <div class="cui-recipe-legend">
             <div>Slots 0,1: diamond (have: {{ inventory.diamond || 0 }})</div>
-            <div>Slot 3: wood/stick (have: {{ inventory.wood || 0 }})</div>
+            <div>Slot 3: wood (have: {{ inventory.wood || 0 }})</div>
           </div>
           <div class="cui-arrow">▶</div>
-          <div class="cui-output" :class="{ ready: pickaxeReady }">
-            <span v-if="pickaxeReady">⛏️</span>
-          </div>
+          <div class="cui-output" :class="{ ready: pickaxeReady }"><span v-if="pickaxeReady">⛏️</span></div>
           <div class="cui-btn" @click="craftPickaxe">Craft Pickaxe</div>
         </template>
 
-        <!-- Flint & Steel recipe -->
         <template v-if="craftTab === 'flint'">
           <div class="cui-recipe-hint">Recipe: flint (top-left) + iron ingot (bottom-right)</div>
           <div class="cui-grid2x2">
             <div class="cui-slot2" :class="{ filled: flintSlots[0] }" @click="toggleFlintSlot(0)">
-              <img v-if="flintSlots[0] && tex.flint" :src="tex.flint" class="slot-tex" />
-              <span v-else-if="flintSlots[0]">🪨</span>
+              <span v-if="flintSlots[0]">🪨</span>
             </div>
-            <div class="cui-slot2"><!-- empty --></div>
-            <div class="cui-slot2"><!-- empty --></div>
+            <div class="cui-slot2"></div>
+            <div class="cui-slot2"></div>
             <div class="cui-slot2" :class="{ filled: flintSlots[3] }" @click="toggleFlintSlot(3)">
-              <img v-if="flintSlots[3] && tex.ironIngot" :src="tex.ironIngot" class="slot-tex" />
-              <span v-else-if="flintSlots[3]">⚙️</span>
+              <span v-if="flintSlots[3]">⚙️</span>
             </div>
           </div>
           <div class="cui-recipe-legend">
@@ -271,9 +80,7 @@
             <div>Slot 3: iron ingot (have: {{ inventory.iron || 0 }})</div>
           </div>
           <div class="cui-arrow">▶</div>
-          <div class="cui-output" :class="{ ready: flintReady }">
-            <span v-if="flintReady">🔥</span>
-          </div>
+          <div class="cui-output" :class="{ ready: flintReady }"><span v-if="flintReady">🔥</span></div>
           <div class="cui-btn" @click="craftFlintSteel">Craft Flint &amp; Steel</div>
         </template>
 
@@ -292,8 +99,7 @@
         @click="equipItem(item.key)"
         :title="item.label + (inventory[item.key] ? ' (x' + inventory[item.key] + ')' : '')"
       >
-        <img v-if="item.tex" :src="item.tex" class="slot-tex" />
-        <span v-else>{{ item.icon }}</span>
+        <span>{{ item.icon }}</span>
         <div class="hotbar-count" v-if="inventory[item.key] > 0">{{ inventory[item.key] }}</div>
       </div>
       <div class="hotbar-equipped-label" v-if="equippedItem">
@@ -306,7 +112,17 @@
       🔥 Click the portal interior to light it!
     </div>
 
-    <!-- ══ PHYSICS DROPS LAYER ══ -->
+    <!-- TNT Crater message -->
+    <div class="mcw-crater" :class="{ visible: craterVisible }">
+      <div class="crater-msg">
+        <div>💥 You found a secret!</div>
+        <div class="crater-quote">"There are only two hard things</div>
+        <div class="crater-quote"> in CS: cache invalidation,</div>
+        <div class="crater-quote"> naming things, and off-by-one errors."</div>
+      </div>
+    </div>
+
+    <!-- Physics drops layer (emoji overlays) -->
     <div class="mcw-drops-layer">
       <div
         v-for="drop in activeDrops"
@@ -321,187 +137,177 @@
         }"
       >{{ drop.icon }}</div>
     </div>
-
-    <!-- ══ PIGLIN PHYSICS LAYER ══ -->
-    <PiglinPhysics
-      v-if="piglinReady"
-      :count="1"
-      :width="780"
-      :height="piglinSceneHeight"
-      :ground-y="piglinGroundY"
-      :portal-area="piglinPortalArea"
-      scene="overworld"
-      @piglin-entered-portal="onPiglinEnteredPortal"
-    />
   </div>
 </template>
 
 <script setup>
 import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
-import PiglinPhysics from './PiglinPhysics.vue'
+import * as THREE from 'three'
+
+// ── Refs ──────────────────────────────────────────────────────────────────────
+const wrapperRef = ref(null)
+const threeCanvas = ref(null)
+const piglinCanvas = ref(null)
+const interacted = ref(false)
+
+// ── Three.js internals ────────────────────────────────────────────────────────
+let renderer = null
+let scene = null
+let camera = null
+let animFrameId = null
+let clock = null
+let portalMat = null   // shader material for portal swirl
+let redstoneLight = null
+const interactableObjects = []
+const objectMeta = new WeakMap() // mesh -> { type, idx }
+
+// Camera parallax
+let targetOffsetX = 0, targetOffsetY = 0
+const basePos = { x: 10, y: 12, z: 10 }
+
+// Camera shake
+let shakeTime = 0
 
 // ── Textures ──────────────────────────────────────────────────────────────────
+const loadedTextures = {}
 
-const tex = reactive({
-  grassBlock: null,
-  stone: null,
-  obsidian: null,
-  craftingTable: null,
-  oakPlanks: null,
-  diamond: null,
-  diamondBlock: null,
-  flint: null,
-  ironIngot: null,
-  stick: null,
-  netherrack: null,
-  glowstone: null,
-})
-
-// Load textures async to avoid blocking initial render
-import('minecraft-textures/dist/textures/json/1.20.id.json').then(mod => {
-  const data = mod.default || mod
-  const items = data.items
-  const get = (id) => items['minecraft:' + id]?.texture || null
-  tex.grassBlock   = get('grass_block')
-  tex.stone        = get('stone')
-  tex.obsidian     = get('obsidian')
-  tex.craftingTable = get('crafting_table')
-  tex.oakPlanks    = get('oak_planks')
-  tex.diamond      = get('diamond')
-  tex.diamondBlock = get('diamond_block')
-  tex.flint        = get('flint')
-  tex.ironIngot    = get('iron_ingot')
-  tex.stick        = get('stick')
-  tex.netherrack   = get('netherrack')
-  tex.glowstone    = get('glowstone')
-}).catch(() => {})
-
-const grassBlockStyle = computed(() => tex.grassBlock ? {
-  backgroundImage: `url("${tex.grassBlock}")`,
-  backgroundSize: 'cover',
-  imageRendering: 'pixelated',
-} : {})
-
-const stoneStyle = computed(() => tex.stone ? {
-  backgroundImage: `url("${tex.stone}")`,
-  backgroundSize: 'cover',
-  imageRendering: 'pixelated',
-} : {})
-
-const trunkStyle = computed(() => tex.oakPlanks ? {
-  backgroundImage: `url("${tex.oakPlanks}")`,
-  backgroundSize: 'cover',
-  imageRendering: 'pixelated',
-} : {})
-
-const signStyle = computed(() => tex.oakPlanks ? {
-  backgroundImage: `url("${tex.oakPlanks}")`,
-  backgroundSize: 'cover',
-  imageRendering: 'pixelated',
-} : {})
-
-const signPostStyle = computed(() => tex.stick ? {} : {})
-
-const doorStyle = computed(() => tex.oakPlanks ? {
-  backgroundImage: `url("${tex.oakPlanks}")`,
-  backgroundSize: 'cover',
-  imageRendering: 'pixelated',
-} : {})
-
-// ── State ─────────────────────────────────────────────────────────────────────
-
-const wrapperRef = ref(null)
-const interacted = ref(false)
-const shaking = ref(false)
-let dropIdCounter = 0
-const activeDrops = reactive([])
-
-// ── Inventory ─────────────────────────────────────────────────────────────────
-
-const inventory = reactive({
-  wheat: 0,
-  diamond: 0,
-  obsidian: 0,
-  wood: 5, // give player some wood by default
-  flint: 1, // give flint
-  iron: 1,  // give iron ingot
-  pickaxe: 0,
-  flintSteel: 0,
-})
-
-const equippedItem = ref(null)
-
-const hotbarItems = computed(() => {
-  const items = []
-  if (inventory.diamond > 0) items.push({ key: 'diamond', icon: '💎', label: 'Diamond', tex: tex.diamond })
-  if (inventory.obsidian > 0) items.push({ key: 'obsidian', icon: '⬛', label: 'Obsidian', tex: tex.obsidian })
-  if (inventory.pickaxe > 0) items.push({ key: 'pickaxe', icon: '⛏️', label: 'Diamond Pickaxe', tex: null })
-  if (inventory.flintSteel > 0) items.push({ key: 'flintSteel', icon: '🔥', label: 'Flint & Steel', tex: null })
-  if (inventory.wheat > 0) items.push({ key: 'wheat', icon: '🌾', label: 'Wheat', tex: null })
-  return items
-})
-
-const hasPickaxe = computed(() => inventory.pickaxe > 0)
-
-function equipItem(key) {
-  equippedItem.value = equippedItem.value === key ? null : key
+function loadBlockTexture(name) {
+  if (loadedTextures[name]) return loadedTextures[name]
+  const tex = new THREE.Texture()
+  tex.magFilter = THREE.NearestFilter
+  tex.minFilter = THREE.NearestFilter
+  loadedTextures[name] = tex
+  return tex
 }
 
-// ── Farm ─────────────────────────────────────────────────────────────────────
+async function initTextures() {
+  try {
+    const mod = await import('minecraft-textures/dist/textures/json/1.20.json')
+    const data = mod.default || mod
+    const blocks = data.blocks || {}
 
+    const blockNames = [
+      'grass_block_top', 'grass_block_side', 'dirt', 'stone', 'obsidian',
+      'crafting_table_top', 'crafting_table_front', 'netherrack', 'glowstone',
+      'farmland_moist', 'wheat_stage7', 'oak_planks', 'oak_log_top', 'oak_log',
+      'oak_leaves', 'tnt_side', 'tnt_top', 'sand',
+    ]
+    for (const name of blockNames) {
+      const b64 = blocks[name]
+      if (!b64) continue
+      const tex = loadBlockTexture(name)
+      const img = new Image()
+      img.src = b64
+      img.onload = () => { tex.image = img; tex.needsUpdate = true }
+    }
+
+    // Also load item textures for hotbar display
+    try {
+      const itemMod = await import('minecraft-textures/dist/textures/json/1.20.id.json')
+      const itemData = itemMod.default || itemMod
+      const items = itemData.items || {}
+      const get = (id) => items['minecraft:' + id]?.texture || null
+      hotbarTexData.diamond = get('diamond')
+      hotbarTexData.obsidian = get('obsidian')
+    } catch (_) {}
+  } catch (e) {
+    // textures unavailable; blocks will use fallback colors
+  }
+}
+
+const hotbarTexData = reactive({ diamond: null, obsidian: null })
+
+// ── Block factory ─────────────────────────────────────────────────────────────
+function makeBlock(texOrColor, x, y, z) {
+  const geo = new THREE.BoxGeometry(1, 1, 1)
+  let mat
+  if (Array.isArray(texOrColor)) {
+    mat = texOrColor.map(t =>
+      typeof t === 'number'
+        ? new THREE.MeshLambertMaterial({ color: t })
+        : new THREE.MeshLambertMaterial({ map: t })
+    )
+  } else if (typeof texOrColor === 'number') {
+    mat = new THREE.MeshLambertMaterial({ color: texOrColor })
+  } else {
+    mat = new THREE.MeshLambertMaterial({ map: texOrColor })
+  }
+  const mesh = new THREE.Mesh(geo, mat)
+  mesh.position.set(x, y, z)
+  mesh.castShadow = true
+  mesh.receiveShadow = true
+  return mesh
+}
+
+function makeGrassBlock(x, y, z) {
+  const top = loadBlockTexture('grass_block_top')
+  const side = loadBlockTexture('grass_block_side')
+  const dirt = loadBlockTexture('dirt')
+  // +x, -x, +y, -y, +z, -z
+  return makeBlock([side, side, top, dirt, side, side], x, y, z)
+}
+
+function makeDirtBlock(x, y, z) {
+  return makeBlock(loadBlockTexture('dirt'), x, y, z)
+}
+
+function makeStoneBlock(x, y, z) {
+  return makeBlock(loadBlockTexture('stone'), x, y, z)
+}
+
+function makeObsidianBlock(x, y, z) {
+  const m = makeBlock(loadBlockTexture('obsidian'), x, y, z)
+  m.userData.type = 'obsidian'
+  return m
+}
+
+function makeOakLog(x, y, z) {
+  const top = loadBlockTexture('oak_log_top')
+  const side = loadBlockTexture('oak_log')
+  return makeBlock([side, side, top, top, side, side], x, y, z)
+}
+
+function makeFarmland(x, y, z) {
+  const tex = loadBlockTexture('farmland_moist')
+  return makeBlock([loadBlockTexture('dirt'), loadBlockTexture('dirt'), tex, loadBlockTexture('dirt'), loadBlockTexture('dirt'), loadBlockTexture('dirt')], x, y, z)
+}
+
+// ── Scene meshes registry ────────────────────────────────────────────────────
+const cropMeshes = []      // 9 crop sprites
+const obsidianMeshes = []  // mineable obsidian meshes
+const portalFrameMeshes = [] // frame obsidian
+const portalInnerMesh = { mesh: null }
+const craftingMesh = { mesh: null }
+const leverMesh = { arm: null }
+const redstoneMeshes = []
+const pistonMesh = { head: null, body: null }
+
+// ── State ────────────────────────────────────────────────────────────────────
 const crops = reactive(
-  Array.from({ length: 9 }, () => ({ stage: Math.floor(Math.random() * 4), growing: false }))
+  Array.from({ length: 9 }, () => ({ stage: Math.floor(Math.random() * 4) }))
 )
 let harvestCount = ref(0)
 
-function handleTileClick(idx) {
-  interacted.value = true
-  const crop = crops[idx]
-  if (crop.stage === 3) {
-    harvest(idx)
-  } else {
-    grow(idx)
-  }
-}
+const inventory = reactive({
+  wheat: 0, diamond: 0, obsidian: 0,
+  wood: 5, flint: 1, iron: 1,
+  pickaxe: 0, flintSteel: 0,
+})
 
-function grow(idx) {
-  const crop = crops[idx]
-  crop.growing = true
-  setTimeout(() => {
-    crop.stage = Math.min(crop.stage + 1, 3)
-    crop.growing = false
-  }, 250)
-}
+const equippedItem = ref(null)
+const hotbarItems = computed(() => {
+  const items = []
+  if (inventory.diamond > 0)    items.push({ key: 'diamond',    icon: '💎', label: 'Diamond' })
+  if (inventory.obsidian > 0)   items.push({ key: 'obsidian',   icon: '⬛', label: 'Obsidian' })
+  if (inventory.pickaxe > 0)    items.push({ key: 'pickaxe',    icon: '⛏️', label: 'Diamond Pickaxe' })
+  if (inventory.flintSteel > 0) items.push({ key: 'flintSteel', icon: '🔥', label: 'Flint & Steel' })
+  if (inventory.wheat > 0)      items.push({ key: 'wheat',      icon: '🌾', label: 'Wheat' })
+  return items
+})
+const hasPickaxe = computed(() => inventory.pickaxe > 0)
+function equipItem(key) { equippedItem.value = equippedItem.value === key ? null : key }
 
-function harvest(idx) {
-  const col = idx % 3
-  const row = Math.floor(idx / 3)
-  const TILE = 48
-  const GRID_LEFT = 16
-  const GRID_TOP = 60
-  spawnDrops(
-    GRID_LEFT + col * TILE + TILE / 2,
-    GRID_TOP + row * TILE + TILE / 2,
-    [{ icon: '🌾', chance: 0.6 }, { icon: '🌱', chance: 1 }]
-  )
-  triggerShake()
-  crops[idx].stage = 0
-  harvestCount.value++
-  inventory.wheat++
-  // Populate crafting slots with wheat
-  for (let i = 0; i < craftSlots.length && harvestCount.value > 0; i++) {
-    if (!craftSlots[i]) { craftSlots[i] = true; break }
-  }
-  // Chance to find diamond (1 in 8)
-  if (Math.random() < 0.125) {
-    inventory.diamond++
-    craftMsg.value = '💎 You found a diamond while farming! Lucky!'
-    setTimeout(() => { if (craftMsg.value.includes('diamond')) craftMsg.value = '' }, 3000)
-  }
-}
-
-// ── Sign ─────────────────────────────────────────────────────────────────────
-
+// Sign
 const signMessages = [
   ['Yuzhe / bkmashiro', 'Imperial College London', 'Full-stack · Systems · AI', 'github.com/bkmashiro'],
   ['Currently:', 'debugging at 2am', '☕ send help', ''],
@@ -511,160 +317,27 @@ const signMessages = [
 ]
 const signIdx = ref(0)
 
-function cycleSignMessage() {
-  interacted.value = true
-  signIdx.value = (signIdx.value + 1) % signMessages.length
-}
-
-// ── Door ─────────────────────────────────────────────────────────────────────
-
-const doorOpen = ref(false)
-
-// ── Crafting ─────────────────────────────────────────────────────────────────
-
+// Crafting
 const craftingOpen = ref(false)
 const craftTab = ref('bread')
 const craftSlots = reactive(Array(4).fill(false))
 const craftMsg = ref('')
 const craftReady = computed(() => craftSlots.filter(Boolean).length >= 3)
-
-// Pickaxe slots: [top-left diamond, top-right diamond, bottom-left empty, bottom-right wood]
 const pickaxeSlots = reactive([false, false, false, false])
 const pickaxeReady = computed(() => pickaxeSlots[0] && pickaxeSlots[1] && pickaxeSlots[3])
-
-// Flint & Steel slots: [top-left flint, top-right empty, bottom-left empty, bottom-right iron]
 const flintSlots = reactive([false, false, false, false])
 const flintReady = computed(() => flintSlots[0] && flintSlots[3])
 
-function openCrafting() {
-  interacted.value = true
-  craftingOpen.value = true
-  craftMsg.value = ''
-}
+// Obsidian blocks (10)
+const obsidianBlockState = reactive(
+  Array.from({ length: 10 }, () => ({ cracks: 0, alive: true }))
+)
 
-function doCraft() {
-  if (craftReady.value) {
-    for (let i = 0; i < craftSlots.length; i++) craftSlots[i] = false
-    craftMsg.value = '🍞 Bread crafted! +1 sustenance. Yuzhe approves.'
-    inventory.wheat = Math.max(0, inventory.wheat - 3)
-    harvestCount.value = Math.max(0, harvestCount.value - 3)
-  } else {
-    craftMsg.value = '⚠ You need wheat. Go farm something.'
-  }
-}
-
-function togglePickaxeSlot(i) {
-  if (i === 0 || i === 1) {
-    if (!pickaxeSlots[i] && (inventory.diamond || 0) < (pickaxeSlots[0] + pickaxeSlots[1] + 1)) {
-      craftMsg.value = '⚠ Not enough diamonds!'
-      return
-    }
-    pickaxeSlots[i] = !pickaxeSlots[i]
-  } else if (i === 3) {
-    if (!pickaxeSlots[3] && (inventory.wood || 0) < 1) {
-      craftMsg.value = '⚠ No wood!'
-      return
-    }
-    pickaxeSlots[3] = !pickaxeSlots[3]
-  }
-}
-
-function craftPickaxe() {
-  if (!pickaxeReady.value) {
-    craftMsg.value = '⚠ Need: 2 diamonds (top) + 1 wood (bottom-right)'
-    return
-  }
-  if ((inventory.diamond || 0) < 2) { craftMsg.value = '⚠ Not enough diamonds!'; return }
-  if ((inventory.wood || 0) < 1) { craftMsg.value = '⚠ No wood!'; return }
-  inventory.diamond -= 2
-  inventory.wood -= 1
-  inventory.pickaxe++
-  for (let i = 0; i < 4; i++) pickaxeSlots[i] = false
-  craftMsg.value = '⛏️ Diamond Pickaxe crafted! Ready to mine obsidian.'
-  equipItem('pickaxe')
-}
-
-function toggleFlintSlot(i) {
-  if (i === 0) {
-    if (!flintSlots[0] && (inventory.flint || 0) < 1) { craftMsg.value = '⚠ No flint!'; return }
-    flintSlots[0] = !flintSlots[0]
-  } else if (i === 3) {
-    if (!flintSlots[3] && (inventory.iron || 0) < 1) { craftMsg.value = '⚠ No iron ingot!'; return }
-    flintSlots[3] = !flintSlots[3]
-  }
-}
-
-function craftFlintSteel() {
-  if (!flintReady.value) {
-    craftMsg.value = '⚠ Need: flint (top-left) + iron ingot (bottom-right)'
-    return
-  }
-  if ((inventory.flint || 0) < 1) { craftMsg.value = '⚠ No flint!'; return }
-  if ((inventory.iron || 0) < 1) { craftMsg.value = '⚠ No iron ingot!'; return }
-  inventory.flint -= 1
-  inventory.iron -= 1
-  inventory.flintSteel++
-  for (let i = 0; i < 4; i++) flintSlots[i] = false
-  craftMsg.value = '🔥 Flint & Steel crafted! You can light portals now.'
-  equipItem('flintSteel')
-}
-
-// ── Obsidian Mining ───────────────────────────────────────────────────────────
-
-const obsidianBlocks = reactive([
-  { cracks: 0 }, { cracks: 0 }, { cracks: 0 },
-  { cracks: 0 }, { cracks: 0 }, { cracks: 0 },
-  { cracks: 0 }, { cracks: 0 }, { cracks: 0 },
-  { cracks: 0 },
-])
-
-function mineObsidian(idx) {
-  if (!hasPickaxe.value) return
-  interacted.value = true
-  const obs = obsidianBlocks[idx]
-  if (obs.cracks < 3) {
-    obs.cracks++
-    triggerShake()
-    if (obs.cracks >= 3) {
-      // Block breaks
-      setTimeout(() => {
-        spawnDrops(60 + idx * 44, 390, [{ icon: '⬛', chance: 1 }], 2, false)
-        obsidianBlocks.splice(idx, 1)
-        inventory.obsidian++
-        craftMsg.value = `⬛ Obsidian mined! (${inventory.obsidian}/10)`
-        if (inventory.obsidian >= 10) {
-          craftMsg.value = '⬛ You have enough obsidian to build a Nether Portal! 🟣'
-        }
-      }, 150)
-    }
-  }
-}
-
-// ── Portal Frame ──────────────────────────────────────────────────────────────
-
-// 4x5 grid, frame positions (0-indexed, row-major)
-// Frame: row 0 all, row 4 all, col 0 and col 3 for rows 1-3
-const PORTAL_COLS = 4
-const PORTAL_ROWS = 5
-const TOTAL_CELLS = PORTAL_COLS * PORTAL_ROWS
-
+// Portal
+const PORTAL_COLS = 4, PORTAL_ROWS = 5, TOTAL_CELLS = PORTAL_COLS * PORTAL_ROWS
 const portalGrid = reactive(Array(TOTAL_CELLS).fill(false))
 const portalActive = ref(false)
-
 const showPortalArea = computed(() => inventory.obsidian >= 10 || portalFrameComplete.value || portalActive.value)
-
-function isPortalInner(idx) {
-  const row = Math.floor(idx / PORTAL_COLS)
-  const col = idx % PORTAL_COLS
-  return row >= 1 && row <= 3 && col >= 1 && col <= 2
-}
-
-function isPortalFrame(idx) {
-  const row = Math.floor(idx / PORTAL_COLS)
-  const col = idx % PORTAL_COLS
-  return !isPortalInner(idx)
-}
-
 const portalFrameComplete = computed(() => {
   for (let i = 0; i < TOTAL_CELLS; i++) {
     if (isPortalFrame(i) && !portalGrid[i]) return false
@@ -672,28 +345,446 @@ const portalFrameComplete = computed(() => {
   return true
 })
 
-function placePortalBlock(idx) {
+function isPortalInner(idx) {
+  const row = Math.floor(idx / PORTAL_COLS), col = idx % PORTAL_COLS
+  return row >= 1 && row <= 3 && col >= 1 && col <= 2
+}
+function isPortalFrame(idx) { return !isPortalInner(idx) }
+
+// Redstone
+const leverOn = ref(false)
+const panelFlickering = ref(false)
+const redstoneTiles = reactive([{ lit: true }, { lit: true }, { lit: true }])
+
+// TNT
+const tntFlashing = ref(false)
+const craterVisible = ref(false)
+let tntCooldown = false
+
+// Physics drops
+let dropIdCounter = 0
+const activeDrops = reactive([])
+const dropFrames = new Map()
+
+// ── Physics drops ─────────────────────────────────────────────────────────────
+function spawnDrops(originX, originY, types, count = null, explosive = false) {
+  const n = count ?? (2 + Math.floor(Math.random() * 3))
+  for (let i = 0; i < n; i++) {
+    const roll = Math.random()
+    let chosen = types[types.length - 1].icon
+    let acc = 0
+    for (const t of types) { acc += t.chance; if (roll <= acc) { chosen = t.icon; break } }
+    const spread = explosive ? 12 : 6
+    const drop = reactive({
+      id: ++dropIdCounter,
+      icon: chosen,
+      x: originX - 8,
+      y: originY - 8,
+      vx: (Math.random() - 0.5) * spread,
+      vy: explosive ? -(6 + Math.random() * 8) : -(4 + Math.random() * 4),
+      angle: 0,
+      angularV: (Math.random() - 0.5) * 20,
+      opacity: 1,
+      size: explosive ? 14 : 16,
+      landed: false,
+    })
+    activeDrops.push(drop)
+    animateDrop(drop)
+  }
+}
+
+function animateDrop(drop) {
+  const GRAVITY = 0.38, FLOOR_Y = 380
+  function step() {
+    if (drop.landed) return
+    drop.vy += GRAVITY
+    drop.x += drop.vx; drop.y += drop.vy
+    drop.angle += drop.angularV
+    if (drop.y >= FLOOR_Y) { drop.y = FLOOR_Y; drop.landed = true; fadeOut(drop); return }
+    dropFrames.set(drop.id, requestAnimationFrame(step))
+  }
+  dropFrames.set(drop.id, requestAnimationFrame(step))
+}
+
+function fadeOut(drop) {
+  let step = 0, STEPS = 40
+  function tick() {
+    step++; drop.opacity = 1 - step / STEPS
+    if (step < STEPS) { dropFrames.set(drop.id, requestAnimationFrame(tick)) }
+    else { const idx = activeDrops.findIndex(d => d.id === drop.id); if (idx !== -1) activeDrops.splice(idx, 1) }
+  }
+  dropFrames.set(drop.id, requestAnimationFrame(tick))
+}
+
+// ── Three.js Scene Builder ─────────────────────────────────────────────────
+function buildScene() {
+  // Surface grass layer
+  for (let x = -6; x <= 6; x++) {
+    for (let z = -4; z <= 4; z++) {
+      // Skip farm area (replaced by farmland)
+      if (x >= -2 && x <= 0 && z >= -1 && z <= 1) continue
+      const m = makeGrassBlock(x, 0, z)
+      scene.add(m)
+    }
+  }
+
+  // Farm: farmland + wheat
+  for (let fx = -2; fx <= 0; fx++) {
+    for (let fz = -1; fz <= 1; fz++) {
+      const m = makeFarmland(fx, 0, fz)
+      scene.add(m)
+      // Crop sprite (plane)
+      const cropIdx = (fx + 2) * 3 + (fz + 1)
+      const cropGeo = new THREE.PlaneGeometry(0.7, 0.7)
+      const cropMat = new THREE.MeshBasicMaterial({
+        map: loadBlockTexture('wheat_stage7'),
+        transparent: true,
+        side: THREE.DoubleSide,
+        alphaTest: 0.1,
+      })
+      const cropMesh = new THREE.Mesh(cropGeo, cropMat)
+      cropMesh.position.set(fx, 0.85, fz)
+      cropMesh.rotation.y = Math.PI / 4
+      cropMesh.userData.type = 'crop'
+      cropMesh.userData.idx = cropIdx
+      cropMeshes[cropIdx] = cropMesh
+      scene.add(cropMesh)
+      interactableObjects.push(cropMesh)
+      objectMeta.set(cropMesh, { type: 'crop', idx: cropIdx })
+    }
+  }
+
+  // Oak tree at x=3, z=0
+  for (let y = 1; y <= 4; y++) scene.add(makeOakLog(3, y, 0))
+  // Leaves cluster at y=5 (3x3x2)
+  const leafTex = loadBlockTexture('oak_leaves')
+  for (let lx = 2; lx <= 4; lx++) {
+    for (let lz = -1; lz <= 1; lz++) {
+      for (let ly = 4; ly <= 5; ly++) {
+        const leaf = makeBlock(leafTex, lx, ly, lz)
+        leaf.material.transparent = true
+        leaf.material.alphaTest = 0.5
+        scene.add(leaf)
+      }
+    }
+  }
+
+  // Crafting table at (-4, 1, 1)
+  const ctTop = loadBlockTexture('crafting_table_top')
+  const ctFront = loadBlockTexture('crafting_table_front')
+  const ctOak = loadBlockTexture('oak_planks')
+  const craftMesh = makeBlock([ctFront, ctOak, ctTop, ctOak, ctFront, ctOak], -4, 1, 1)
+  craftMesh.userData.type = 'crafting'
+  craftingMesh.mesh = craftMesh
+  scene.add(craftMesh)
+  interactableObjects.push(craftMesh)
+  objectMeta.set(craftMesh, { type: 'crafting' })
+
+  // TNT block at (-4, 1, -1)
+  const tntSide = loadBlockTexture('tnt_side')
+  const tntTop = loadBlockTexture('tnt_top')
+  const tntMesh = makeBlock([tntSide, tntSide, tntTop, tntTop, tntSide, tntSide], -4, 1, -1)
+  tntMesh.userData.type = 'tnt'
+  scene.add(tntMesh)
+  interactableObjects.push(tntMesh)
+  objectMeta.set(tntMesh, { type: 'tnt' })
+
+  // Sign post at (2, 1, -2): oak planks block + text sprite
+  const signBase = makeBlock(loadBlockTexture('oak_planks'), 2, 1, -2)
+  signBase.userData.type = 'sign'
+  scene.add(signBase)
+  interactableObjects.push(signBase)
+  objectMeta.set(signBase, { type: 'sign' })
+
+  // Underground stone floor y=-1..-3
+  for (let x = -6; x <= 6; x++) {
+    for (let z = -4; z <= 4; z++) {
+      for (let y = -1; y >= -3; y--) {
+        scene.add(makeStoneBlock(x, y, z))
+      }
+    }
+  }
+
+  // Lever base block at (-5, 0, 0)
+  const leverBase = makeBlock(loadBlockTexture('stone'), -5, 0, 0)
+  leverBase.userData.type = 'lever'
+  scene.add(leverBase)
+  interactableObjects.push(leverBase)
+  objectMeta.set(leverBase, { type: 'lever' })
+
+  // Lever arm
+  const armGeo = new THREE.BoxGeometry(0.1, 0.5, 0.1)
+  const armMat = new THREE.MeshLambertMaterial({ color: 0x8B4513 })
+  const armMesh = new THREE.Mesh(armGeo, armMat)
+  armMesh.position.set(-5, 0.75, 0)
+  leverMesh.arm = armMesh
+  scene.add(armMesh)
+
+  // Redstone dust tiles at y=-1, x=-5..-3, z=0
+  for (let rx = -5; rx <= -3; rx++) {
+    const rdGeo = new THREE.PlaneGeometry(0.9, 0.9)
+    const rdMat = new THREE.MeshBasicMaterial({ color: 0xff2200, transparent: true, opacity: 0.9 })
+    const rdMesh = new THREE.Mesh(rdGeo, rdMat)
+    rdMesh.rotation.x = -Math.PI / 2
+    rdMesh.position.set(rx, -0.49, 0)
+    redstoneMeshes.push({ mesh: rdMesh, mat: rdMat })
+    scene.add(rdMesh)
+  }
+
+  // Piston at (-2, -1, 0)
+  const pistonBodyMesh = makeBlock(loadBlockTexture('stone'), -2, -1, 0)
+  const pistonHeadGeo = new THREE.BoxGeometry(0.9, 0.3, 0.9)
+  const pistonHeadMat = new THREE.MeshLambertMaterial({ color: 0xddaa55 })
+  const pistonHeadMesh = new THREE.Mesh(pistonHeadGeo, pistonHeadMat)
+  pistonHeadMesh.position.set(-2, -0.35, 0)
+  pistonMesh.body = pistonBodyMesh
+  pistonMesh.head = pistonHeadMesh
+  scene.add(pistonBodyMesh)
+  scene.add(pistonHeadMesh)
+
+  // Info block at (-1, -1, 0): stone normally, reveals text
+  const infoBlock = makeBlock(loadBlockTexture('stone'), -1, -1, 0)
+  infoBlock.userData.type = 'info'
+  scene.add(infoBlock)
+
+  // Scattered obsidian in underground
+  const obsPositions = [
+    [-3, -2, 1], [-1, -2, -2], [1, -1, 2], [2, -2, 1], [3, -1, -3],
+    [-5, -2, 2], [4, -2, 0], [5, -1, 3], [-2, -3, -1], [0, -3, 3],
+  ]
+  obsPositions.forEach(([ox, oy, oz], idx) => {
+    const obs = makeObsidianBlock(ox, oy, oz)
+    obs.userData.type = 'obsidian'
+    obs.userData.idx = idx
+    obsidianMeshes[idx] = obs
+    scene.add(obs)
+    interactableObjects.push(obs)
+    objectMeta.set(obs, { type: 'obsidian', idx })
+  })
+
+  // Portal frame area (built dynamically based on portalGrid)
+  // Frame at x=1, z=-3, going right 4, up 5
+  buildPortalFrame()
+
+  // Redstone glow light
+  redstoneLight = new THREE.PointLight(0xff2200, 0, 3)
+  redstoneLight.position.set(-3, -1, 0)
+  scene.add(redstoneLight)
+}
+
+// ── Portal Frame ──────────────────────────────────────────────────────────────
+const portalFramePositions = []
+for (let row = 0; row < PORTAL_ROWS; row++) {
+  for (let col = 0; col < PORTAL_COLS; col++) {
+    portalFramePositions.push({
+      x: 1 + col,
+      y: row,
+      z: -3,
+    })
+  }
+}
+
+function buildPortalFrame() {
+  // Remove old meshes
+  portalFrameMeshes.forEach(m => scene.remove(m))
+  portalFrameMeshes.length = 0
+
+  // Add placed portal blocks
+  for (let i = 0; i < TOTAL_CELLS; i++) {
+    if (!portalGrid[i] && !isPortalInner(i)) continue
+    if (isPortalInner(i)) continue // inner is handled by portal swirl
+    const pos = portalFramePositions[i]
+    const m = makeObsidianBlock(pos.x, pos.y, pos.z)
+    m.userData.type = 'portalFrame'
+    m.userData.idx = i
+    portalFrameMeshes.push(m)
+    scene.add(m)
+    // Make it interactable for placing obsidian
+    interactableObjects.push(m)
+    objectMeta.set(m, { type: 'portalFrame', idx: i })
+  }
+
+  // Add unplaced frame slots as interactable ghost blocks
+  for (let i = 0; i < TOTAL_CELLS; i++) {
+    if (portalGrid[i] || isPortalInner(i)) continue
+    const pos = portalFramePositions[i]
+    const geo = new THREE.BoxGeometry(1, 1, 1)
+    const mat = new THREE.MeshBasicMaterial({ color: 0x444444, transparent: true, opacity: 0.3, wireframe: true })
+    const ghost = new THREE.Mesh(geo, mat)
+    ghost.position.set(pos.x, pos.y, pos.z)
+    ghost.userData.type = 'portalSlot'
+    ghost.userData.idx = i
+    portalFrameMeshes.push(ghost)
+    scene.add(ghost)
+    interactableObjects.push(ghost)
+    objectMeta.set(ghost, { type: 'portalSlot', idx: i })
+  }
+
+  // Portal inner plane
+  if (portalInnerMesh.mesh) { scene.remove(portalInnerMesh.mesh); portalInnerMesh.mesh = null }
   if (portalActive.value) {
-    // Click interior to activate if frame complete + flint equipped
-    if (isPortalInner(idx) && portalFrameComplete.value && equippedItem.value === 'flintSteel') {
-      activatePortal()
-    } else if (isPortalInner(idx) && portalActive.value) {
-      enterPortal()
-    }
-    return
+    const geo = new THREE.PlaneGeometry(2, 3)
+    portalMat = new THREE.ShaderMaterial({
+      uniforms: { time: { value: 0 }, opacity: { value: 0.85 } },
+      vertexShader: `varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,
+      fragmentShader: `
+        uniform float time;
+        uniform float opacity;
+        varying vec2 vUv;
+        void main() {
+          vec2 uv = vUv - 0.5;
+          float angle = atan(uv.y, uv.x) + time;
+          float r = length(uv);
+          float swirl = sin(angle * 5.0 + r * 10.0 - time * 3.0);
+          vec3 col = mix(vec3(0.3, 0.0, 0.5), vec3(0.7, 0.3, 1.0), swirl * 0.5 + 0.5);
+          gl_FragColor = vec4(col, opacity * (1.0 - r * 1.5));
+        }
+      `,
+      transparent: true,
+      side: THREE.DoubleSide,
+    })
+    const pm = new THREE.Mesh(geo, portalMat)
+    // Center of 2x3 inner portal at cols 1-2, rows 1-3 → center x=2.5, y=2, z=-3
+    pm.position.set(2.5, 2, -2.99)
+    pm.userData.type = 'portalInner'
+    portalInnerMesh.mesh = pm
+    scene.add(pm)
+    interactableObjects.push(pm)
+    objectMeta.set(pm, { type: 'portalInner' })
   }
-  if (isPortalInner(idx)) {
-    if (portalFrameComplete.value && equippedItem.value === 'flintSteel') {
-      activatePortal()
-    }
-    return
-  }
-  // Place obsidian in frame slot
-  if (!portalGrid[idx] && (inventory.obsidian > 0)) {
-    portalGrid[idx] = true
-    inventory.obsidian--
+}
+
+// ── Crop visual update ────────────────────────────────────────────────────────
+function updateCropMesh(idx) {
+  const crop = crops[idx]
+  const mesh = cropMeshes[idx]
+  if (!mesh) return
+  const s = [0.1, 0.3, 0.6, 1.0][crop.stage] ?? 1
+  mesh.scale.set(s, s, s)
+  // Tint: stage 0 = brown, 1-2 = green, 3 = yellow
+  const colors = [0x8b6914, 0x5a8a10, 0x6aaa10, 0xf0d700]
+  const c = colors[crop.stage] ?? 0xf0d700
+  if (mesh.material) mesh.material.color = new THREE.Color(c)
+}
+
+// ── Raycasting ────────────────────────────────────────────────────────────────
+const raycaster = new THREE.Raycaster()
+const mouse = new THREE.Vector2()
+
+function onCanvasClick(e) {
+  if (!renderer || !camera) return
+  const rect = threeCanvas.value.getBoundingClientRect()
+  mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1
+  mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1
+  raycaster.setFromCamera(mouse, camera)
+  const hits = raycaster.intersectObjects(interactableObjects, false)
+  if (hits.length > 0) {
+    handleClick(hits[0].object)
     interacted.value = true
   }
+}
+
+function handleClick(obj) {
+  const meta = objectMeta.get(obj)
+  if (!meta) return
+  switch (meta.type) {
+    case 'crop': handleFarmClick(meta.idx); break
+    case 'crafting': craftingOpen.value = true; craftMsg.value = ''; break
+    case 'tnt': triggerTNT(); break
+    case 'sign': signIdx.value = (signIdx.value + 1) % signMessages.length; break
+    case 'lever': toggleLever(); break
+    case 'obsidian': mineObsidian(meta.idx); break
+    case 'portalSlot': placePortalBlock(meta.idx); break
+    case 'portalFrame': placePortalBlock(meta.idx); break
+    case 'portalInner': if (portalActive.value) enterPortal(); break
+  }
+}
+
+// ── Farm ─────────────────────────────────────────────────────────────────────
+function handleFarmClick(idx) {
+  const crop = crops[idx]
+  if (crop.stage === 3) harvestCrop(idx)
+  else { crop.stage = Math.min(crop.stage + 1, 3); updateCropMesh(idx) }
+}
+
+function harvestCrop(idx) {
+  const mesh = cropMeshes[idx]
+  const screenPos = mesh ? worldToScreen(mesh.position) : { x: 300, y: 200 }
+  spawnDrops(screenPos.x, screenPos.y, [{ icon: '🌾', chance: 0.6 }, { icon: '🌱', chance: 1 }])
+  triggerCameraShake()
+  crops[idx].stage = 0
+  harvestCount.value++
+  inventory.wheat++
+  for (let i = 0; i < craftSlots.length; i++) { if (!craftSlots[i]) { craftSlots[i] = true; break } }
+  if (Math.random() < 0.125) {
+    inventory.diamond++
+    craftMsg.value = '💎 You found a diamond while farming! Lucky!'
+    setTimeout(() => { if (craftMsg.value.includes('diamond')) craftMsg.value = '' }, 3000)
+  }
+  updateCropMesh(idx)
+}
+
+function worldToScreen(worldPos) {
+  if (!camera || !renderer) return { x: 300, y: 200 }
+  const v = worldPos.clone().project(camera)
+  const rect = threeCanvas.value?.getBoundingClientRect() || { width: 780, height: 420, left: 0, top: 0 }
+  return {
+    x: (v.x + 1) / 2 * rect.width,
+    y: (1 - (v.y + 1) / 2) * rect.height,
+  }
+}
+
+// ── Obsidian mining ────────────────────────────────────────────────────────────
+function mineObsidian(idx) {
+  if (!hasPickaxe.value) return
+  const state = obsidianBlockState[idx]
+  if (!state || !state.alive) return
+  state.cracks++
+  triggerCameraShake()
+  const mesh = obsidianMeshes[idx]
+  if (mesh) {
+    // Visual crack effect: darken and scale slightly
+    const t = state.cracks / 3
+    mesh.material.color = new THREE.Color(1 - t * 0.5, 1 - t * 0.5, 1 - t * 0.5)
+    if (Array.isArray(mesh.material)) mesh.material.forEach(m => { m.color = new THREE.Color(1 - t * 0.5, 1 - t * 0.5, 1 - t * 0.5) })
+  }
+  if (state.cracks >= 3) {
+    state.alive = false
+    if (mesh) {
+      const sp = worldToScreen(mesh.position)
+      spawnDrops(sp.x, sp.y, [{ icon: '⬛', chance: 1 }], 2, false)
+      scene.remove(mesh)
+      const iio = interactableObjects.indexOf(mesh)
+      if (iio !== -1) interactableObjects.splice(iio, 1)
+    }
+    inventory.obsidian++
+    craftMsg.value = `⬛ Obsidian mined! (${inventory.obsidian}/10)`
+    if (inventory.obsidian >= 10) craftMsg.value = '⬛ You have enough obsidian to build a Nether Portal! 🟣'
+  }
+}
+
+// ── Portal ─────────────────────────────────────────────────────────────────────
+function placePortalBlock(idx) {
+  if (portalActive.value) return
+  if (isPortalInner(idx)) {
+    if (portalFrameComplete.value && equippedItem.value === 'flintSteel') activatePortal()
+    return
+  }
+  if (!portalGrid[idx] && inventory.obsidian > 0) {
+    portalGrid[idx] = true
+    inventory.obsidian--
+    // Rebuild frame visuals
+    rebuildPortalVisuals()
+  }
+}
+
+function rebuildPortalVisuals() {
+  // Remove old portal frame meshes from interactables
+  portalFrameMeshes.forEach(m => {
+    const iio = interactableObjects.indexOf(m)
+    if (iio !== -1) interactableObjects.splice(iio, 1)
+  })
+  buildPortalFrame()
 }
 
 function activatePortal() {
@@ -702,20 +793,13 @@ function activatePortal() {
   portalActive.value = true
   equippedItem.value = null
   craftMsg.value = '🔥 The portal ignites... 🟣'
+  rebuildPortalVisuals()
 }
 
-function enterPortal() {
-  window.open('/nether', '_blank')
-}
+function enterPortal() { window.open('/nether', '_blank') }
 
-// ── Redstone Lever ───────────────────────────────────────────────────────────
-
-const leverOn = ref(false)
-const panelFlickering = ref(false)
-const redstoneTiles = reactive([{ lit: true }, { lit: true }, { lit: true }])
-
+// ── Lever & Redstone ────────────────────────────────────────────────────────────
 function toggleLever() {
-  interacted.value = true
   if (!leverOn.value) {
     let delay = 0
     for (let i = 0; i < redstoneTiles.length; i++) {
@@ -743,165 +827,395 @@ function toggleLever() {
   }
 }
 
-// ── TNT ───────────────────────────────────────────────────────────────────────
-
-const tntFlashing = ref(false)
-const buttonPressed = ref(false)
-const craterVisible = ref(false)
-let tntCooldown = false
-
+// ── TNT ─────────────────────────────────────────────────────────────────────────
 function triggerTNT() {
   if (tntCooldown) return
-  interacted.value = true
   tntCooldown = true
-  buttonPressed.value = true
-  setTimeout(() => { buttonPressed.value = false }, 200)
-
   tntFlashing.value = true
   setTimeout(() => {
     tntFlashing.value = false
-    triggerShake()
-    const cx = 420, cy = 340
+    triggerCameraShake()
+    const cx = 300, cy = 200
     for (let i = 0; i < 18; i++) {
       const icons = ['🪨', '💥', '🔥', '⬛', '🟫']
       spawnDrops(
-        cx + (Math.random() - 0.5) * 40,
-        cy + (Math.random() - 0.5) * 20,
-        icons.map(icon => ({ icon, chance: 1 })),
-        1,
-        true
+        cx + (Math.random() - 0.5) * 60,
+        cy + (Math.random() - 0.5) * 40,
+        icons.map(icon => ({ icon, chance: 1 })), 1, true
       )
     }
-    // TNT also gives flint & iron
     inventory.flint += 1
     inventory.iron += 1
     craterVisible.value = true
-    setTimeout(() => {
-      craterVisible.value = false
-      tntCooldown = false
-    }, 5000)
+    setTimeout(() => { craterVisible.value = false; tntCooldown = false }, 5000)
   }, 1500)
 }
 
-// ── Physics drops ─────────────────────────────────────────────────────────────
+// ── Crafting ────────────────────────────────────────────────────────────────────
+function doCraft() {
+  if (craftReady.value) {
+    for (let i = 0; i < craftSlots.length; i++) craftSlots[i] = false
+    craftMsg.value = '🍞 Bread crafted! +1 sustenance. Yuzhe approves.'
+    inventory.wheat = Math.max(0, inventory.wheat - 3)
+    harvestCount.value = Math.max(0, harvestCount.value - 3)
+  } else { craftMsg.value = '⚠ You need wheat. Go farm something.' }
+}
 
-function spawnDrops(originX, originY, types, count = null, explosive = false) {
-  const n = count ?? (2 + Math.floor(Math.random() * 3))
-  for (let i = 0; i < n; i++) {
-    const roll = Math.random()
-    let chosen = types[types.length - 1].icon
-    let acc = 0
-    for (const t of types) {
-      acc += t.chance
-      if (roll <= acc) { chosen = t.icon; break }
+function togglePickaxeSlot(i) {
+  if (i === 0 || i === 1) {
+    if (!pickaxeSlots[i] && (inventory.diamond || 0) < (pickaxeSlots[0] + pickaxeSlots[1] + 1)) { craftMsg.value = '⚠ Not enough diamonds!'; return }
+    pickaxeSlots[i] = !pickaxeSlots[i]
+  } else if (i === 3) {
+    if (!pickaxeSlots[3] && (inventory.wood || 0) < 1) { craftMsg.value = '⚠ No wood!'; return }
+    pickaxeSlots[3] = !pickaxeSlots[3]
+  }
+}
+
+function craftPickaxe() {
+  if (!pickaxeReady.value) { craftMsg.value = '⚠ Need: 2 diamonds (top) + 1 wood (bottom-right)'; return }
+  if ((inventory.diamond || 0) < 2) { craftMsg.value = '⚠ Not enough diamonds!'; return }
+  if ((inventory.wood || 0) < 1) { craftMsg.value = '⚠ No wood!'; return }
+  inventory.diamond -= 2; inventory.wood -= 1; inventory.pickaxe++
+  for (let i = 0; i < 4; i++) pickaxeSlots[i] = false
+  craftMsg.value = '⛏️ Diamond Pickaxe crafted! Ready to mine obsidian.'
+  equipItem('pickaxe')
+}
+
+function toggleFlintSlot(i) {
+  if (i === 0) { if (!flintSlots[0] && (inventory.flint || 0) < 1) { craftMsg.value = '⚠ No flint!'; return } flintSlots[0] = !flintSlots[0] }
+  else if (i === 3) { if (!flintSlots[3] && (inventory.iron || 0) < 1) { craftMsg.value = '⚠ No iron ingot!'; return } flintSlots[3] = !flintSlots[3] }
+}
+
+function craftFlintSteel() {
+  if (!flintReady.value) { craftMsg.value = '⚠ Need: flint (top-left) + iron ingot (bottom-right)'; return }
+  if ((inventory.flint || 0) < 1) { craftMsg.value = '⚠ No flint!'; return }
+  if ((inventory.iron || 0) < 1) { craftMsg.value = '⚠ No iron ingot!'; return }
+  inventory.flint--; inventory.iron--; inventory.flintSteel++
+  for (let i = 0; i < 4; i++) flintSlots[i] = false
+  craftMsg.value = '🔥 Flint & Steel crafted! You can light portals now.'
+  equipItem('flintSteel')
+}
+
+// ── Camera shake ─────────────────────────────────────────────────────────────
+function triggerCameraShake() { shakeTime = 0.4 }
+
+// ── Piglin (matter-js + skinview3d) ──────────────────────────────────────────
+let Matter = null
+let piglinEngine = null
+let piglinWorld = null
+let piglinBody = null
+let piglinViewer = null
+let piglinAnimFrame = null
+const piglinState = reactive({ x: 390, y: 300, vx: 0, flipped: 1, dead: false, hitCount: 0, flashing: false, walkTimer: null })
+const netherDeathMsg = ref('')
+let broadcastChannel = null
+
+const PIGLIN_W = 32, PIGLIN_H = 48
+
+const piglinCanvasStyle = computed(() => ({
+  left: (piglinState.x - PIGLIN_W / 2) + 'px',
+  top: (piglinState.y - PIGLIN_H / 2) + 'px',
+  transform: `scaleX(${piglinState.flipped})`,
+  filter: piglinState.flashing ? 'hue-rotate(300deg) saturate(3) brightness(1.5)' : 'none',
+}))
+
+let mouseDownTime = 0, mouseDownPos2 = null
+
+function onPiglinMouseDown(e) {
+  if (piglinState.dead) return
+  mouseDownTime = Date.now()
+  mouseDownPos2 = { x: e.clientX, y: e.clientY }
+  const onUp = (ev) => {
+    if (mouseDownPos2) {
+      const dx = ev.clientX - mouseDownPos2.x, dy = ev.clientY - mouseDownPos2.y
+      if (Math.sqrt(dx * dx + dy * dy) < 5) attackPiglin()
     }
-    const spread = explosive ? 12 : 6
-    const vx = (Math.random() - 0.5) * spread
-    const vy = explosive ? -(6 + Math.random() * 8) : -(4 + Math.random() * 4)
-    const drop = reactive({
-      id: ++dropIdCounter,
-      icon: chosen,
-      x: originX - 8,
-      y: originY - 8,
-      vx,
-      vy,
-      angle: 0,
-      angularV: (Math.random() - 0.5) * 20,
-      opacity: 1,
-      size: explosive ? 14 : 16,
-      landed: false,
+    mouseDownPos2 = null
+    window.removeEventListener('mouseup', onUp)
+  }
+  window.addEventListener('mouseup', onUp)
+}
+
+function attackPiglin() {
+  if (piglinState.dead) return
+  piglinState.flashing = true
+  setTimeout(() => { piglinState.flashing = false }, 300)
+  if (Matter && piglinBody) {
+    Matter.Body.applyForce(piglinBody, piglinBody.position, {
+      x: (Math.random() - 0.5) * 0.015, y: -0.03,
     })
-    activeDrops.push(drop)
-    animateDrop(drop)
   }
+  piglinState.hitCount++
+  if (piglinState.hitCount >= 5) killPiglin()
 }
 
-function animateDrop(drop) {
-  const GRAVITY = 0.38
-  const FLOOR_Y = 480
-  let frame
+function killPiglin() {
+  piglinState.dead = true
+  if (Matter && piglinBody) Matter.Body.setStatic(piglinBody, true)
+  setTimeout(() => respawnPiglin(), 5000)
+}
 
-  function step() {
-    if (drop.landed) return
-    drop.vy += GRAVITY
-    drop.x += drop.vx
-    drop.y += drop.vy
-    drop.angle += drop.angularV
-    if (drop.y >= FLOOR_Y) {
-      drop.y = FLOOR_Y
-      drop.landed = true
-      fadeOut(drop)
-      return
+function respawnPiglin() {
+  if (!Matter || !piglinBody) return
+  const W = threeCanvas.value?.clientWidth || 780
+  const side = Math.random() > 0.5 ? 80 : W - 80
+  Matter.Body.setStatic(piglinBody, false)
+  Matter.Body.setPosition(piglinBody, { x: side, y: 300 })
+  Matter.Body.setVelocity(piglinBody, { x: 0, y: 0 })
+  piglinState.dead = false
+  piglinState.hitCount = 0
+  schedulePiglinWalk()
+}
+
+function schedulePiglinWalk() {
+  if (piglinState.walkTimer) clearTimeout(piglinState.walkTimer)
+  piglinState.walkTimer = setTimeout(() => {
+    if (!piglinState.dead && Matter && piglinBody) {
+      Matter.Body.applyForce(piglinBody, piglinBody.position, { x: (Math.random() - 0.5) * 0.004, y: 0 })
     }
-    frame = requestAnimationFrame(step)
-  }
-  frame = requestAnimationFrame(step)
-  onUnmounted(() => cancelAnimationFrame(frame))
+    schedulePiglinWalk()
+  }, 2000 + Math.random() * 2000)
 }
 
-function fadeOut(drop) {
-  let step = 0
-  const STEPS = 40
-  let frame
+async function initPiglin() {
+  try {
+    Matter = await import('matter-js')
+    const { Engine, World, Bodies, Body, Runner, MouseConstraint: MC, Mouse } = Matter
 
-  function tick() {
-    step++
-    drop.opacity = 1 - step / STEPS
-    if (step < STEPS) {
-      frame = requestAnimationFrame(tick)
-    } else {
-      const idx = activeDrops.findIndex(d => d.id === drop.id)
-      if (idx !== -1) activeDrops.splice(idx, 1)
+    piglinEngine = Engine.create({ gravity: { y: 1.5 } })
+    piglinWorld = piglinEngine.world
+
+    const W = threeCanvas.value?.clientWidth || 780
+    const H = threeCanvas.value?.clientHeight || 420
+    const groundY = H - 48
+
+    const ground = Bodies.rectangle(W / 2, groundY + 24, W, 48, { isStatic: true })
+    const wallL = Bodies.rectangle(-24, H / 2, 48, H, { isStatic: true })
+    const wallR = Bodies.rectangle(W + 24, H / 2, 48, H, { isStatic: true })
+    World.add(piglinWorld, [ground, wallL, wallR])
+
+    piglinBody = Bodies.rectangle(W / 2, groundY - PIGLIN_H, PIGLIN_W, PIGLIN_H, {
+      restitution: 0.3, friction: 0.8, frictionAir: 0.02,
+    })
+    World.add(piglinWorld, piglinBody)
+
+    if (piglinCanvas.value) {
+      const mouse = Mouse.create(piglinCanvas.value.parentElement)
+      const mc = MC.create(piglinEngine, { mouse, constraint: { stiffness: 0.2, render: { visible: false } } })
+      World.add(piglinWorld, mc)
     }
+
+    schedulePiglinWalk()
+    checkNetherSync()
+
+    let last = performance.now()
+    function loop(now) {
+      const dt = Math.min(now - last, 32); last = now
+      Engine.update(piglinEngine, 1000 / 60)
+
+      piglinState.x = piglinBody.position.x
+      piglinState.y = piglinBody.position.y
+      piglinState.vx = piglinBody.velocity.x
+      if (Math.abs(piglinState.vx) > 0.5) piglinState.flipped = piglinState.vx > 0 ? 1 : -1
+
+      if (piglinViewer?.animation) {
+        piglinViewer.animation.speed = 0.3 + Math.abs(piglinState.vx) / 3
+      }
+
+      checkPortalCollision()
+      piglinAnimFrame = requestAnimationFrame(loop)
+    }
+    piglinAnimFrame = requestAnimationFrame(loop)
+  } catch (e) {
+    // matter-js unavailable (SSR or blocked)
   }
-  frame = requestAnimationFrame(tick)
-  onUnmounted(() => cancelAnimationFrame(frame))
 }
 
-// ── Screen shake ──────────────────────────────────────────────────────────────
-
-function triggerShake() {
-  shaking.value = true
-  setTimeout(() => (shaking.value = false), 400)
+async function initPiglinViewer() {
+  if (!piglinCanvas.value) return
+  try {
+    const { SkinViewer, WalkingAnimation } = await import('skinview3d')
+    piglinViewer = new SkinViewer({
+      canvas: piglinCanvas.value,
+      width: PIGLIN_W,
+      height: PIGLIN_H,
+      skin: 'https://minecraft.wiki/images/Piglin_texture.png',
+    })
+    piglinViewer.animation = new WalkingAnimation()
+    piglinViewer.animation.speed = 0.8
+  } catch (_) {}
 }
 
-// ── Piglin Physics ────────────────────────────────────────────────────────────
+function checkPortalCollision() {
+  if (!portalActive.value || !piglinBody) return
+  // Portal is at x: 1 to 4 (Three.js coords) — need to map to screen coords
+  // We use a rough screen space estimate since the Three.js canvas maps these positions
+  // Portal inner x: 1.5-3.5, y: 1-3, z: -3
+  // Screen position of portal center
+  if (!camera || !threeCanvas.value) return
+  const portalCenter = new THREE.Vector3(2.5, 2, -3)
+  const sc = worldToScreen(portalCenter)
+  const px = piglinState.x, py = piglinState.y
+  const rect = threeCanvas.value.getBoundingClientRect()
+  if (Math.abs(px - sc.x) < 40 && Math.abs(py - sc.y) < 60) {
+    sendPiglinToNether()
+  }
+}
 
-const piglinReady = ref(false)
-const piglinSceneHeight = ref(500)
-const piglinGroundY = ref(420)
-
-// Portal area for cross-window easter egg (where the nether portal appears)
-const piglinPortalArea = computed(() => {
-  // The portal grid appears in row3 of the underground section
-  // Approximate pixel position: x ~20, y ~390, w ~160, h ~160
-  return portalActive.value ? { x: 20, y: 360, w: 160, h: 160 } : null
-})
-
-function onPiglinEnteredPortal(data) {
-  // Piglin walked into the nether portal
+function sendPiglinToNether() {
+  const data = { health: 5 - piglinState.hitCount, name: 'Piglin-1', enteredAt: Date.now() }
+  try { localStorage.setItem('piglin_in_nether', JSON.stringify(data)) } catch (_) {}
+  broadcastChannel?.postMessage({ type: 'piglin_enter', piglinData: data })
   craftMsg.value = '🟣 Your Piglin entered the Nether!'
   setTimeout(() => { craftMsg.value = '' }, 3000)
+  killPiglin()
 }
 
-onMounted(() => {
-  // Measure scene height for physics
-  const el = wrapperRef.value
-  if (el) {
-    const h = el.offsetHeight || 500
-    piglinSceneHeight.value = h
-    piglinGroundY.value = h - 80
+function checkNetherSync() {
+  try {
+    broadcastChannel = new BroadcastChannel('kotodama-nether')
+    broadcastChannel.onmessage = (e) => {
+      if (e.data.type === 'piglin_died_in_nether') {
+        netherDeathMsg.value = 'Your piglin died in the Nether...'
+        setTimeout(() => { netherDeathMsg.value = '' }, 5000)
+      }
+    }
+  } catch (_) {}
+}
+
+// ── Three.js Init ─────────────────────────────────────────────────────────────
+function initThree() {
+  const canvas = threeCanvas.value
+  const W = canvas.clientWidth || 780
+  const H = Math.round(W * 0.54) || 420
+  canvas.width = W
+  canvas.height = H
+
+  renderer = new THREE.WebGLRenderer({ canvas, antialias: false, alpha: false })
+  renderer.setSize(W, H)
+  renderer.shadowMap.enabled = true
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+
+  scene = new THREE.Scene()
+  scene.background = new THREE.Color(0x87ceeb)
+  scene.fog = new THREE.Fog(0x87ceeb, 20, 35)
+
+  camera = new THREE.PerspectiveCamera(60, W / H, 0.1, 100)
+  camera.position.set(basePos.x, basePos.y, basePos.z)
+  camera.lookAt(0, 0, 0)
+
+  // Lighting
+  const ambient = new THREE.AmbientLight(0xffffff, 0.6)
+  scene.add(ambient)
+  const sun = new THREE.DirectionalLight(0xfffacd, 1.0)
+  sun.position.set(5, 10, 5)
+  sun.castShadow = true
+  sun.shadow.mapSize.width = 1024
+  sun.shadow.mapSize.height = 1024
+  scene.add(sun)
+
+  clock = new THREE.Clock()
+
+  buildScene()
+
+  // Crop initial states
+  for (let i = 0; i < 9; i++) updateCropMesh(i)
+
+  // Parallax
+  document.addEventListener('mousemove', onMouseMove)
+  canvas.addEventListener('click', onCanvasClick)
+
+  // Render loop
+  function render() {
+    const delta = clock.getDelta()
+    const elapsed = clock.getElapsedTime()
+
+    // Portal shader time
+    if (portalMat) portalMat.uniforms.time.value = elapsed
+
+    // Camera parallax
+    camera.position.x = THREE.MathUtils.lerp(camera.position.x, basePos.x + targetOffsetX, 0.05)
+    camera.position.y = THREE.MathUtils.lerp(camera.position.y, basePos.y - targetOffsetY, 0.05)
+
+    // Camera shake
+    if (shakeTime > 0) {
+      shakeTime -= delta
+      const intensity = shakeTime * 0.3
+      camera.position.x += (Math.random() - 0.5) * intensity
+      camera.position.y += (Math.random() - 0.5) * intensity
+    }
+
+    camera.lookAt(0, 0, 0)
+
+    // Lever arm tilt
+    if (leverMesh.arm) {
+      leverMesh.arm.rotation.z = leverOn.value
+        ? THREE.MathUtils.lerp(leverMesh.arm.rotation.z, -0.8, 0.15)
+        : THREE.MathUtils.lerp(leverMesh.arm.rotation.z, 0.8, 0.15)
+    }
+
+    // Redstone tiles emissive
+    redstoneMeshes.forEach((rd, i) => {
+      const lit = redstoneTiles[i]?.lit ?? true
+      rd.mat.color = lit ? new THREE.Color(0xff2200) : new THREE.Color(0x330000)
+      rd.mat.opacity = lit ? 0.9 : 0.3
+    })
+
+    // Redstone light
+    if (redstoneLight) redstoneLight.intensity = leverOn.value ? 2 : 0
+
+    // Piston head
+    if (pistonMesh.head) {
+      pistonMesh.head.position.y = leverOn.value
+        ? THREE.MathUtils.lerp(pistonMesh.head.position.y, -0.1, 0.1)
+        : THREE.MathUtils.lerp(pistonMesh.head.position.y, -0.35, 0.1)
+    }
+
+    // Crop billboard
+    cropMeshes.forEach(m => {
+      if (m) m.rotation.y = elapsed * 0.5
+    })
+
+    renderer.render(scene, camera)
+    animFrameId = requestAnimationFrame(render)
   }
-  piglinReady.value = true
+  animFrameId = requestAnimationFrame(render)
+}
+
+function onMouseMove(e) {
+  const nx = (e.clientX / window.innerWidth - 0.5) * 2
+  const ny = (e.clientY / window.innerHeight - 0.5) * 2
+  targetOffsetX = nx * 1.5
+  targetOffsetY = ny * 0.8
+}
+
+// ── Lifecycle ─────────────────────────────────────────────────────────────────
+onMounted(async () => {
+  initThree()
+  await initTextures()
+  await initPiglin()
+  await initPiglinViewer()
+})
+
+onUnmounted(() => {
+  if (animFrameId) cancelAnimationFrame(animFrameId)
+  if (piglinAnimFrame) cancelAnimationFrame(piglinAnimFrame)
+  document.removeEventListener('mousemove', onMouseMove)
+  threeCanvas.value?.removeEventListener('click', onCanvasClick)
+  for (const id of dropFrames.values()) cancelAnimationFrame(id)
+  if (piglinState.walkTimer) clearTimeout(piglinState.walkTimer)
+  broadcastChannel?.close()
+  if (piglinViewer) try { piglinViewer.dispose() } catch (_) {}
+  if (renderer) renderer.dispose()
+  if (Matter && piglinEngine) Matter.Engine.clear(piglinEngine)
 })
 </script>
 
 <style scoped>
-/* ══ Root wrapper ════════════════════════════════════════════════════════════ */
 .mcw-wrapper {
   position: relative;
   font-family: "Courier New", monospace;
-  image-rendering: pixelated;
   user-select: none;
   width: 780px;
   max-width: 100%;
@@ -920,829 +1234,176 @@ onMounted(() => {
 }
 .mcw-hint.hidden { opacity: 0; pointer-events: none; }
 
-/* ══ Scene container ════════════════════════════════════════════════════════ */
-.mcw-scene {
+.mcw-canvas-container {
   position: relative;
-  width: 780px;
-  max-width: 100%;
+  width: 100%;
   border: 3px solid #3a5a3a;
   box-shadow: 0 0 0 3px #1a3a0a, 4px 4px 0 6px #0a1a04;
   overflow: hidden;
+  line-height: 0;
 }
 
-@keyframes shake {
-  0%   { transform: translate(0, 0); }
-  15%  { transform: translate(-4px, 3px); }
-  30%  { transform: translate(4px, -3px); }
-  45%  { transform: translate(-3px, 4px); }
-  60%  { transform: translate(3px, -2px); }
-  80%  { transform: translate(-2px, 2px); }
-  100% { transform: translate(0, 0); }
-}
-.mcw-wrapper.shake .mcw-scene {
-  animation: shake 0.4s ease-out;
-}
-
-/* ══ Texture helpers ════════════════════════════════════════════════════════ */
-.block-tex {
-  width: 100%;
-  height: 100%;
-  image-rendering: pixelated;
+.mcw-three-canvas {
   display: block;
-  object-fit: cover;
-}
-.slot-tex {
-  width: 28px;
-  height: 28px;
+  width: 100%;
+  height: auto;
   image-rendering: pixelated;
+  cursor: crosshair;
 }
 
-/* ══ Sky layer ══════════════════════════════════════════════════════════════ */
-.mcw-sky {
-  background: linear-gradient(to bottom, #5a9fd4 0%, #87CEEB 60%, #a8d8f0 100%);
-  height: 80px;
-  position: relative;
-  overflow: hidden;
-}
-
-.mcw-sun {
+.mcw-piglin-canvas {
   position: absolute;
-  top: 10px;
-  right: 40px;
-  width: 24px;
-  height: 24px;
-  background: #ffe060;
-  box-shadow: 0 0 0 4px #ffe060, 0 0 12px 4px rgba(255,220,60,0.5);
-}
-
-.mcw-cloud {
-  position: absolute;
-  background: white;
-  height: 14px;
-  border-radius: 0;
-}
-.mcw-cloud::before, .mcw-cloud::after {
-  content: '';
-  position: absolute;
-  background: white;
-  height: 14px;
-}
-.cloud1 { width: 60px; top: 18px; animation: drift1 22s linear infinite; }
-.cloud1::before { width: 28px; height: 14px; top: -14px; left: 8px; }
-.cloud1::after  { width: 20px; height: 14px; top: -10px; left: 28px; }
-.cloud2 { width: 48px; top: 28px; animation: drift2 30s linear infinite; }
-.cloud2::before { width: 22px; height: 14px; top: -14px; left: 6px; }
-.cloud2::after  { width: 16px; height: 14px; top: -10px; left: 22px; }
-.cloud3 { width: 38px; top: 10px; animation: drift3 18s linear infinite; }
-.cloud3::before { width: 18px; height: 14px; top: -14px; left: 4px; }
-.cloud3::after  { width: 14px; height: 10px; top: -8px; left: 16px; }
-
-@keyframes drift1 { from { left: -80px; } to { left: 820px; } }
-@keyframes drift2 { from { left: 200px; } to { left: 900px; } }
-@keyframes drift3 { from { left: 500px; } to { left: 1100px; } }
-
-/* ══ Surface layer ══════════════════════════════════════════════════════════ */
-.mcw-surface {
-  background: #3a1a0a;
-  display: flex;
-  align-items: flex-end;
-  gap: 0;
-  min-height: 170px;
-  padding: 0;
-  position: relative;
-}
-
-.mcw-section {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  padding: 8px 8px 0;
-}
-
-.farm-section { padding-top: 12px; }
-
-.mcw-farm-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 44px);
-  grid-template-rows: repeat(3, 44px);
-  gap: 2px;
-}
-
-.mcw-tile {
-  position: relative;
-  width: 44px;
-  height: 44px;
-  cursor: pointer;
-}
-.mcw-tile:hover .mcw-tile-hover { opacity: 1; }
-.mcw-tile-hover {
-  position: absolute;
-  inset: 0;
-  background: rgba(255,255,200,0.1);
-  border: 2px solid rgba(255,255,200,0.3);
-  opacity: 0;
-  transition: opacity 0.12s;
-  pointer-events: none;
-}
-
-.mcw-farmland {
-  position: absolute;
-  inset: 0;
-  background:
-    repeating-linear-gradient(90deg, transparent 0, transparent 9px, rgba(90,58,26,0.4) 9px, rgba(90,58,26,0.4) 10px),
-    repeating-linear-gradient(0deg, transparent 0, transparent 9px, rgba(90,58,26,0.3) 9px, rgba(90,58,26,0.3) 10px),
-    #5a3a1a;
-  border-bottom: 3px solid #3a2008;
-  border-right: 2px solid #3a2008;
-  border-top: 1px solid #7a5a2a;
-}
-
-.mcw-crop {
-  position: absolute;
-  bottom: 3px;
-  left: 50%;
-  transform: translateX(-50%);
+  width: 32px;
+  height: 48px;
   image-rendering: pixelated;
-  transition: height 0.18s ease-out;
-}
-.mcw-crop.stage-0 { width: 5px; height: 3px; background: #8b6914; border-radius: 1px; bottom: 4px; }
-.mcw-crop.stage-1 {
-  width: 8px; height: 14px;
-  background: linear-gradient(to top, #5a8a10, #7ab820 60%, #5a8a10);
-  clip-path: polygon(40% 100%, 60% 100%, 70% 40%, 55% 0%, 45% 0%, 30% 40%);
-}
-.mcw-crop.stage-2 {
-  width: 11px; height: 24px;
-  background: linear-gradient(to top, #3a7010, #6aaa10 50%, #b8960c);
-  clip-path: polygon(35% 100%, 65% 100%, 70% 65%, 85% 55%, 80% 45%, 65% 50%, 68% 20%, 55% 0%, 45% 0%, 32% 20%, 35% 50%, 20% 45%, 15% 55%, 30% 65%);
-}
-.mcw-crop.stage-3 {
-  width: 15px; height: 38px;
-  background: linear-gradient(to top, #5a7a10 0%, #8aaa10 30%, #d4b800 65%, #f0d700 100%);
-  clip-path: polygon(40% 100%, 60% 100%, 65% 70%, 80% 62%, 90% 48%, 75% 42%, 72% 28%, 85% 18%, 78% 8%, 62% 14%, 55% 0%, 45% 0%, 38% 14%, 22% 8%, 15% 18%, 28% 28%, 25% 42%, 10% 48%, 20% 62%, 35% 70%);
-  filter: drop-shadow(0 0 3px rgba(240,215,0,0.5));
-}
-@keyframes pop-grow {
-  0%   { transform: translateX(-50%) scale(0.7); }
-  60%  { transform: translateX(-50%) scale(1.15); }
-  100% { transform: translateX(-50%) scale(1); }
-}
-.mcw-crop.growing { animation: pop-grow 0.25s ease-out forwards; }
-
-.mcw-grass-row { display: flex; gap: 2px; margin-top: 2px; }
-
-.mcw-grass-block {
-  width: 44px; height: 24px;
-  background: linear-gradient(to bottom, #4a7a2a 0%, #4a7a2a 6px, #8B4513 6px, #8B4513 100%);
-  border-top: 2px solid #5a9a3a;
-  border-right: 2px solid #3a5a18;
-  border-bottom: 2px solid #5a3010;
-  border-left: 2px solid #5a9a3a;
-  position: relative;
-}
-.mcw-grass-block.wide { width: 90px; }
-.mcw-grass-block.door-grass { width: 54px; height: 24px; }
-
-/* ══ Oak Tree ═══════════════════════════════════════════════════════════════ */
-.tree-section { align-items: center; }
-
-.mcw-tree {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.mcw-leaves {
-  width: 72px; height: 54px;
-  background: #2d5a1b;
-  border: 2px solid #1d4a0b;
-  position: relative;
-  margin-bottom: -2px;
-}
-.mcw-leaves::before {
-  content: '';
-  position: absolute;
-  inset: 6px;
-  background: #3a6a22;
-}
-@keyframes leaf-sway {
-  0%, 100% { transform: rotate(-1deg); }
-  50%       { transform: rotate(1.5deg); }
-}
-.mcw-leaves { transform-origin: bottom center; animation: leaf-sway 4s ease-in-out infinite; }
-
-.mcw-trunk {
-  width: 20px; height: 24px;
-  background: linear-gradient(to right, #6b4a14, #c8a86a 40%, #6b4a14);
-  border-left: 2px solid #4a3008;
-  border-right: 2px solid #4a3008;
-}
-
-/* ══ Sign ═══════════════════════════════════════════════════════════════════ */
-.sign-section { align-items: center; justify-content: flex-end; cursor: pointer; }
-
-.mcw-sign-container {
-  perspective: 200px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-.mcw-sign-face {
-  transform: rotateY(-8deg);
-  width: 120px;
-  background: #c8a86a;
-  border: 3px solid #8b6914;
-  border-bottom: 4px solid #6b4a0a;
-  border-right: 4px solid #6b4a0a;
-  padding: 5px 6px;
-  box-shadow: 2px 2px 0 #4a3008, inset 0 0 8px rgba(0,0,0,0.15);
-  position: relative;
-  min-height: 72px;
-  transition: transform 0.2s;
-}
-.mcw-sign-container:hover .mcw-sign-face { transform: rotateY(-4deg) scale(1.02); }
-.mcw-sign-face::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: repeating-linear-gradient(0deg, transparent 0, transparent 7px, rgba(100,60,10,0.12) 7px, rgba(100,60,10,0.12) 8px);
-  pointer-events: none;
-}
-.mcw-sign-line {
-  font-size: 8px; font-weight: bold; line-height: 1.65; color: #1a1008;
-  letter-spacing: 0.5px; white-space: nowrap; position: relative;
-}
-.mcw-sign-line.name { font-size: 8.5px; border-bottom: 1px solid rgba(0,0,0,0.2); padding-bottom: 2px; margin-bottom: 2px; }
-.mcw-sign-line.small { font-size: 7.5px; }
-.mcw-sign-line.link { font-size: 7px; color: #2a4080; }
-
-.mcw-sign-post {
-  width: 8px; height: 44px;
-  background: linear-gradient(to right, #a07830, #c8a86a 40%, #a07830);
-  border: 1px solid #6b4a0a;
-}
-
-/* ══ Door ═══════════════════════════════════════════════════════════════════ */
-.door-section { padding-right: 12px; justify-content: flex-end; }
-
-.mcw-door-frame {
-  width: 30px; height: 60px;
-  position: relative;
-  border: 2px solid #5a3a0a;
-  background: #1a0a00;
-  overflow: hidden;
-}
-.mcw-door-bg {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to right, #0a0500 0%, #1a0a00 50%, #050200 100%);
-}
-.mcw-door {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to right, #c8a86a 0%, #a07830 50%, #7a5a20 100%);
-  border-right: 2px solid #4a2a00;
-  transform-origin: left center;
-  transition: transform 0.35s ease;
-  z-index: 1;
-}
-.mcw-door::before {
-  content: '';
-  position: absolute;
-  left: 50%; top: 50%;
-  transform: translate(-50%, -50%);
-  width: 5px; height: 5px;
-  background: #d4aa00;
-  border-radius: 50%;
-}
-.mcw-door.open { transform: perspective(200px) rotateY(-80deg); }
-
-.mcw-pressure-plate-area { margin-top: 2px; }
-.mcw-pressure-plate {
-  position: absolute;
-  bottom: 4px; left: 50%;
-  transform: translateX(-50%);
-  width: 24px; height: 4px;
-  background: #c0c0c0;
-  border: 1px solid #808080;
-  transition: transform 0.1s;
-}
-.mcw-pressure-plate.pressed { transform: translateX(-50%) scaleY(0.5); }
-
-/* ══ Underground ════════════════════════════════════════════════════════════ */
-.mcw-underground {
-  background: #1a1a2e;
-  border-top: 3px solid #3a3a5a;
-}
-
-.mcw-ug-row {
-  display: flex;
-  align-items: stretch;
-  height: 44px;
-  border-bottom: 2px solid #0a0a1a;
-}
-
-.mcw-stone {
-  flex: 1; min-width: 44px; height: 44px;
-  background:
-    repeating-linear-gradient(90deg, transparent 0, transparent 10px, rgba(60,60,80,0.3) 10px, rgba(60,60,80,0.3) 11px),
-    repeating-linear-gradient(0deg, transparent 0, transparent 10px, rgba(60,60,80,0.3) 10px, rgba(60,60,80,0.3) 11px),
-    #606070;
-  border-right: 1px solid #4a4a5a;
-  border-bottom: 2px solid #4a4a5a;
-  border-top: 1px solid #7a7a8a;
-}
-
-/* ══ Obsidian ═══════════════════════════════════════════════════════════════ */
-.mcw-obsidian {
-  width: 44px; height: 44px;
-  flex-shrink: 0;
-  position: relative;
-  overflow: hidden;
-  background: #1a0a2a;
-  border: 1px solid #2a1a3a;
+  cursor: grab;
+  pointer-events: auto;
   transition: filter 0.1s;
 }
-.mcw-obsidian.minable:hover { filter: brightness(1.3); cursor: crosshair; }
-.obs-crack-overlay {
+
+.nether-death-msg {
   position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 2;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.8);
+  color: #ff4444;
+  font-family: "Courier New", monospace;
+  font-size: 12px;
+  padding: 8px 16px;
+  border: 2px solid #aa2222;
+  white-space: nowrap;
+  z-index: 20;
+  animation: tombstone-appear 0.3s ease-out;
 }
-.mcw-obsidian.cracked1 .obs-crack-overlay {
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Cpath d='M8 4 L14 16 L6 20 M14 16 L20 12 L26 22' stroke='rgba(255,255,255,0.4)' stroke-width='1.5' fill='none'/%3E%3C/svg%3E") center/contain no-repeat;
-}
-.mcw-obsidian.cracked2 .obs-crack-overlay {
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Cpath d='M4 6 L12 18 L4 24 M12 18 L22 10 L28 24 M16 6 L18 14 L26 12' stroke='rgba(255,255,255,0.55)' stroke-width='1.5' fill='none'/%3E%3C/svg%3E") center/contain no-repeat;
+@keyframes tombstone-appear {
+  from { opacity: 0; transform: translateX(-50%) scale(0.8); }
+  to   { opacity: 1; transform: translateX(-50%) scale(1); }
 }
 
-/* Crafting Table */
-.mcw-crafting-table {
-  width: 48px; height: 44px;
-  cursor: pointer;
-  position: relative;
-  flex-shrink: 0;
-  transition: filter 0.15s;
-  overflow: hidden;
-}
-.mcw-crafting-table:hover { filter: brightness(1.2); }
-.ct-top {
-  height: 14px;
-  background:
-    repeating-linear-gradient(90deg, transparent 0, transparent 5px, rgba(0,0,0,0.2) 5px, rgba(0,0,0,0.2) 6px),
-    #c8a86a;
-  border-bottom: 2px solid #8b6914;
-  border-top: 1px solid #e0c080;
-}
-.ct-top::before {
-  content: '';
-  position: absolute;
-  top: 2px; left: 4px; right: 4px;
-  height: 2px; background: rgba(0,0,0,0.3);
-}
-.ct-front {
-  height: 30px;
-  background: #a07030;
-  border-top: 1px solid #c89040;
-  position: relative;
-}
-.ct-front::before {
-  content: '⊞';
-  position: absolute;
-  inset: 0;
+/* ── Hotbar ── */
+.mcw-hotbar {
   display: flex;
+  gap: 4px;
+  padding: 6px 8px;
+  background: rgba(0,0,0,0.6);
   align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  color: #6b4a0a;
-  line-height: 30px;
+  flex-wrap: wrap;
+  border: 2px solid #555;
+  border-top: none;
+}
+.hotbar-slot {
+  position: relative;
+  width: 36px; height: 36px;
+  background: rgba(60,60,60,0.8);
+  border: 2px solid #555;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  cursor: pointer;
+  transition: border-color 0.1s;
+}
+.hotbar-slot:hover { border-color: #aaa; }
+.hotbar-slot.equipped { border-color: #fff; background: rgba(100,100,100,0.8); }
+.hotbar-count {
+  position: absolute;
+  bottom: 1px; right: 2px;
+  font-size: 9px; color: #fff;
+  font-family: "Courier New", monospace;
+  text-shadow: 1px 1px 0 #000;
+  line-height: 1;
+}
+.hotbar-equipped-label {
+  font-size: 10px; color: #fff;
+  margin-left: 8px;
+  font-family: "Courier New", monospace;
+}
+
+/* ── Portal hint ── */
+.portal-activate-hint {
+  font-size: 11px; color: #cc88ff;
   text-align: center;
+  padding: 4px;
+  background: rgba(0,0,0,0.5);
+  font-family: "Courier New", monospace;
 }
 
-/* TNT */
-.mcw-tnt-area { display: flex; align-items: center; gap: 3px; flex-shrink: 0; }
-
-.mcw-tnt {
-  width: 40px; height: 40px;
-  position: relative;
-  background:
-    repeating-linear-gradient(0deg, #cc2200 0, #cc2200 10px, #f0f0f0 10px, #f0f0f0 14px, #cc2200 14px),
-    #cc2200;
-  border: 2px solid #881500;
-  cursor: default;
-}
-.tnt-label {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 9px;
-  font-weight: bold;
-  color: #f0f0f0;
-  letter-spacing: 1px;
-  background: rgba(0,0,0,0.15);
-}
-
-@keyframes tnt-flash {
-  0%, 100% { background: #cc2200; }
-  25%       { background: #ffffff; filter: brightness(2); }
-  50%       { background: #cc2200; }
-  75%       { background: #ffffff; filter: brightness(2); }
-}
-.mcw-tnt.flash { animation: tnt-flash 0.25s steps(1) infinite; }
-
-.mcw-button {
-  width: 12px; height: 8px;
-  background: #808080;
-  border-top: 2px solid #a0a0a0;
-  border-left: 2px solid #a0a0a0;
-  border-bottom: 2px solid #404040;
-  border-right: 2px solid #404040;
-  cursor: pointer;
-  transition: transform 0.1s;
-  position: relative;
-}
-.mcw-button:hover { filter: brightness(1.2); }
-.mcw-button.pressed { transform: translateY(2px); border-top-width: 1px; border-bottom-width: 3px; }
-
-/* Lever */
-.mcw-lever-block {
-  width: 44px; height: 44px;
-  background: #606070;
-  border: 1px solid #4a4a5a;
-  position: relative;
-  cursor: pointer;
-  flex-shrink: 0;
-}
-.mcw-lever-block:hover { filter: brightness(1.15); }
-
-.lever-base {
-  position: absolute;
-  bottom: 8px; left: 50%; transform: translateX(-50%);
-  width: 16px; height: 6px;
-  background: #808090;
-  border: 1px solid #505060;
-}
-.lever-arm {
-  position: absolute;
-  bottom: 14px; left: 50%;
-  width: 4px; height: 18px;
-  background: linear-gradient(to bottom, #c0a050, #a08030);
-  transform-origin: bottom center;
-  transform: translateX(-50%) rotate(-35deg);
-  transition: transform 0.2s ease;
-}
-.lever-arm.on { transform: translateX(-50%) rotate(35deg); }
-
-/* Redstone tiles */
-.mcw-redstone-tile {
-  flex: 1; min-width: 44px; height: 44px;
-  position: relative;
-  background: #505060;
-  border: 1px solid #404050;
-  transition: background 0.1s;
-}
-.mcw-redstone-tile::after {
-  content: '';
-  position: absolute;
-  bottom: 6px; left: 4px; right: 4px;
-  height: 4px;
-  background: #3d0000;
-  transition: background 0.1s, box-shadow 0.1s;
-}
-.mcw-redstone-tile.lit::after {
-  background: #ff2200;
-  box-shadow: 0 0 6px 2px rgba(255,34,0,0.6);
-  animation: rs-pulse 1s ease-in-out infinite;
-}
-@keyframes rs-pulse {
-  0%, 100% { box-shadow: 0 0 4px 1px rgba(255,34,0,0.5); }
-  50%       { box-shadow: 0 0 10px 4px rgba(255,100,0,0.8); }
-}
-
-/* Piston */
-.mcw-piston {
-  width: 52px; height: 44px;
-  display: flex;
-  align-items: center;
-  flex-shrink: 0;
-  gap: 0;
-}
-.piston-body {
-  width: 32px; height: 40px;
-  background: #7a7a8a;
-  border: 2px solid #5a5a6a;
-  border-right: none;
-  position: relative;
-}
-.piston-body::before {
-  content: '';
-  position: absolute;
-  top: 4px; left: 4px; right: 4px; height: 6px;
-  background: #9a9aaa;
-}
-.piston-head {
-  width: 20px; height: 36px;
-  background: #c8a86a;
-  border: 2px solid #8b6914;
-  transition: width 0.3s ease;
-}
-.mcw-piston.retracted .piston-head { width: 4px; }
-
-/* Info block */
-.mcw-info-block {
-  width: 90px; height: 44px;
-  position: relative;
-  flex-shrink: 0;
-  overflow: hidden;
-}
-.stone-cover {
-  position: absolute;
-  inset: 0;
-  background:
-    repeating-linear-gradient(90deg, transparent 0, transparent 10px, rgba(60,60,80,0.3) 10px, rgba(60,60,80,0.3) 11px),
-    repeating-linear-gradient(0deg, transparent 0, transparent 10px, rgba(60,60,80,0.3) 10px, rgba(60,60,80,0.3) 11px),
-    #606070;
-  transition: opacity 0.3s;
-  z-index: 2;
-}
-.stone-cover.hidden { opacity: 0; pointer-events: none; }
-
-.info-panel {
-  position: absolute;
-  inset: 0;
-  background: #1a3a1a;
-  border: 1px solid #2a6a2a;
-  padding: 3px 4px;
-  opacity: 0;
-  transition: opacity 0.2s;
-  z-index: 1;
-  overflow: hidden;
-}
-.info-panel.visible { opacity: 1; }
-
-@keyframes flicker {
-  0%   { opacity: 0; }
-  20%  { opacity: 1; }
-  30%  { opacity: 0.3; }
-  50%  { opacity: 1; }
-  65%  { opacity: 0.5; }
-  80%  { opacity: 1; }
-  100% { opacity: 1; }
-}
-.info-panel.flicker { animation: flicker 0.6s ease forwards; }
-
-.ip-title { font-size: 7px; color: #60ff60; font-weight: bold; margin-bottom: 1px; }
-.ip-item  { font-size: 6px; color: #40ff40; line-height: 1.5; }
-
-/* ══ Portal Frame ═══════════════════════════════════════════════════════════ */
-.portal-row {
-  height: auto !important;
-  flex-direction: column;
-  padding: 6px;
-  background: #0d0d1a;
-  border-top: 2px solid #2a1a4a;
-}
-.portal-hint {
-  font-size: 9px;
-  color: #cc88ff;
-  text-align: center;
-  margin-bottom: 4px;
-  letter-spacing: 0.5px;
-  animation: portal-hint-pulse 2s ease-in-out infinite;
-}
-@keyframes portal-hint-pulse {
-  0%, 100% { opacity: 0.7; }
-  50% { opacity: 1; }
-}
-.portal-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 32px);
-  grid-template-rows: repeat(5, 32px);
-  gap: 2px;
-  margin: 0 auto;
-}
-.portal-cell {
-  width: 32px; height: 32px;
-  background: #0a0a1a;
-  border: 1px solid #1a1a2a;
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-  transition: border-color 0.2s;
-}
-.portal-cell:not(.portal-filled):not(.portal-inner):hover {
-  border-color: #9900ff;
-  background: #1a0a2a;
-}
-.portal-cell.portal-inner {
-  background: #050515;
-  cursor: default;
-}
-.portal-cell.portal-inner.portal-glow {
-  background: radial-gradient(ellipse at center, #5500aa 0%, #1a0044 60%, #050515 100%);
-  animation: portal-inner-ripple 1.5s ease-in-out infinite;
-  cursor: pointer;
-}
-@keyframes portal-inner-ripple {
-  0%, 100% { background: radial-gradient(ellipse at center, #5500aa 0%, #1a0044 60%, #050515 100%); }
-  50%       { background: radial-gradient(ellipse at center, #7700ff 0%, #2a0066 60%, #050515 100%); }
-}
-.portal-filled { background: #1a0a2a !important; border-color: #3a1a5a !important; cursor: default; }
-.portal-obs-fallback {
-  width: 100%; height: 100%;
-  background: #1a0a2a;
-  border: 1px solid #3a1a5a;
-}
-.portal-swirl {
-  position: absolute;
-  inset: 2px;
-  background: radial-gradient(ellipse at center, #8800ff 0%, #4400aa 50%, transparent 100%);
-  animation: portal-swirl-spin 2s linear infinite;
-  border-radius: 50%;
-  opacity: 0.8;
-}
-@keyframes portal-swirl-spin {
-  from { transform: rotate(0deg) scale(0.9); }
-  to   { transform: rotate(360deg) scale(1.1); }
-}
-
-/* ══ Crater ═════════════════════════════════════════════════════════════════ */
+/* ── TNT Crater ── */
 .mcw-crater {
   display: none;
   position: absolute;
-  bottom: 60px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #1a0a00;
-  border: 2px solid #cc4400;
-  padding: 10px 14px;
-  z-index: 20;
-  text-align: center;
-  box-shadow: 0 0 20px rgba(255,100,0,0.4);
-}
-.mcw-crater.visible { display: block; animation: crater-appear 0.3s ease; }
-
-@keyframes crater-appear {
-  from { transform: translateX(-50%) scale(0.5); opacity: 0; }
-  to   { transform: translateX(-50%) scale(1); opacity: 1; }
-}
-.crater-msg { font-size: 10px; color: #ff8040; font-weight: bold; line-height: 1.8; }
-.crater-quote { font-size: 9px; color: #ffaa60; font-weight: normal; }
-
-/* ══ Crafting overlay ═══════════════════════════════════════════════════════ */
-.mcw-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,0.7);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  top: 30%; left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0,0,0,0.85);
+  border: 3px solid #ff4400;
+  padding: 16px 20px;
   z-index: 30;
+  pointer-events: none;
+  font-family: "Courier New", monospace;
 }
-.mcw-crafting-ui {
-  background: #3a3a4a;
-  border: 3px solid #6a6a8a;
-  padding: 16px;
-  position: relative;
-  min-width: 240px;
-  box-shadow: 0 0 0 2px #2a2a3a, 4px 4px 0 4px #1a1a2a;
+.mcw-crater.visible { display: block; animation: crater-pop 0.3s ease-out; }
+@keyframes crater-pop {
+  from { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+  to   { transform: translate(-50%, -50%) scale(1); opacity: 1; }
 }
-.cui-title {
-  font-size: 11px; color: #e0e0e0; font-weight: bold;
-  text-align: center; margin-bottom: 8px; letter-spacing: 1px;
-}
-.cui-tabs {
-  display: flex; gap: 2px; margin-bottom: 8px;
-}
-.cui-tab {
-  flex: 1; text-align: center; padding: 3px 4px;
-  background: #2a2a3a; color: #888; font-size: 8px;
-  cursor: pointer; border: 1px solid #4a4a6a;
-  transition: background 0.1s, color 0.1s;
-}
-.cui-tab.active { background: #4a4a6a; color: #fff; border-color: #8a8aaa; }
-.cui-tab:hover { background: #3a3a5a; color: #ccc; }
+.crater-msg { color: #ff8800; font-size: 13px; }
+.crater-quote { color: #ffcc88; font-size: 11px; margin-top: 2px; }
 
-.cui-recipe-hint {
-  font-size: 8px; color: #8888aa; text-align: center; margin-bottom: 6px;
-}
-.cui-grid {
-  display: grid; grid-template-columns: repeat(2, 44px);
-  grid-template-rows: repeat(2, 44px);
-  gap: 3px; margin: 0 auto 10px;
-  width: fit-content;
-}
-.cui-slot {
-  width: 44px; height: 44px;
-  background: #1a1a2a;
-  border: 2px solid #5a5a7a;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 20px;
-}
-.cui-slot.filled { background: #2a2a4a; border-color: #8a8aaa; }
-
-.cui-grid2x2 {
-  display: grid; grid-template-columns: repeat(2, 44px);
-  grid-template-rows: repeat(2, 44px);
-  gap: 3px; margin: 0 auto 6px;
-  width: fit-content;
-}
-.cui-slot2 {
-  width: 44px; height: 44px;
-  background: #1a1a2a;
-  border: 2px solid #5a5a7a;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 18px; cursor: pointer;
-  transition: background 0.1s, border-color 0.1s;
-}
-.cui-slot2:hover { background: #2a2a3a; border-color: #7a7a9a; }
-.cui-slot2.filled { background: #2a2a4a; border-color: #8a8aaa; }
-.slot-hint { font-size: 10px; color: #555; }
-
-.cui-recipe-legend {
-  font-size: 7px; color: #6688aa; text-align: center; margin-bottom: 4px; line-height: 1.6;
-}
-
-.cui-arrow { text-align: center; font-size: 16px; color: #a0a0c0; margin: 4px 0; }
-.cui-output {
-  width: 44px; height: 44px; margin: 0 auto 10px;
-  background: #1a1a2a; border: 2px solid #5a5a7a;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 24px;
-}
-.cui-output.ready { border-color: #aaaa40; background: #2a2a1a; }
-
-.cui-btn {
-  display: block; text-align: center; padding: 6px 16px;
-  background: #4a7a2a; border: 2px solid #6aaa3a;
-  color: #ccffcc; font-size: 10px; font-weight: bold;
-  cursor: pointer; letter-spacing: 1px;
-  margin: 0 auto 6px;
-  transition: filter 0.1s;
-}
-.cui-btn:hover { filter: brightness(1.2); }
-.cui-btn:active { filter: brightness(0.9); }
-
-.cui-msg { font-size: 9px; color: #cccc40; text-align: center; min-height: 14px; padding: 0 4px; }
-.cui-close {
-  position: absolute; top: 6px; right: 8px;
-  font-size: 12px; color: #888; cursor: pointer;
-}
-.cui-close:hover { color: #fff; }
-
-/* ══ Hotbar ══════════════════════════════════════════════════════════════════ */
-.mcw-hotbar {
-  display: flex;
-  align-items: center;
-  gap: 3px;
-  padding: 6px 8px;
-  background: #1a1a2e;
-  border-top: 2px solid #3a3a5a;
-  min-height: 44px;
-  flex-wrap: wrap;
-}
-.hotbar-slot {
-  width: 36px; height: 36px;
-  background: #2a2a3a;
-  border: 2px solid #5a5a7a;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 16px; cursor: pointer;
-  position: relative;
-  transition: border-color 0.1s, background 0.1s;
-}
-.hotbar-slot:hover { background: #3a3a4a; border-color: #8a8aaa; }
-.hotbar-slot.equipped { border-color: #ffff00; background: #3a3a1a; box-shadow: 0 0 6px rgba(255,255,0,0.4); }
-.hotbar-count {
-  position: absolute; bottom: 1px; right: 2px;
-  font-size: 7px; color: #fff; line-height: 1;
-  text-shadow: 0 0 2px #000;
-}
-.hotbar-equipped-label {
-  font-size: 8px; color: #aaaacc; margin-left: 6px;
-  letter-spacing: 0.5px;
-}
-
-/* ══ Portal activation hint ═════════════════════════════════════════════════ */
-.portal-activate-hint {
-  font-size: 9px; color: #ffaa00; text-align: center;
-  padding: 4px; background: #1a0a00; border-top: 1px solid #aa5500;
-  animation: portal-hint-pulse 1s ease-in-out infinite;
-}
-
-/* ══ Drop items ═════════════════════════════════════════════════════════════ */
+/* ── Physics drops ── */
 .mcw-drops-layer {
   position: absolute;
   inset: 0;
   pointer-events: none;
   overflow: hidden;
-  z-index: 10;
 }
 .mcw-drop-item {
   position: absolute;
+  pointer-events: none;
+  font-size: 16px;
   line-height: 1;
-  will-change: transform, opacity;
 }
+
+/* ── Crafting overlay ── */
+.mcw-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+.mcw-crafting-ui {
+  background: #2a2a2a;
+  border: 3px solid #555;
+  padding: 20px 24px;
+  font-family: "Courier New", monospace;
+  color: #eee;
+  min-width: 260px;
+  position: relative;
+}
+.cui-title { font-size: 16px; font-weight: bold; margin-bottom: 12px; color: #fff; }
+.cui-tabs { display: flex; gap: 6px; margin-bottom: 12px; }
+.cui-tab { padding: 4px 10px; background: #333; border: 2px solid #555; cursor: pointer; font-size: 11px; }
+.cui-tab.active { background: #555; border-color: #aaa; }
+.cui-recipe-hint { font-size: 10px; color: #aaa; margin-bottom: 8px; }
+.cui-grid { display: grid; grid-template-columns: repeat(4, 36px); gap: 3px; margin-bottom: 8px; }
+.cui-slot { width: 36px; height: 36px; background: #1a1a1a; border: 2px solid #444; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+.cui-slot.filled { border-color: #888; background: #333; }
+.cui-grid2x2 { display: grid; grid-template-columns: repeat(2, 36px); gap: 3px; margin-bottom: 8px; }
+.cui-slot2 { width: 36px; height: 36px; background: #1a1a1a; border: 2px solid #444; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; }
+.cui-slot2.filled { border-color: #888; background: #333; }
+.cui-slot2:hover { border-color: #aaa; }
+.cui-recipe-legend { font-size: 10px; color: #888; margin-bottom: 8px; }
+.cui-arrow { font-size: 20px; margin: 4px 0; color: #aaa; }
+.cui-output { width: 44px; height: 44px; background: #1a1a1a; border: 2px solid #444; display: flex; align-items: center; justify-content: center; font-size: 22px; margin-bottom: 10px; }
+.cui-output.ready { border-color: #88ff88; background: #1a3a1a; }
+.cui-btn { padding: 6px 14px; background: #444; border: 2px solid #888; cursor: pointer; font-family: "Courier New", monospace; color: #fff; font-size: 13px; display: inline-block; }
+.cui-btn:hover { background: #666; }
+.cui-msg { margin-top: 8px; font-size: 11px; color: #88ff88; }
+.cui-close {
+  position: absolute; top: 8px; right: 10px;
+  cursor: pointer; font-size: 16px; color: #888;
+}
+.cui-close:hover { color: #fff; }
+.slot-hint { font-size: 12px; color: #666; }
 </style>

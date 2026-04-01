@@ -12,6 +12,7 @@
   },
   "devDependencies": {
     "@types/matter-js": "^0.20.2",
+    "@types/three": "^0.183.1",
     "@vheemstra/vite-plugin-imagemin": "^2.0.0",
     "@vuepress/bundler-vite": "2.0.0-rc.14",
     "imagemin-mozjpeg": "^10.0.0",
@@ -32,6 +33,7 @@
     "matter-js": "^0.20.0",
     "mermaid": "^10.9.1",
     "minecraft-textures": "^26.1.0",
-    "skinview3d": "^3.4.1"
+    "skinview3d": "^3.4.1",
+    "three": "^0.183.2"
   }
 }
