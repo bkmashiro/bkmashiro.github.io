@@ -321,11 +321,24 @@
         }"
       >{{ drop.icon }}</div>
     </div>
+
+    <!-- ══ PIGLIN PHYSICS LAYER ══ -->
+    <PiglinPhysics
+      v-if="piglinReady"
+      :count="1"
+      :width="780"
+      :height="piglinSceneHeight"
+      :ground-y="piglinGroundY"
+      :portal-area="piglinPortalArea"
+      scene="overworld"
+      @piglin-entered-portal="onPiglinEnteredPortal"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, computed, onUnmounted } from 'vue'
+import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
+import PiglinPhysics from './PiglinPhysics.vue'
 
 // ── Textures ──────────────────────────────────────────────────────────────────
 
@@ -851,6 +864,36 @@ function triggerShake() {
   shaking.value = true
   setTimeout(() => (shaking.value = false), 400)
 }
+
+// ── Piglin Physics ────────────────────────────────────────────────────────────
+
+const piglinReady = ref(false)
+const piglinSceneHeight = ref(500)
+const piglinGroundY = ref(420)
+
+// Portal area for cross-window easter egg (where the nether portal appears)
+const piglinPortalArea = computed(() => {
+  // The portal grid appears in row3 of the underground section
+  // Approximate pixel position: x ~20, y ~390, w ~160, h ~160
+  return portalActive.value ? { x: 20, y: 360, w: 160, h: 160 } : null
+})
+
+function onPiglinEnteredPortal(data) {
+  // Piglin walked into the nether portal
+  craftMsg.value = '🟣 Your Piglin entered the Nether!'
+  setTimeout(() => { craftMsg.value = '' }, 3000)
+}
+
+onMounted(() => {
+  // Measure scene height for physics
+  const el = wrapperRef.value
+  if (el) {
+    const h = el.offsetHeight || 500
+    piglinSceneHeight.value = h
+    piglinGroundY.value = h - 80
+  }
+  piglinReady.value = true
+})
 </script>
 
 <style scoped>

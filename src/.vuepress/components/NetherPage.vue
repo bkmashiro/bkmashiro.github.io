@@ -43,21 +43,17 @@
         <a href="/" class="return-btn">← Return to Overworld</a>
       </div>
 
-      <!-- Piglin silhouette -->
-      <div class="piglin-wrapper">
-        <div class="piglin" :class="{ 'piglin-flip': piglinFlipped }">
-          <!-- Body -->
-          <div class="piglin-head"></div>
-          <div class="piglin-body"></div>
-          <div class="piglin-legs">
-            <div class="piglin-leg left" :class="{ walk: piglinWalking }"></div>
-            <div class="piglin-leg right" :class="{ walk: piglinWalking }"></div>
-          </div>
-          <div class="piglin-arms">
-            <div class="piglin-arm left-arm"></div>
-            <div class="piglin-arm right-arm"></div>
-          </div>
-        </div>
+      <!-- Piglin physics layer -->
+      <div class="piglin-physics-wrapper" ref="netherSceneRef">
+        <PiglinPhysics
+          v-if="piglinReady"
+          :count="2"
+          :width="netherWidth"
+          :height="netherHeight"
+          :ground-y="netherGroundY"
+          :spawn-positions="[netherWidth * 0.3, netherWidth * 0.7]"
+          scene="nether"
+        />
       </div>
     </div>
 
@@ -86,6 +82,7 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
+import PiglinPhysics from './PiglinPhysics.vue'
 
 const texGlowstone = ref(null)
 const texNetherrack = ref(null)
@@ -134,20 +131,23 @@ const fires = Array.from({ length: 6 }, (_, i) => ({
   delay: (Math.random() * 1) + 's',
 }))
 
-// Piglin pacing
-const piglinFlipped = ref(false)
-const piglinWalking = ref(true)
-let piglinInterval = null
+// Piglin physics
+const netherSceneRef = ref(null)
+const piglinReady = ref(false)
+const netherWidth = ref(400)
+const netherHeight = ref(400)
+const netherGroundY = ref(320)
 
 onMounted(() => {
-  piglinInterval = setInterval(() => {
-    piglinFlipped.value = !piglinFlipped.value
-  }, 2500)
+  if (netherSceneRef.value) {
+    netherWidth.value = netherSceneRef.value.offsetWidth || 400
+    netherHeight.value = netherSceneRef.value.offsetHeight || 400
+    netherGroundY.value = (netherSceneRef.value.offsetHeight || 400) - 60
+  }
+  piglinReady.value = true
 })
 
-onUnmounted(() => {
-  if (piglinInterval) clearInterval(piglinInterval)
-})
+onUnmounted(() => {})
 </script>
 
 <style scoped>
@@ -316,6 +316,14 @@ onUnmounted(() => {
 .return-btn:hover { filter: brightness(1.3); background: #4a2800; }
 
 /* ══ Piglin ═════════════════════════════════════════════════════════════════ */
+.piglin-physics-wrapper {
+  position: relative;
+  width: 200px;
+  min-height: 360px;
+  flex-shrink: 0;
+}
+
+/* Legacy CSS piglin (kept as reference, not rendered) */
 .piglin-wrapper {
   display: flex;
   flex-direction: column;
