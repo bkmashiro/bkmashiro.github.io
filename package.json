@@ -28,6 +28,7 @@
     "@vercel/speed-insights": "^1.0.12",
     "katex": "^0.16.11",
     "mathjax-full": "^3.2.2",
-    "mermaid": "^10.9.1"
+    "mermaid": "^10.9.1",
+    "minecraft-textures": "^26.1.0"
   }
 }

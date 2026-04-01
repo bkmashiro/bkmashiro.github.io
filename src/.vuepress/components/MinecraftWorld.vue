@@ -30,7 +30,7 @@
             </div>
           </div>
           <div class="mcw-grass-row">
-            <div v-for="i in 3" :key="i" class="mcw-grass-block"></div>
+            <div v-for="i in 3" :key="i" class="mcw-grass-block" :style="grassBlockStyle"></div>
           </div>
         </div>
 
@@ -38,35 +38,36 @@
         <div class="mcw-section tree-section">
           <div class="mcw-tree">
             <div class="mcw-leaves"></div>
-            <div class="mcw-trunk"></div>
-            <div class="mcw-trunk"></div>
+            <div class="mcw-trunk" :style="trunkStyle"></div>
+            <div class="mcw-trunk" :style="trunkStyle"></div>
           </div>
-          <div class="mcw-grass-block wide"></div>
+          <div class="mcw-grass-block wide" :style="grassBlockStyle"></div>
         </div>
 
         <!-- Sign -->
         <div class="mcw-section sign-section">
           <div class="mcw-sign-container" @click="cycleSignMessage" title="Click to change message">
-            <div class="mcw-sign-face">
+            <div class="mcw-sign-face" :style="signStyle">
               <div class="mcw-sign-line name">{{ signMessages[signIdx][0] }}</div>
               <div class="mcw-sign-line">{{ signMessages[signIdx][1] }}</div>
               <div class="mcw-sign-line small">{{ signMessages[signIdx][2] }}</div>
               <div class="mcw-sign-line link">{{ signMessages[signIdx][3] }}</div>
             </div>
-            <div class="mcw-sign-post"></div>
+            <div class="mcw-sign-post" :style="signPostStyle"></div>
           </div>
-          <div class="mcw-grass-block wide"></div>
+          <div class="mcw-grass-block wide" :style="grassBlockStyle"></div>
         </div>
 
         <!-- Door + Pressure Plate -->
         <div class="mcw-section door-section">
           <div class="mcw-door-frame">
-            <div class="mcw-door" :class="{ open: doorOpen }"></div>
+            <div class="mcw-door" :class="{ open: doorOpen }" :style="doorStyle"></div>
             <div class="mcw-door-bg"></div>
           </div>
           <div class="mcw-pressure-plate-area">
             <div
               class="mcw-grass-block door-grass"
+              :style="grassBlockStyle"
               @mouseenter="doorOpen = true"
               @mouseleave="doorOpen = false"
             >
@@ -80,11 +81,14 @@
       <div class="mcw-underground">
         <!-- Underground left filler -->
         <div class="mcw-ug-row row1">
-          <div class="mcw-stone" v-for="i in 2" :key="i"></div>
+          <div class="mcw-stone" v-for="i in 2" :key="i" :style="stoneStyle"></div>
           <!-- Crafting Table -->
           <div class="mcw-crafting-table" @click="openCrafting" title="Click to craft">
-            <div class="ct-top"></div>
-            <div class="ct-front"></div>
+            <img v-if="tex.craftingTable" :src="tex.craftingTable" class="block-tex" alt="crafting table" />
+            <template v-else>
+              <div class="ct-top"></div>
+              <div class="ct-front"></div>
+            </template>
           </div>
           <!-- TNT + Button -->
           <div class="mcw-tnt-area">
@@ -98,12 +102,25 @@
               title="Don't press this"
             ></div>
           </div>
-          <div class="mcw-stone" v-for="i in 3" :key="i + 10"></div>
+          <!-- Obsidian blocks -->
+          <div
+            v-for="(obs, oi) in obsidianBlocks"
+            :key="'obs' + oi"
+            class="mcw-obsidian"
+            :class="{ minable: hasPickaxe, cracked1: obs.cracks === 1, cracked2: obs.cracks === 2 }"
+            @click="mineObsidian(oi)"
+            :title="hasPickaxe ? 'Mine obsidian (click 3x)' : 'Need diamond pickaxe'"
+            :style="{ cursor: hasPickaxe ? 'crosshair' : 'default' }"
+          >
+            <img v-if="tex.obsidian" :src="tex.obsidian" class="block-tex" alt="obsidian" />
+            <div class="obs-crack-overlay" v-if="obs.cracks > 0"></div>
+          </div>
+          <div class="mcw-stone" v-for="i in 2" :key="i + 10" :style="stoneStyle"></div>
         </div>
 
         <!-- Redstone row -->
         <div class="mcw-ug-row row2">
-          <div class="mcw-stone"></div>
+          <div class="mcw-stone" :style="stoneStyle"></div>
           <!-- Lever -->
           <div class="mcw-lever-block" @click="toggleLever" title="Pull the lever!">
             <div class="lever-base"></div>
@@ -123,7 +140,7 @@
           </div>
           <!-- Info panel / stone block -->
           <div class="mcw-info-block" :class="{ revealed: leverOn }">
-            <div class="stone-cover" :class="{ hidden: leverOn }"></div>
+            <div class="stone-cover" :class="{ hidden: leverOn }" :style="stoneStyle"></div>
             <div class="info-panel" :class="{ visible: leverOn, flicker: leverOn && panelFlickering }">
               <div class="ip-title">🔧 Current Projects</div>
               <div class="ip-item">• kotodama — iOS app</div>
@@ -132,12 +149,37 @@
               <div class="ip-item">• redscript — compiler</div>
             </div>
           </div>
-          <div class="mcw-stone"></div>
+          <div class="mcw-stone" :style="stoneStyle"></div>
+        </div>
+
+        <!-- Portal frame row -->
+        <div class="mcw-ug-row row3 portal-row" v-if="showPortalArea">
+          <div class="portal-hint" v-if="!portalComplete && !portalActive">
+            🟣 You have enough obsidian to build a Nether Portal...
+          </div>
+          <div class="portal-grid">
+            <div
+              v-for="(cell, pi) in portalGrid"
+              :key="pi"
+              class="portal-cell"
+              :class="{
+                'portal-filled': cell,
+                'portal-inner': isPortalInner(pi),
+                'portal-glow': portalActive
+              }"
+              @click="placePortalBlock(pi)"
+              :title="cell ? 'Obsidian' : (isPortalInner(pi) ? (portalActive ? 'Active portal' : 'Empty') : 'Click to place obsidian')"
+            >
+              <img v-if="cell && tex.obsidian" :src="tex.obsidian" class="block-tex" alt="obsidian" />
+              <div v-else-if="cell" class="portal-obs-fallback"></div>
+              <div v-else-if="portalActive && isPortalInner(pi)" class="portal-swirl"></div>
+            </div>
+          </div>
         </div>
 
         <!-- Bottom stone row -->
-        <div class="mcw-ug-row row3">
-          <div class="mcw-stone" v-for="i in 8" :key="i"></div>
+        <div class="mcw-ug-row row3" v-if="!showPortalArea">
+          <div class="mcw-stone" v-for="i in 8" :key="i" :style="stoneStyle"></div>
         </div>
       </div>
 
@@ -156,22 +198,112 @@
     <div class="mcw-overlay" v-if="craftingOpen" @click.self="craftingOpen = false">
       <div class="mcw-crafting-ui">
         <div class="cui-title">Crafting Table</div>
-        <div class="cui-grid">
-          <div
-            v-for="(slot, i) in craftSlots"
-            :key="i"
-            class="cui-slot"
-            :class="{ filled: slot }"
-          >{{ slot ? '🌾' : '' }}</div>
+
+        <!-- Recipe tabs -->
+        <div class="cui-tabs">
+          <div class="cui-tab" :class="{ active: craftTab === 'bread' }" @click="craftTab = 'bread'">🍞 Bread</div>
+          <div class="cui-tab" :class="{ active: craftTab === 'pickaxe' }" @click="craftTab = 'pickaxe'">⛏️ Pickaxe</div>
+          <div class="cui-tab" :class="{ active: craftTab === 'flint' }" @click="craftTab = 'flint'">🔥 Flint&Steel</div>
         </div>
-        <div class="cui-arrow">▶</div>
-        <div class="cui-output" :class="{ ready: craftReady }">
-          <span v-if="craftReady">🍞</span>
-        </div>
-        <div class="cui-btn" @click="doCraft">Craft</div>
+
+        <!-- Bread recipe -->
+        <template v-if="craftTab === 'bread'">
+          <div class="cui-recipe-hint">Recipe: 3+ wheat</div>
+          <div class="cui-grid">
+            <div v-for="(slot, i) in craftSlots" :key="i" class="cui-slot" :class="{ filled: slot }">
+              {{ slot ? '🌾' : '' }}
+            </div>
+          </div>
+          <div class="cui-arrow">▶</div>
+          <div class="cui-output" :class="{ ready: craftReady }">
+            <span v-if="craftReady">🍞</span>
+          </div>
+          <div class="cui-btn" @click="doCraft">Craft</div>
+        </template>
+
+        <!-- Diamond Pickaxe recipe -->
+        <template v-if="craftTab === 'pickaxe'">
+          <div class="cui-recipe-hint">Recipe: 2 diamonds (top row) + 1 wood (bottom-right)</div>
+          <div class="cui-grid2x2">
+            <div class="cui-slot2" :class="{ filled: pickaxeSlots[0] }" @click="togglePickaxeSlot(0)">
+              <img v-if="pickaxeSlots[0] && tex.diamond" :src="tex.diamond" class="slot-tex" />
+              <span v-else-if="pickaxeSlots[0]">💎</span>
+              <span v-else class="slot-hint" :title="'Need: diamond (' + (inventory.diamond||0) + ')'">{{ inventory.diamond ? '💎?' : '' }}</span>
+            </div>
+            <div class="cui-slot2" :class="{ filled: pickaxeSlots[1] }" @click="togglePickaxeSlot(1)">
+              <img v-if="pickaxeSlots[1] && tex.diamond" :src="tex.diamond" class="slot-tex" />
+              <span v-else-if="pickaxeSlots[1]">💎</span>
+            </div>
+            <div class="cui-slot2"><!-- empty --></div>
+            <div class="cui-slot2" :class="{ filled: pickaxeSlots[3] }" @click="togglePickaxeSlot(3)">
+              <img v-if="pickaxeSlots[3] && tex.oakPlanks" :src="tex.oakPlanks" class="slot-tex" />
+              <span v-else-if="pickaxeSlots[3]">🪵</span>
+            </div>
+          </div>
+          <div class="cui-recipe-legend">
+            <div>Slots 0,1: diamond (have: {{ inventory.diamond || 0 }})</div>
+            <div>Slot 3: wood/stick (have: {{ inventory.wood || 0 }})</div>
+          </div>
+          <div class="cui-arrow">▶</div>
+          <div class="cui-output" :class="{ ready: pickaxeReady }">
+            <span v-if="pickaxeReady">⛏️</span>
+          </div>
+          <div class="cui-btn" @click="craftPickaxe">Craft Pickaxe</div>
+        </template>
+
+        <!-- Flint & Steel recipe -->
+        <template v-if="craftTab === 'flint'">
+          <div class="cui-recipe-hint">Recipe: flint (top-left) + iron ingot (bottom-right)</div>
+          <div class="cui-grid2x2">
+            <div class="cui-slot2" :class="{ filled: flintSlots[0] }" @click="toggleFlintSlot(0)">
+              <img v-if="flintSlots[0] && tex.flint" :src="tex.flint" class="slot-tex" />
+              <span v-else-if="flintSlots[0]">🪨</span>
+            </div>
+            <div class="cui-slot2"><!-- empty --></div>
+            <div class="cui-slot2"><!-- empty --></div>
+            <div class="cui-slot2" :class="{ filled: flintSlots[3] }" @click="toggleFlintSlot(3)">
+              <img v-if="flintSlots[3] && tex.ironIngot" :src="tex.ironIngot" class="slot-tex" />
+              <span v-else-if="flintSlots[3]">⚙️</span>
+            </div>
+          </div>
+          <div class="cui-recipe-legend">
+            <div>Slot 0: flint (have: {{ inventory.flint || 0 }})</div>
+            <div>Slot 3: iron ingot (have: {{ inventory.iron || 0 }})</div>
+          </div>
+          <div class="cui-arrow">▶</div>
+          <div class="cui-output" :class="{ ready: flintReady }">
+            <span v-if="flintReady">🔥</span>
+          </div>
+          <div class="cui-btn" @click="craftFlintSteel">Craft Flint &amp; Steel</div>
+        </template>
+
         <div class="cui-msg" v-if="craftMsg">{{ craftMsg }}</div>
         <div class="cui-close" @click="craftingOpen = false">✕</div>
       </div>
+    </div>
+
+    <!-- ══ HOTBAR ══ -->
+    <div class="mcw-hotbar">
+      <div
+        v-for="item in hotbarItems"
+        :key="item.key"
+        class="hotbar-slot"
+        :class="{ equipped: equippedItem === item.key }"
+        @click="equipItem(item.key)"
+        :title="item.label + (inventory[item.key] ? ' (x' + inventory[item.key] + ')' : '')"
+      >
+        <img v-if="item.tex" :src="item.tex" class="slot-tex" />
+        <span v-else>{{ item.icon }}</span>
+        <div class="hotbar-count" v-if="inventory[item.key] > 0">{{ inventory[item.key] }}</div>
+      </div>
+      <div class="hotbar-equipped-label" v-if="equippedItem">
+        Equipped: {{ hotbarItems.find(i => i.key === equippedItem)?.label }}
+      </div>
+    </div>
+
+    <!-- Portal activation hint -->
+    <div class="portal-activate-hint" v-if="portalFrameComplete && !portalActive && equippedItem === 'flintSteel'">
+      🔥 Click the portal interior to light it!
     </div>
 
     <!-- ══ PHYSICS DROPS LAYER ══ -->
@@ -195,6 +327,74 @@
 <script setup>
 import { ref, reactive, computed, onUnmounted } from 'vue'
 
+// ── Textures ──────────────────────────────────────────────────────────────────
+
+const tex = reactive({
+  grassBlock: null,
+  stone: null,
+  obsidian: null,
+  craftingTable: null,
+  oakPlanks: null,
+  diamond: null,
+  diamondBlock: null,
+  flint: null,
+  ironIngot: null,
+  stick: null,
+  netherrack: null,
+  glowstone: null,
+})
+
+// Load textures async to avoid blocking initial render
+import('minecraft-textures/dist/textures/json/1.20.id.json').then(mod => {
+  const data = mod.default || mod
+  const items = data.items
+  const get = (id) => items['minecraft:' + id]?.texture || null
+  tex.grassBlock   = get('grass_block')
+  tex.stone        = get('stone')
+  tex.obsidian     = get('obsidian')
+  tex.craftingTable = get('crafting_table')
+  tex.oakPlanks    = get('oak_planks')
+  tex.diamond      = get('diamond')
+  tex.diamondBlock = get('diamond_block')
+  tex.flint        = get('flint')
+  tex.ironIngot    = get('iron_ingot')
+  tex.stick        = get('stick')
+  tex.netherrack   = get('netherrack')
+  tex.glowstone    = get('glowstone')
+}).catch(() => {})
+
+const grassBlockStyle = computed(() => tex.grassBlock ? {
+  backgroundImage: `url("${tex.grassBlock}")`,
+  backgroundSize: 'cover',
+  imageRendering: 'pixelated',
+} : {})
+
+const stoneStyle = computed(() => tex.stone ? {
+  backgroundImage: `url("${tex.stone}")`,
+  backgroundSize: 'cover',
+  imageRendering: 'pixelated',
+} : {})
+
+const trunkStyle = computed(() => tex.oakPlanks ? {
+  backgroundImage: `url("${tex.oakPlanks}")`,
+  backgroundSize: 'cover',
+  imageRendering: 'pixelated',
+} : {})
+
+const signStyle = computed(() => tex.oakPlanks ? {
+  backgroundImage: `url("${tex.oakPlanks}")`,
+  backgroundSize: 'cover',
+  imageRendering: 'pixelated',
+} : {})
+
+const signPostStyle = computed(() => tex.stick ? {} : {})
+
+const doorStyle = computed(() => tex.oakPlanks ? {
+  backgroundImage: `url("${tex.oakPlanks}")`,
+  backgroundSize: 'cover',
+  imageRendering: 'pixelated',
+} : {})
+
 // ── State ─────────────────────────────────────────────────────────────────────
 
 const wrapperRef = ref(null)
@@ -202,6 +402,37 @@ const interacted = ref(false)
 const shaking = ref(false)
 let dropIdCounter = 0
 const activeDrops = reactive([])
+
+// ── Inventory ─────────────────────────────────────────────────────────────────
+
+const inventory = reactive({
+  wheat: 0,
+  diamond: 0,
+  obsidian: 0,
+  wood: 5, // give player some wood by default
+  flint: 1, // give flint
+  iron: 1,  // give iron ingot
+  pickaxe: 0,
+  flintSteel: 0,
+})
+
+const equippedItem = ref(null)
+
+const hotbarItems = computed(() => {
+  const items = []
+  if (inventory.diamond > 0) items.push({ key: 'diamond', icon: '💎', label: 'Diamond', tex: tex.diamond })
+  if (inventory.obsidian > 0) items.push({ key: 'obsidian', icon: '⬛', label: 'Obsidian', tex: tex.obsidian })
+  if (inventory.pickaxe > 0) items.push({ key: 'pickaxe', icon: '⛏️', label: 'Diamond Pickaxe', tex: null })
+  if (inventory.flintSteel > 0) items.push({ key: 'flintSteel', icon: '🔥', label: 'Flint & Steel', tex: null })
+  if (inventory.wheat > 0) items.push({ key: 'wheat', icon: '🌾', label: 'Wheat', tex: null })
+  return items
+})
+
+const hasPickaxe = computed(() => inventory.pickaxe > 0)
+
+function equipItem(key) {
+  equippedItem.value = equippedItem.value === key ? null : key
+}
 
 // ── Farm ─────────────────────────────────────────────────────────────────────
 
@@ -234,7 +465,7 @@ function harvest(idx) {
   const row = Math.floor(idx / 3)
   const TILE = 48
   const GRID_LEFT = 16
-  const GRID_TOP = 60 // sky(80) + surface padding
+  const GRID_TOP = 60
   spawnDrops(
     GRID_LEFT + col * TILE + TILE / 2,
     GRID_TOP + row * TILE + TILE / 2,
@@ -243,9 +474,16 @@ function harvest(idx) {
   triggerShake()
   crops[idx].stage = 0
   harvestCount.value++
+  inventory.wheat++
   // Populate crafting slots with wheat
   for (let i = 0; i < craftSlots.length && harvestCount.value > 0; i++) {
     if (!craftSlots[i]) { craftSlots[i] = true; break }
+  }
+  // Chance to find diamond (1 in 8)
+  if (Math.random() < 0.125) {
+    inventory.diamond++
+    craftMsg.value = '💎 You found a diamond while farming! Lucky!'
+    setTimeout(() => { if (craftMsg.value.includes('diamond')) craftMsg.value = '' }, 3000)
   }
 }
 
@@ -272,9 +510,18 @@ const doorOpen = ref(false)
 // ── Crafting ─────────────────────────────────────────────────────────────────
 
 const craftingOpen = ref(false)
+const craftTab = ref('bread')
 const craftSlots = reactive(Array(4).fill(false))
 const craftMsg = ref('')
 const craftReady = computed(() => craftSlots.filter(Boolean).length >= 3)
+
+// Pickaxe slots: [top-left diamond, top-right diamond, bottom-left empty, bottom-right wood]
+const pickaxeSlots = reactive([false, false, false, false])
+const pickaxeReady = computed(() => pickaxeSlots[0] && pickaxeSlots[1] && pickaxeSlots[3])
+
+// Flint & Steel slots: [top-left flint, top-right empty, bottom-left empty, bottom-right iron]
+const flintSlots = reactive([false, false, false, false])
+const flintReady = computed(() => flintSlots[0] && flintSlots[3])
 
 function openCrafting() {
   interacted.value = true
@@ -286,10 +533,166 @@ function doCraft() {
   if (craftReady.value) {
     for (let i = 0; i < craftSlots.length; i++) craftSlots[i] = false
     craftMsg.value = '🍞 Bread crafted! +1 sustenance. Yuzhe approves.'
+    inventory.wheat = Math.max(0, inventory.wheat - 3)
     harvestCount.value = Math.max(0, harvestCount.value - 3)
   } else {
     craftMsg.value = '⚠ You need wheat. Go farm something.'
   }
+}
+
+function togglePickaxeSlot(i) {
+  if (i === 0 || i === 1) {
+    if (!pickaxeSlots[i] && (inventory.diamond || 0) < (pickaxeSlots[0] + pickaxeSlots[1] + 1)) {
+      craftMsg.value = '⚠ Not enough diamonds!'
+      return
+    }
+    pickaxeSlots[i] = !pickaxeSlots[i]
+  } else if (i === 3) {
+    if (!pickaxeSlots[3] && (inventory.wood || 0) < 1) {
+      craftMsg.value = '⚠ No wood!'
+      return
+    }
+    pickaxeSlots[3] = !pickaxeSlots[3]
+  }
+}
+
+function craftPickaxe() {
+  if (!pickaxeReady.value) {
+    craftMsg.value = '⚠ Need: 2 diamonds (top) + 1 wood (bottom-right)'
+    return
+  }
+  if ((inventory.diamond || 0) < 2) { craftMsg.value = '⚠ Not enough diamonds!'; return }
+  if ((inventory.wood || 0) < 1) { craftMsg.value = '⚠ No wood!'; return }
+  inventory.diamond -= 2
+  inventory.wood -= 1
+  inventory.pickaxe++
+  for (let i = 0; i < 4; i++) pickaxeSlots[i] = false
+  craftMsg.value = '⛏️ Diamond Pickaxe crafted! Ready to mine obsidian.'
+  equipItem('pickaxe')
+}
+
+function toggleFlintSlot(i) {
+  if (i === 0) {
+    if (!flintSlots[0] && (inventory.flint || 0) < 1) { craftMsg.value = '⚠ No flint!'; return }
+    flintSlots[0] = !flintSlots[0]
+  } else if (i === 3) {
+    if (!flintSlots[3] && (inventory.iron || 0) < 1) { craftMsg.value = '⚠ No iron ingot!'; return }
+    flintSlots[3] = !flintSlots[3]
+  }
+}
+
+function craftFlintSteel() {
+  if (!flintReady.value) {
+    craftMsg.value = '⚠ Need: flint (top-left) + iron ingot (bottom-right)'
+    return
+  }
+  if ((inventory.flint || 0) < 1) { craftMsg.value = '⚠ No flint!'; return }
+  if ((inventory.iron || 0) < 1) { craftMsg.value = '⚠ No iron ingot!'; return }
+  inventory.flint -= 1
+  inventory.iron -= 1
+  inventory.flintSteel++
+  for (let i = 0; i < 4; i++) flintSlots[i] = false
+  craftMsg.value = '🔥 Flint & Steel crafted! You can light portals now.'
+  equipItem('flintSteel')
+}
+
+// ── Obsidian Mining ───────────────────────────────────────────────────────────
+
+const obsidianBlocks = reactive([
+  { cracks: 0 }, { cracks: 0 }, { cracks: 0 },
+  { cracks: 0 }, { cracks: 0 }, { cracks: 0 },
+  { cracks: 0 }, { cracks: 0 }, { cracks: 0 },
+  { cracks: 0 },
+])
+
+function mineObsidian(idx) {
+  if (!hasPickaxe.value) return
+  interacted.value = true
+  const obs = obsidianBlocks[idx]
+  if (obs.cracks < 3) {
+    obs.cracks++
+    triggerShake()
+    if (obs.cracks >= 3) {
+      // Block breaks
+      setTimeout(() => {
+        spawnDrops(60 + idx * 44, 390, [{ icon: '⬛', chance: 1 }], 2, false)
+        obsidianBlocks.splice(idx, 1)
+        inventory.obsidian++
+        craftMsg.value = `⬛ Obsidian mined! (${inventory.obsidian}/10)`
+        if (inventory.obsidian >= 10) {
+          craftMsg.value = '⬛ You have enough obsidian to build a Nether Portal! 🟣'
+        }
+      }, 150)
+    }
+  }
+}
+
+// ── Portal Frame ──────────────────────────────────────────────────────────────
+
+// 4x5 grid, frame positions (0-indexed, row-major)
+// Frame: row 0 all, row 4 all, col 0 and col 3 for rows 1-3
+const PORTAL_COLS = 4
+const PORTAL_ROWS = 5
+const TOTAL_CELLS = PORTAL_COLS * PORTAL_ROWS
+
+const portalGrid = reactive(Array(TOTAL_CELLS).fill(false))
+const portalActive = ref(false)
+
+const showPortalArea = computed(() => inventory.obsidian >= 10 || portalFrameComplete.value || portalActive.value)
+
+function isPortalInner(idx) {
+  const row = Math.floor(idx / PORTAL_COLS)
+  const col = idx % PORTAL_COLS
+  return row >= 1 && row <= 3 && col >= 1 && col <= 2
+}
+
+function isPortalFrame(idx) {
+  const row = Math.floor(idx / PORTAL_COLS)
+  const col = idx % PORTAL_COLS
+  return !isPortalInner(idx)
+}
+
+const portalFrameComplete = computed(() => {
+  for (let i = 0; i < TOTAL_CELLS; i++) {
+    if (isPortalFrame(i) && !portalGrid[i]) return false
+  }
+  return true
+})
+
+function placePortalBlock(idx) {
+  if (portalActive.value) {
+    // Click interior to activate if frame complete + flint equipped
+    if (isPortalInner(idx) && portalFrameComplete.value && equippedItem.value === 'flintSteel') {
+      activatePortal()
+    } else if (isPortalInner(idx) && portalActive.value) {
+      enterPortal()
+    }
+    return
+  }
+  if (isPortalInner(idx)) {
+    if (portalFrameComplete.value && equippedItem.value === 'flintSteel') {
+      activatePortal()
+    }
+    return
+  }
+  // Place obsidian in frame slot
+  if (!portalGrid[idx] && (inventory.obsidian > 0)) {
+    portalGrid[idx] = true
+    inventory.obsidian--
+    interacted.value = true
+  }
+}
+
+function activatePortal() {
+  if (portalActive.value) return
+  inventory.flintSteel = Math.max(0, inventory.flintSteel - 1)
+  portalActive.value = true
+  equippedItem.value = null
+  craftMsg.value = '🔥 The portal ignites... 🟣'
+}
+
+function enterPortal() {
+  window.open('/nether', '_blank')
 }
 
 // ── Redstone Lever ───────────────────────────────────────────────────────────
@@ -301,7 +704,6 @@ const redstoneTiles = reactive([{ lit: true }, { lit: true }, { lit: true }])
 function toggleLever() {
   interacted.value = true
   if (!leverOn.value) {
-    // Turn ON: extinguish tiles left→right, then reveal panel
     let delay = 0
     for (let i = 0; i < redstoneTiles.length; i++) {
       const idx = i
@@ -314,7 +716,6 @@ function toggleLever() {
       setTimeout(() => { panelFlickering.value = false }, 600)
     }, delay + 300)
   } else {
-    // Turn OFF: flicker off, re-light tiles right→left
     panelFlickering.value = true
     setTimeout(() => {
       leverOn.value = false
@@ -343,13 +744,10 @@ function triggerTNT() {
   buttonPressed.value = true
   setTimeout(() => { buttonPressed.value = false }, 200)
 
-  // Flash TNT
   tntFlashing.value = true
   setTimeout(() => {
     tntFlashing.value = false
-    // BOOM
     triggerShake()
-    // Spawn debris
     const cx = 420, cy = 340
     for (let i = 0; i < 18; i++) {
       const icons = ['🪨', '💥', '🔥', '⬛', '🟫']
@@ -361,6 +759,9 @@ function triggerTNT() {
         true
       )
     }
+    // TNT also gives flint & iron
+    inventory.flint += 1
+    inventory.iron += 1
     craterVisible.value = true
     setTimeout(() => {
       craterVisible.value = false
@@ -499,6 +900,20 @@ function triggerShake() {
   animation: shake 0.4s ease-out;
 }
 
+/* ══ Texture helpers ════════════════════════════════════════════════════════ */
+.block-tex {
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+  display: block;
+  object-fit: cover;
+}
+.slot-tex {
+  width: 28px;
+  height: 28px;
+  image-rendering: pixelated;
+}
+
 /* ══ Sky layer ══════════════════════════════════════════════════════════════ */
 .mcw-sky {
   background: linear-gradient(to bottom, #5a9fd4 0%, #87CEEB 60%, #a8d8f0 100%);
@@ -529,15 +944,12 @@ function triggerShake() {
   background: white;
   height: 14px;
 }
-/* Cloud 1 */
 .cloud1 { width: 60px; top: 18px; animation: drift1 22s linear infinite; }
 .cloud1::before { width: 28px; height: 14px; top: -14px; left: 8px; }
 .cloud1::after  { width: 20px; height: 14px; top: -10px; left: 28px; }
-/* Cloud 2 */
 .cloud2 { width: 48px; top: 28px; animation: drift2 30s linear infinite; }
 .cloud2::before { width: 22px; height: 14px; top: -14px; left: 6px; }
 .cloud2::after  { width: 16px; height: 14px; top: -10px; left: 22px; }
-/* Cloud 3 */
 .cloud3 { width: 38px; top: 10px; animation: drift3 18s linear infinite; }
 .cloud3::before { width: 18px; height: 14px; top: -14px; left: 4px; }
 .cloud3::after  { width: 14px; height: 10px; top: -8px; left: 16px; }
@@ -564,7 +976,6 @@ function triggerShake() {
   padding: 8px 8px 0;
 }
 
-/* Farm section */
 .farm-section { padding-top: 12px; }
 
 .mcw-farm-grid {
@@ -671,7 +1082,6 @@ function triggerShake() {
   inset: 6px;
   background: #3a6a22;
 }
-/* Leaf sway */
 @keyframes leaf-sway {
   0%, 100% { transform: rotate(-1deg); }
   50%       { transform: rotate(1.5deg); }
@@ -800,6 +1210,30 @@ function triggerShake() {
   border-top: 1px solid #7a7a8a;
 }
 
+/* ══ Obsidian ═══════════════════════════════════════════════════════════════ */
+.mcw-obsidian {
+  width: 44px; height: 44px;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+  background: #1a0a2a;
+  border: 1px solid #2a1a3a;
+  transition: filter 0.1s;
+}
+.mcw-obsidian.minable:hover { filter: brightness(1.3); cursor: crosshair; }
+.obs-crack-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+.mcw-obsidian.cracked1 .obs-crack-overlay {
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Cpath d='M8 4 L14 16 L6 20 M14 16 L20 12 L26 22' stroke='rgba(255,255,255,0.4)' stroke-width='1.5' fill='none'/%3E%3C/svg%3E") center/contain no-repeat;
+}
+.mcw-obsidian.cracked2 .obs-crack-overlay {
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Cpath d='M4 6 L12 18 L4 24 M12 18 L22 10 L28 24 M16 6 L18 14 L26 12' stroke='rgba(255,255,255,0.55)' stroke-width='1.5' fill='none'/%3E%3C/svg%3E") center/contain no-repeat;
+}
+
 /* Crafting Table */
 .mcw-crafting-table {
   width: 48px; height: 44px;
@@ -807,6 +1241,7 @@ function triggerShake() {
   position: relative;
   flex-shrink: 0;
   transition: filter 0.15s;
+  overflow: hidden;
 }
 .mcw-crafting-table:hover { filter: brightness(1.2); }
 .ct-top {
@@ -916,9 +1351,7 @@ function triggerShake() {
   transform: translateX(-50%) rotate(-35deg);
   transition: transform 0.2s ease;
 }
-.lever-arm.on {
-  transform: translateX(-50%) rotate(35deg);
-}
+.lever-arm.on { transform: translateX(-50%) rotate(35deg); }
 
 /* Redstone tiles */
 .mcw-redstone-tile {
@@ -1021,6 +1454,78 @@ function triggerShake() {
 .ip-title { font-size: 7px; color: #60ff60; font-weight: bold; margin-bottom: 1px; }
 .ip-item  { font-size: 6px; color: #40ff40; line-height: 1.5; }
 
+/* ══ Portal Frame ═══════════════════════════════════════════════════════════ */
+.portal-row {
+  height: auto !important;
+  flex-direction: column;
+  padding: 6px;
+  background: #0d0d1a;
+  border-top: 2px solid #2a1a4a;
+}
+.portal-hint {
+  font-size: 9px;
+  color: #cc88ff;
+  text-align: center;
+  margin-bottom: 4px;
+  letter-spacing: 0.5px;
+  animation: portal-hint-pulse 2s ease-in-out infinite;
+}
+@keyframes portal-hint-pulse {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+.portal-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 32px);
+  grid-template-rows: repeat(5, 32px);
+  gap: 2px;
+  margin: 0 auto;
+}
+.portal-cell {
+  width: 32px; height: 32px;
+  background: #0a0a1a;
+  border: 1px solid #1a1a2a;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.portal-cell:not(.portal-filled):not(.portal-inner):hover {
+  border-color: #9900ff;
+  background: #1a0a2a;
+}
+.portal-cell.portal-inner {
+  background: #050515;
+  cursor: default;
+}
+.portal-cell.portal-inner.portal-glow {
+  background: radial-gradient(ellipse at center, #5500aa 0%, #1a0044 60%, #050515 100%);
+  animation: portal-inner-ripple 1.5s ease-in-out infinite;
+  cursor: pointer;
+}
+@keyframes portal-inner-ripple {
+  0%, 100% { background: radial-gradient(ellipse at center, #5500aa 0%, #1a0044 60%, #050515 100%); }
+  50%       { background: radial-gradient(ellipse at center, #7700ff 0%, #2a0066 60%, #050515 100%); }
+}
+.portal-filled { background: #1a0a2a !important; border-color: #3a1a5a !important; cursor: default; }
+.portal-obs-fallback {
+  width: 100%; height: 100%;
+  background: #1a0a2a;
+  border: 1px solid #3a1a5a;
+}
+.portal-swirl {
+  position: absolute;
+  inset: 2px;
+  background: radial-gradient(ellipse at center, #8800ff 0%, #4400aa 50%, transparent 100%);
+  animation: portal-swirl-spin 2s linear infinite;
+  border-radius: 50%;
+  opacity: 0.8;
+}
+@keyframes portal-swirl-spin {
+  from { transform: rotate(0deg) scale(0.9); }
+  to   { transform: rotate(360deg) scale(1.1); }
+}
+
 /* ══ Crater ═════════════════════════════════════════════════════════════════ */
 .mcw-crater {
   display: none;
@@ -1059,12 +1564,27 @@ function triggerShake() {
   border: 3px solid #6a6a8a;
   padding: 16px;
   position: relative;
-  min-width: 220px;
+  min-width: 240px;
   box-shadow: 0 0 0 2px #2a2a3a, 4px 4px 0 4px #1a1a2a;
 }
 .cui-title {
   font-size: 11px; color: #e0e0e0; font-weight: bold;
-  text-align: center; margin-bottom: 10px; letter-spacing: 1px;
+  text-align: center; margin-bottom: 8px; letter-spacing: 1px;
+}
+.cui-tabs {
+  display: flex; gap: 2px; margin-bottom: 8px;
+}
+.cui-tab {
+  flex: 1; text-align: center; padding: 3px 4px;
+  background: #2a2a3a; color: #888; font-size: 8px;
+  cursor: pointer; border: 1px solid #4a4a6a;
+  transition: background 0.1s, color 0.1s;
+}
+.cui-tab.active { background: #4a4a6a; color: #fff; border-color: #8a8aaa; }
+.cui-tab:hover { background: #3a3a5a; color: #ccc; }
+
+.cui-recipe-hint {
+  font-size: 8px; color: #8888aa; text-align: center; margin-bottom: 6px;
 }
 .cui-grid {
   display: grid; grid-template-columns: repeat(2, 44px);
@@ -1081,7 +1601,29 @@ function triggerShake() {
 }
 .cui-slot.filled { background: #2a2a4a; border-color: #8a8aaa; }
 
-.cui-arrow { text-align: center; font-size: 16px; color: #a0a0c0; margin: 6px 0; }
+.cui-grid2x2 {
+  display: grid; grid-template-columns: repeat(2, 44px);
+  grid-template-rows: repeat(2, 44px);
+  gap: 3px; margin: 0 auto 6px;
+  width: fit-content;
+}
+.cui-slot2 {
+  width: 44px; height: 44px;
+  background: #1a1a2a;
+  border: 2px solid #5a5a7a;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; cursor: pointer;
+  transition: background 0.1s, border-color 0.1s;
+}
+.cui-slot2:hover { background: #2a2a3a; border-color: #7a7a9a; }
+.cui-slot2.filled { background: #2a2a4a; border-color: #8a8aaa; }
+.slot-hint { font-size: 10px; color: #555; }
+
+.cui-recipe-legend {
+  font-size: 7px; color: #6688aa; text-align: center; margin-bottom: 4px; line-height: 1.6;
+}
+
+.cui-arrow { text-align: center; font-size: 16px; color: #a0a0c0; margin: 4px 0; }
 .cui-output {
   width: 44px; height: 44px; margin: 0 auto 10px;
   background: #1a1a2a; border: 2px solid #5a5a7a;
@@ -1107,6 +1649,45 @@ function triggerShake() {
   font-size: 12px; color: #888; cursor: pointer;
 }
 .cui-close:hover { color: #fff; }
+
+/* ══ Hotbar ══════════════════════════════════════════════════════════════════ */
+.mcw-hotbar {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 6px 8px;
+  background: #1a1a2e;
+  border-top: 2px solid #3a3a5a;
+  min-height: 44px;
+  flex-wrap: wrap;
+}
+.hotbar-slot {
+  width: 36px; height: 36px;
+  background: #2a2a3a;
+  border: 2px solid #5a5a7a;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; cursor: pointer;
+  position: relative;
+  transition: border-color 0.1s, background 0.1s;
+}
+.hotbar-slot:hover { background: #3a3a4a; border-color: #8a8aaa; }
+.hotbar-slot.equipped { border-color: #ffff00; background: #3a3a1a; box-shadow: 0 0 6px rgba(255,255,0,0.4); }
+.hotbar-count {
+  position: absolute; bottom: 1px; right: 2px;
+  font-size: 7px; color: #fff; line-height: 1;
+  text-shadow: 0 0 2px #000;
+}
+.hotbar-equipped-label {
+  font-size: 8px; color: #aaaacc; margin-left: 6px;
+  letter-spacing: 0.5px;
+}
+
+/* ══ Portal activation hint ═════════════════════════════════════════════════ */
+.portal-activate-hint {
+  font-size: 9px; color: #ffaa00; text-align: center;
+  padding: 4px; background: #1a0a00; border-top: 1px solid #aa5500;
+  animation: portal-hint-pulse 1s ease-in-out infinite;
+}
 
 /* ══ Drop items ═════════════════════════════════════════════════════════════ */
 .mcw-drops-layer {
